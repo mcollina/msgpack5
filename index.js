@@ -35,13 +35,16 @@ function msgpack() {
     assert(Buffer.isBuffer(buf), 'must be a Buffer')
     assert(buf.length > 0, 'must not be empty')
 
-    if (buf[0] === 0xc0) {
-      return null
-    } else if(buf[0] === 0xc2) {
-      return false
-    } else if(buf[0] === 0xc3) {
-      return true
-    } else if (buf[0] < 0x80) {
+    switch (buf[0]) {
+      case 0xc0:
+        return null
+      case 0xc2:
+        return false
+      case 0xc3:
+        return true
+    }
+
+    if (buf[0] < 0x80) {
       return buf[0]
     } else {
       throw new Error('not implemented yet')
