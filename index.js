@@ -22,7 +22,10 @@ function msgpack() {
     }
 
     if (typeof obj == 'number') {
-      if (obj < 0x80) {
+      if (obj > -32 && obj < 0) {
+        buf = new Buffer(1)
+        buf[0] = 0xe0 | -obj
+      } else if (obj < 0x80) {
         buf = new Buffer(1)
         buf[0] = obj
       }
@@ -44,7 +47,9 @@ function msgpack() {
         return true
     }
 
-    if (buf[0] < 0x80) {
+    if (buf[0] > 0xe0) {
+      return - (~0xe0 & buf[0])
+    } else if (buf[0] < 0x80) {
       return buf[0]
     } else {
       throw new Error('not implemented yet')
