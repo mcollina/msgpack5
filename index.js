@@ -6,6 +6,7 @@ function msgpack() {
 
   function encode(obj) {
     var buf
+      , len
 
     if (obj === null) {
       buf = new Buffer(1)
@@ -20,6 +21,30 @@ function msgpack() {
     if (obj === false) {
       buf = new Buffer(1)
       buf[0] = 0xc2
+    }
+
+    if (typeof obj === 'string') {
+      len = Buffer.byteLength(obj)
+      if (len < 32) {
+        buf = new Buffer(1 + len)
+        buf[0] = 0xa0 | len
+        buf.write(obj, 1)
+      } else if (len <= 0xff) {
+        buf = new Buffer(2 + len)
+        buf[0] = 0xd9
+        buf[1] = len
+        buf.write(obj, 2)
+      } else if (len <= 0xffff) {
+        buf = new Buffer(3 + len)
+        buf[0] = 0xda
+        buf.writeUInt16BE(len, 1)
+        buf.write(obj, 3)
+      } else {
+        buf = new Buffer(5 + len)
+        buf[0] = 0xdb
+        buf.writeUInt32BE(len, 1)
+        buf.write(obj, 5)
+      }
     }
 
     if (typeof obj === 'number') {
@@ -63,11 +88,12 @@ function msgpack() {
           buf = new Buffer(5)
           buf[0] = 0xd2
           buf.writeInt32BE(obj, 1)
-        } else {
-          throw new Error('not implemented yet')
         }
       }
     }
+
+    if (!buf)
+      throw new Error('not implemented yet')
 
     return buf
   }
@@ -113,6 +139,19 @@ function msgpack() {
       case 0xcb:
         // 8-bytes double
         return buf.readDoubleBE(1)
+      case 0xd9:
+        // strings up to 2^8 - 1 bytes
+        return buf.toString('utf8', 2, 2 + buf[1])
+      case 0xda:
+        // strings up to 2^16 - 1 bytes
+        return buf.toString('utf8', 3, 3 + buf.readUInt16BE(1))
+      case 0xdb:
+        // strings up to 2^16 - 1 bytes
+        return buf.toString('utf8', 5, 5 + buf.readUInt32BE(1))
+    }
+
+    if ((buf[0] & 0xe0) === 0xa0) {
+      return buf.toString('utf8', 1, buf[0] & 0x1f + 1)
     }
 
     if (buf[0] > 0xe0) {
@@ -139,7 +178,7 @@ function write64BitUint(buf, obj) {
 }
 
 function isFloat(n) {
-  return n !== Math.floor(n);
+  return n !== Math.floor(n)
 }
 
 function encodeFloat(obj) {
