@@ -2,7 +2,7 @@
 var test    = require('tap').test
   , msgpack = require('../')
 
-test('encoding/decoding 16-bit big-endian unsigned integers', function(t) {
+test('encoding/decoding 16-bits big-endian unsigned integers', function(t) {
   var encoder = msgpack()
     , allNum  = []
     , i

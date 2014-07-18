@@ -2,7 +2,7 @@
 var test    = require('tap').test
   , msgpack = require('../')
 
-test('encoding/decoding 7-bit positive ints', function(t) {
+test('encoding/decoding 7-bits positive ints', function(t) {
   var encoder = msgpack()
     , allNum  = []
     , i

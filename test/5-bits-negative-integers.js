@@ -2,7 +2,7 @@
 var test    = require('tap').test
   , msgpack = require('../')
 
-test('encoding/decoding 5-bit negative ints', function(t) {
+test('encoding/decoding 5-bits negative ints', function(t) {
   var encoder = msgpack()
     , allNum  = []
     , i

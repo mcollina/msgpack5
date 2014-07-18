@@ -2,7 +2,7 @@
 var test    = require('tap').test
   , msgpack = require('../')
 
-test('encoding/decoding 8-bit integers', function(t) {
+test('encoding/decoding 8-bits integers', function(t) {
   var encoder = msgpack()
     , allNum  = []
     , i
