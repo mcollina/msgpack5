@@ -1,5 +1,6 @@
 
 var assert    = require('assert')
+  , bl        = require('bl')
   , TOLERANCE = 0.1
 
 function msgpack() {
@@ -7,6 +8,10 @@ function msgpack() {
   function encode(obj) {
     var buf
       , len
+
+    if (obj === undefined) {
+      throw new Error('undefined is not encodable in msgpack!')
+    }
 
     if (obj === null) {
       buf = new Buffer(1)
@@ -45,6 +50,15 @@ function msgpack() {
         buf.writeUInt32BE(len, 1)
         buf.write(obj, 5)
       }
+    }
+
+    // weird hack to support Buffer
+    // and Buffer-like objects
+    if (obj && obj.readUInt32LE) {
+      buf = new Buffer(2)
+      buf[0] = 0xc4
+      buf[1] = obj.length
+      return bl([buf, obj])
     }
 
     if (typeof obj === 'number') {
@@ -99,10 +113,11 @@ function msgpack() {
   }
 
   function decode(buf) {
-    assert(Buffer.isBuffer(buf), 'must be a Buffer')
     assert(buf.length > 0, 'must not be empty')
 
-    switch (buf[0]) {
+    var first = buf.readUInt8(0)
+
+    switch (first) {
       case 0xc0:
         return null
       case 0xc2:
@@ -111,7 +126,7 @@ function msgpack() {
         return true
       case 0xcc:
         // 1-byte unsigned int
-        return buf[1]
+        return buf.readUInt8(1)
       case 0xcd:
         // 2-bytes BE unsigned int
         return buf.readUInt16BE(1)
@@ -148,18 +163,21 @@ function msgpack() {
       case 0xdb:
         // strings up to 2^16 - 1 bytes
         return buf.toString('utf8', 5, 5 + buf.readUInt32BE(1))
+      case 0xc4:
+        // buffers up to 2^8 - 1 bytes
+        return buf.slice(2, 2 + buf.readUInt8(1))
     }
 
-    if ((buf[0] & 0xe0) === 0xa0) {
-      return buf.toString('utf8', 1, buf[0] & 0x1f + 1)
+    if ((first & 0xe0) === 0xa0) {
+      return buf.toString('utf8', 1, first & 0x1f + 1)
     }
 
-    if (buf[0] > 0xe0) {
+    if (first > 0xe0) {
       // 5 bits negative ints
-      return - (~0xe0 & buf[0])
-    } else if (buf[0] < 0x80) {
+      return - (~0xe0 & first)
+    } else if (first < 0x80) {
       // 7-bits positive ints
-      return buf[0]
+      return first
     } else {
       throw new Error('not implemented yet')
     }

@@ -27,5 +27,8 @@
   "devDependencies": {
     "pre-commit": "0.0.9",
     "tap": "^0.4.11"
+  },
+  "dependencies": {
+    "bl": "^0.8.2"
   }
 }
