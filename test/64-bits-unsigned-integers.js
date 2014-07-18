@@ -15,7 +15,7 @@ test('encoding/decoding 64-bits big-endian unsigned integers', function(t) {
   allNum.forEach(function(num) {
     t.test('encoding ' + num, function(t) {
       var buf = encoder.encode(num)
-      t.equal(buf.length, 9, 'must have 5 bytes')
+      t.equal(buf.length, 9, 'must have 9 bytes')
       t.equal(buf[0], 0xcf, 'must have the proper header')
       t.equal(buf.readUInt32BE(5) * base + buf.readUInt32BE(1), num, 'must decode correctly');
       t.end()

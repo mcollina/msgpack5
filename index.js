@@ -22,41 +22,47 @@ function msgpack() {
     }
 
     if (typeof obj === 'number') {
-      if (obj < -32768) {
-        buf = new Buffer(5)
-        buf[0] = 0xd2
-        buf.writeInt32BE(obj, 1)
-      } else if (obj < -128) {
-        buf = new Buffer(3)
-        buf[0] = 0xd1
-        buf.writeInt16BE(obj, 1)
-      } else if (obj <= -32) {
-        buf = new Buffer(2)
-        buf[0] = 0xd0
-        buf.writeInt8(obj, 1)
-      } else if (obj < 0) {
-        buf = new Buffer(1)
-        buf[0] = 0xe0 | -obj
-      } else if (obj < 128) {
-        buf = new Buffer(1)
-        buf[0] = obj
-      } else if (obj < 256) {
-        buf = new Buffer(2)
-        buf[0] = 0xcc
-        buf[1] = obj
-      } else if (obj < 65536) {
-        buf = new Buffer(3)
-        buf[0] = 0xcd
-        buf.writeUInt16BE(obj, 1)
-      } else if (obj < 0xffffffff) {
-        buf = new Buffer(5)
-        buf[0] = 0xce
-        buf.writeUInt32BE(obj, 1)
-      } else {
-        buf = new Buffer(9)
-        buf[0] = 0xcf
+      if (obj >= 0) {
+        if (obj < 128) {
+          buf = new Buffer(1)
+          buf[0] = obj
+        } else if (obj < 256) {
+          buf = new Buffer(2)
+          buf[0] = 0xcc
+          buf[1] = obj
+        } else if (obj < 65536) {
+          buf = new Buffer(3)
+          buf[0] = 0xcd
+          buf.writeUInt16BE(obj, 1)
+        } else if (obj < 0xffffffff) {
+          buf = new Buffer(5)
+          buf[0] = 0xce
+          buf.writeUInt32BE(obj, 1)
+        } else {
+          buf = new Buffer(9)
+          buf[0] = 0xcf
 
-        write64BitUint(buf, obj)
+          write64BitUint(buf, obj)
+        }
+      } else {
+         if (obj > -32) {
+          buf = new Buffer(1)
+          buf[0] = 0xe0 | -obj
+        } else if (obj >= -128) {
+          buf = new Buffer(2)
+          buf[0] = 0xd0
+          buf.writeInt8(obj, 1)
+        } else if (obj >= -32768) {
+          buf = new Buffer(3)
+          buf[0] = 0xd1
+          buf.writeInt16BE(obj, 1)
+        } else if (obj > -214748365) {
+          buf = new Buffer(5)
+          buf[0] = 0xd2
+          buf.writeInt32BE(obj, 1)
+        } else {
+          throw new Error('not implemented yet')
+        }
       }
     }
 
@@ -95,6 +101,9 @@ function msgpack() {
       case 0xd2:
         // 4-bytes signed int
         return buf.readInt32BE(1)
+      case 0xd3:
+        // 8-bytes signed int
+        throw new Error('not implemented yet')
     }
 
     if (buf[0] > 0xe0) {
