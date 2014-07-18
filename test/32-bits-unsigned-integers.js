@@ -11,7 +11,7 @@ test('encoding/decoding 32-bits big-endian unsigned integers', function(t) {
     allNum.push(i)
   }
 
-  allNum.push(65536 * 65536 - 1)
+  allNum.push(0xfffffffe)
 
   allNum.forEach(function(num) {
     t.test('encoding ' + num, function(t) {

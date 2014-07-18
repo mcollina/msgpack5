@@ -36,10 +36,15 @@ function msgpack() {
         buf = new Buffer(3)
         buf[0] = 0xcd
         buf.writeUInt16BE(obj, 1)
-      } else {
+      } else if (obj < 0xffffffff) {
         buf = new Buffer(5)
         buf[0] = 0xce
         buf.writeUInt32BE(obj, 1)
+      } else {
+        buf = new Buffer(9)
+        buf[0] = 0xcf
+
+        write64BitUint(buf, obj)
       }
     }
 
@@ -66,6 +71,8 @@ function msgpack() {
       case 0xce:
         // 4-bytes BE unsigned int
         return buf.readUInt32BE(1)
+      case 0xcf:
+        return buf.readUInt32BE(5) * 0xffffffff + buf.readUInt32BE(1)
     }
 
     if (buf[0] > 0xe0) {
@@ -83,6 +90,12 @@ function msgpack() {
     encode: encode,
     decode: decode
   }
+}
+
+function write64BitUint(buf, obj) {
+  var big = Math.floor(obj / 0xffffffff)
+  buf.writeUInt32BE(big, 5)
+  buf.writeUInt32BE(obj - big * 0xffffffff, 1)
 }
 
 module.exports = msgpack
