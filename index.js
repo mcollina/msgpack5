@@ -22,11 +22,15 @@ function msgpack() {
     }
 
     if (typeof obj === 'number') {
-      if (obj >= -128 && obj <= -32) {
+      if (obj < -128) {
+        buf = new Buffer(3)
+        buf[0] = 0xd1
+        buf.writeInt16BE(obj, 1)
+      } else if (obj <= -32) {
         buf = new Buffer(2)
         buf[0] = 0xd0
         buf.writeInt8(obj, 1)
-      } else if (obj > -32 && obj < 0) {
+      } else if (obj < 0) {
         buf = new Buffer(1)
         buf[0] = 0xe0 | -obj
       } else if (obj < 128) {
@@ -81,6 +85,9 @@ function msgpack() {
       case 0xd0:
         // 1-byte signed int
         return buf.readInt8(1)
+      case 0xd1:
+        // 2-bytes signed int
+        return buf.readInt16BE(1)
     }
 
     if (buf[0] > 0xe0) {
