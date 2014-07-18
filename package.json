@@ -4,7 +4,7 @@
   "description": "A msgpack v5 implementation for node.js, with extension points",
   "main": "index.js",
   "scripts": {
-    "test": "tap test.js"
+    "test": "tap test/*"
   },
   "repository": {
     "type": "git",

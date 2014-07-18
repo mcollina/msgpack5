@@ -28,10 +28,14 @@ function msgpack() {
       } else if (obj < 128) {
         buf = new Buffer(1)
         buf[0] = obj
-      } else if (obj >= 128) {
+      } else if (obj < 255) {
         buf = new Buffer(2)
         buf[0] = 0xcc
         buf[1] = obj
+      } else if (obj >= 256) {
+        buf = new Buffer(3)
+        buf[0] = 0xcd
+        buf.writeUInt16BE(obj, 1)
       }
     }
 
@@ -52,6 +56,9 @@ function msgpack() {
       case 0xcc:
         // 1-byte unsigned int
         return buf[1]
+      case 0xcd:
+        // 2-bytes BE unsigned int
+        return buf.readUInt16BE(1)
     }
 
     if (buf[0] > 0xe0) {
