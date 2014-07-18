@@ -21,13 +21,17 @@ function msgpack() {
       buf[0] = 0xc2
     }
 
-    if (typeof obj == 'number') {
+    if (typeof obj === 'number') {
       if (obj > -32 && obj < 0) {
         buf = new Buffer(1)
         buf[0] = 0xe0 | -obj
-      } else if (obj < 0x80) {
+      } else if (obj < 128) {
         buf = new Buffer(1)
         buf[0] = obj
+      } else if (obj >= 128) {
+        buf = new Buffer(2)
+        buf[0] = 0xcc
+        buf[1] = obj
       }
     }
 
@@ -45,11 +49,16 @@ function msgpack() {
         return false
       case 0xc3:
         return true
+      case 0xcc:
+        // 1-byte unsigned int
+        return buf[1]
     }
 
     if (buf[0] > 0xe0) {
+      // 5 bits negative ints
       return - (~0xe0 & buf[0])
     } else if (buf[0] < 0x80) {
+      // 7-bits positive ints
       return buf[0]
     } else {
       throw new Error('not implemented yet')
