@@ -1,5 +1,6 @@
 
-var assert = require('assert')
+var assert    = require('assert')
+  , TOLERANCE = 0.1
 
 function msgpack() {
 
@@ -22,7 +23,9 @@ function msgpack() {
     }
 
     if (typeof obj === 'number') {
-      if (obj >= 0) {
+      if (isFloat(obj)) {
+        return encodeFloat(obj)
+      } else if (obj >= 0) {
         if (obj < 128) {
           buf = new Buffer(1)
           buf[0] = obj
@@ -104,6 +107,12 @@ function msgpack() {
       case 0xd3:
         // 8-bytes signed int
         throw new Error('not implemented yet')
+      case 0xca:
+        // 4-bytes float
+        return buf.readFloatBE(1)
+      case 0xcb:
+        // 8-bytes double
+        return buf.readDoubleBE(1)
     }
 
     if (buf[0] > 0xe0) {
@@ -127,6 +136,28 @@ function write64BitUint(buf, obj) {
   var big = Math.floor(obj / 0xffffffff)
   buf.writeUInt32BE(big, 5)
   buf.writeUInt32BE(obj - big * 0xffffffff, 1)
+}
+
+function isFloat(n) {
+  return n !== Math.floor(n);
+}
+
+function encodeFloat(obj) {
+  var buf
+
+  buf = new Buffer(5)
+  buf[0] = 0xca
+  buf.writeFloatBE(obj, 1)
+
+  // FIXME is there a way to check if a
+  // value fits in a float?
+  if (Math.abs(obj - buf.readFloatBE(1)) > TOLERANCE) {
+    buf = new Buffer(9)
+    buf[0] = 0xcb
+    buf.writeDoubleBE(obj, 1)
+  }
+
+  return buf
 }
 
 module.exports = msgpack
