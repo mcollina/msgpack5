@@ -11,31 +11,30 @@ function build(size) {
   return buf
 }
 
-test('encode/decode 2^16-1 bytes buffers', function(t) {
+test('encode/decode 2^32-1 bytes buffers', function(t) {
 
   var encoder = msgpack()
     , all     = []
 
-  all.push(build(Math.pow(2, 8)))
-  all.push(build(Math.pow(2, 8) + 1))
-  all.push(build(Math.pow(2, 12) + 1))
-  all.push(build(Math.pow(2, 16) - 1))
+  all.push(build(Math.pow(2, 16)))
+  all.push(build(Math.pow(2, 16) + 1))
+  all.push(build(Math.pow(2, 18) + 1))
 
   all.forEach(function(orig) {
     t.test('encoding a buffer of length ' + orig.length, function(t) {
       var buf = encoder.encode(orig)
-      t.equal(buf.length, 3 + orig.length, 'must have the right length');
-      t.equal(buf.readUInt8(0), 0xc5, 'must have the proper header');
-      t.equal(buf.readUInt16BE(1), orig.length, 'must include the buf length');
-      t.equal(buf.toString('utf8', 3), orig.toString('utf8'), 'must decode correctly');
+      t.equal(buf.length, 5 + orig.length, 'must have the right length');
+      t.equal(buf.readUInt8(0), 0xc6, 'must have the proper header');
+      t.equal(buf.readUInt32BE(1), orig.length, 'must include the buf length');
+      t.equal(buf.toString('utf8', 5), orig.toString('utf8'), 'must decode correctly');
       t.end()
     })
 
     t.test('decoding a buffer of length ' + orig.length, function(t) {
-      var buf = new Buffer(3 + orig.length)
-      buf[0] = 0xc5
-      buf.writeUInt16BE(orig.length, 1)
-      orig.copy(buf, 3)
+      var buf = new Buffer(5 + orig.length)
+      buf[0] = 0xc6
+      buf.writeUInt32BE(orig.length, 1)
+      orig.copy(buf, 5)
       t.equal(encoder.decode(buf).toString('utf8'), orig.toString('utf8'), 'must decode correctly');
       t.end()
     })

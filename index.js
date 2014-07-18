@@ -55,14 +55,19 @@ function msgpack() {
     // weird hack to support Buffer
     // and Buffer-like objects
     if (obj && obj.readUInt32LE) {
+      console.log(obj.length);
       if (obj.length <= 0xff) {
         buf = new Buffer(2)
         buf[0] = 0xc4
         buf[1] = obj.length
-      } else {
+      } else if (obj.length <= 0xffff) {
         buf = new Buffer(3)
         buf[0] = 0xc5
         buf.writeUInt16BE(obj.length, 1)
+      } else {
+        buf = new Buffer(5)
+        buf[0] = 0xc6
+        buf.writeUInt32BE(obj.length, 1)
       }
 
       return bl([buf, obj])
@@ -168,7 +173,7 @@ function msgpack() {
         // strings up to 2^16 - 1 bytes
         return buf.toString('utf8', 3, 3 + buf.readUInt16BE(1))
       case 0xdb:
-        // strings up to 2^16 - 1 bytes
+        // strings up to 2^32 - 1 bytes
         return buf.toString('utf8', 5, 5 + buf.readUInt32BE(1))
       case 0xc4:
         // buffers up to 2^8 - 1 bytes
@@ -176,6 +181,9 @@ function msgpack() {
       case 0xc5:
         // buffers up to 2^16 - 1 bytes
         return buf.slice(3, 3 + buf.readUInt16BE(1))
+      case 0xc6:
+        // buffers up to 2^32 - 1 bytes
+        return buf.slice(5, 5 + buf.readUInt32BE(1))
     }
 
     if ((first & 0xe0) === 0xa0) {
