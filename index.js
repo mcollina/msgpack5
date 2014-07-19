@@ -77,6 +77,10 @@ function msgpack() {
       if (obj.length < 16) {
         buf = new Buffer(1)
         buf[0] = 0x90 | obj.length
+      } else {
+        buf = new Buffer(2)
+        buf[0] = 0xdc
+        buf[1] = obj.length
       }
 
       buf = obj.reduce(function(acc, obj) {
@@ -236,6 +240,17 @@ function msgpack() {
         result = buf.slice(5, 5 + buf.readUInt32BE(1))
         buf.consume(6 + buf.readUInt32BE(1))
         return result
+      case 0xdc:
+        // array up to 2^8 elements
+        result = []
+        length = buf.readUInt8(1)
+        buf.consume(2)
+
+        for (i = 0; i < length; i++) {
+          result.push(decode(buf))
+        }
+
+        return result
     }
 
     if ((first & 0xf0) === 0x90) {
@@ -244,11 +259,8 @@ function msgpack() {
       result = []
       buf.consume(1)
 
-      if (length < 16) {
-
-        for (i = 0; i < length; i++) {
-          result.push(decode(buf))
-        }
+      for (i = 0; i < length; i++) {
+        result.push(decode(buf))
       }
 
       return result
