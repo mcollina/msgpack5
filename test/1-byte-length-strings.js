@@ -20,8 +20,8 @@ test('encode/decode 32 <-> (2^8-1) bytes strings', function(t) {
     t.test('encoding a string of length ' + str.length, function(t) {
       var buf = encoder.encode(str)
       t.equal(buf.length, 2 + Buffer.byteLength(str), 'must be the proper length')
-      t.equal(buf[0], 0xd9, 'must have the proper header');
-      t.equal(buf[1], Buffer.byteLength(str), 'must include the str length');
+      t.equal(buf.readUInt8(0), 0xd9, 'must have the proper header');
+      t.equal(buf.readUInt8(1), Buffer.byteLength(str), 'must include the str length');
       t.equal(buf.toString('utf8', 2, Buffer.byteLength(str) + 2), str, 'must decode correctly');
       t.end()
     })

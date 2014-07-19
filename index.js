@@ -73,6 +73,18 @@ function msgpack() {
       return bl([buf, obj])
     }
 
+    if (Array.isArray(obj)) {
+      if (obj.length < 16) {
+        buf = new Buffer(1)
+        buf[0] = 0x90 | obj.length
+      }
+
+      buf = obj.reduce(function(acc, obj) {
+        acc.append(encode(obj))
+        return acc
+      }, bl().append(buf))
+    }
+
     if (typeof obj === 'number') {
       if (isFloat(obj)) {
         return encodeFloat(obj)
@@ -127,70 +139,122 @@ function msgpack() {
   function decode(buf) {
     assert(buf.length > 0, 'must not be empty')
 
+    if (!(buf instanceof bl)) {
+      buf = bl().append(buf)
+    }
+
     var first = buf.readUInt8(0)
+      , i
+      , length
+      , result
 
     switch (first) {
       case 0xc0:
+        buf.consume(1)
         return null
       case 0xc2:
+        buf.consume(1)
         return false
       case 0xc3:
+        buf.consume(1)
         return true
       case 0xcc:
         // 1-byte unsigned int
-        return buf.readUInt8(1)
+        result = buf.readUInt8(1)
+        buf.consume(2)
+        return result
       case 0xcd:
         // 2-bytes BE unsigned int
-        return buf.readUInt16BE(1)
+        result = buf.readUInt16BE(1)
+        buf.consume(3)
+        return result
       case 0xce:
         // 4-bytes BE unsigned int
-        return buf.readUInt32BE(1)
+        result = buf.readUInt32BE(1)
+        buf.consume(5)
+        return result
       case 0xcf:
         // 8-bytes BE unsigned int
-        return buf.readUInt32BE(5) * 0xffffffff + buf.readUInt32BE(1)
+        result = buf.readUInt32BE(5) * 0xffffffff + buf.readUInt32BE(1)
+        buf.consume(9)
+        return result
       case 0xd0:
         // 1-byte signed int
-        return buf.readInt8(1)
+        result = buf.readInt8(1)
+        buf.consume(2)
+        return result
       case 0xd1:
         // 2-bytes signed int
-        return buf.readInt16BE(1)
+        result = buf.readInt16BE(1)
+        buf.consume(3)
+        return result
       case 0xd2:
         // 4-bytes signed int
-        return buf.readInt32BE(1)
+        result = buf.readInt32BE(1)
+        buf.consume(5)
+        return result
       case 0xd3:
         // 8-bytes signed int
         throw new Error('not implemented yet')
       case 0xca:
         // 4-bytes float
-        return buf.readFloatBE(1)
+        result = buf.readFloatBE(1)
+        buf.consume(5)
+        return result
       case 0xcb:
         // 8-bytes double
-        return buf.readDoubleBE(1)
+        result = buf.readDoubleBE(1)
+        buf.consume(9)
+        return result
       case 0xd9:
         // strings up to 2^8 - 1 bytes
-        return buf.toString('utf8', 2, 2 + buf[1])
+        result = buf.toString('utf8', 2, 2 + buf.readUInt8(1))
+        buf.consume(3 + buf.readUInt8(1))
+        return result
       case 0xda:
-        // strings up to 2^16 - 1 bytes
-        return buf.toString('utf8', 3, 3 + buf.readUInt16BE(1))
+        // strings up to 2^16 - 2 bytes
+        result = buf.toString('utf8', 3, 3 + buf.readUInt16BE(1))
+        buf.consume(4 + buf.readUInt16BE(1))
+        return result
       case 0xdb:
-        // strings up to 2^32 - 1 bytes
-        return buf.toString('utf8', 5, 5 + buf.readUInt32BE(1))
+        // strings up to 2^32 - 4 bytes
+        result = buf.toString('utf8', 5, 5 + buf.readUInt32BE(1))
+        buf.consume(6 + buf.readUInt32BE(1))
+        return result
       case 0xc4:
         // buffers up to 2^8 - 1 bytes
-        return buf.slice(2, 2 + buf.readUInt8(1))
+        result = buf.slice(2, 2 + buf.readUInt8(1))
+        buf.consume(3 + buf.readUInt8(1))
+        return result
       case 0xc5:
         // buffers up to 2^16 - 1 bytes
-        return buf.slice(3, 3 + buf.readUInt16BE(1))
+        result = buf.slice(3, 3 + buf.readUInt16BE(1))
+        buf.consume(4 + buf.readUInt16BE(1))
+        return result
       case 0xc6:
         // buffers up to 2^32 - 1 bytes
-        return buf.slice(5, 5 + buf.readUInt32BE(1))
+        result = buf.slice(5, 5 + buf.readUInt32BE(1))
+        buf.consume(6 + buf.readUInt32BE(1))
+        return result
     }
 
-    if ((first & 0xe0) === 0xa0) {
+    if ((first & 0xf0) === 0x90) {
+      // we have an array
+      length = first & 0x0f
+      result = []
+      buf.consume(1)
+
+      if (length < 16) {
+
+        for (i = 0; i < length; i++) {
+          result.push(decode(buf))
+        }
+      }
+
+      return result
+    } else if ((first & 0xe0) === 0xa0) {
       return buf.toString('utf8', 1, first & 0x1f + 1)
-    }
-
-    if (first > 0xe0) {
+    } else if (first > 0xe0) {
       // 5 bits negative ints
       return - (~0xe0 & first)
     } else if (first < 0x80) {
