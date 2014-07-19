@@ -253,12 +253,17 @@ function msgpack() {
 
       return result
     } else if ((first & 0xe0) === 0xa0) {
-      return buf.toString('utf8', 1, first & 0x1f + 1)
+      result = buf.toString('utf8', 1, (first & 0x1f) + 1)
+      buf.consume((first & 0x1f) + 1)
+      return result
     } else if (first > 0xe0) {
       // 5 bits negative ints
-      return - (~0xe0 & first)
+      result = - (~0xe0 & first)
+      buf.consume(1)
+      return result
     } else if (first < 0x80) {
       // 7-bits positive ints
+      buf.consume(1)
       return first
     } else {
       throw new Error('not implemented yet')
