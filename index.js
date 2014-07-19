@@ -11,24 +11,16 @@ function msgpack() {
 
     if (obj === undefined) {
       throw new Error('undefined is not encodable in msgpack!')
-    }
-
-    if (obj === null) {
+    } else if (obj === null) {
       buf = new Buffer(1)
       buf[0] = 0xc0
-    }
-
-    if (obj === true) {
+    } else if (obj === true) {
       buf = new Buffer(1)
       buf[0] = 0xc3
-    }
-
-    if (obj === false) {
+    } else if (obj === false) {
       buf = new Buffer(1)
       buf[0] = 0xc2
-    }
-
-    if (typeof obj === 'string') {
+    } else if (typeof obj === 'string') {
       len = Buffer.byteLength(obj)
       if (len < 32) {
         buf = new Buffer(1 + len)
@@ -50,12 +42,9 @@ function msgpack() {
         buf.writeUInt32BE(len, 1)
         buf.write(obj, 5)
       }
-    }
-
-    // weird hack to support Buffer
-    // and Buffer-like objects
-    if (obj && obj.readUInt32LE) {
-      console.log(obj.length);
+    } else if (obj && obj.readUInt32LE) {
+      // weird hack to support Buffer
+      // and Buffer-like objects
       if (obj.length <= 0xff) {
         buf = new Buffer(2)
         buf[0] = 0xc4
@@ -70,10 +59,8 @@ function msgpack() {
         buf.writeUInt32BE(obj.length, 1)
       }
 
-      return bl([buf, obj])
-    }
-
-    if (Array.isArray(obj)) {
+      buf = bl([buf, obj])
+    } else if (Array.isArray(obj)) {
       if (obj.length < 16) {
         buf = new Buffer(1)
         buf[0] = 0x90 | obj.length
@@ -91,9 +78,9 @@ function msgpack() {
         acc.append(encode(obj))
         return acc
       }, bl().append(buf))
-    }
-
-    if (typeof obj === 'number') {
+    } else if (typeof obj === 'object') {
+      buf = encodeObject(obj)
+    } else if (typeof obj === 'number') {
       if (isFloat(obj)) {
         return encodeFloat(obj)
       } else if (obj >= 0) {
@@ -270,13 +257,24 @@ function msgpack() {
     }
 
     if ((first & 0xf0) === 0x90) {
-      // we have an array
+      // we have an array with less than 15 elements
       length = first & 0x0f
       result = []
       buf.consume(1)
 
       for (i = 0; i < length; i++) {
         result.push(decode(buf))
+      }
+
+      return result
+    } else if ((first & 0xf0) === 0x80) {
+      // we have a map with less than 15 elements
+      length = first & 0x0f
+      result = {}
+      buf.consume(1)
+
+      for (i = 0; i < length; i++) {
+        result[decode(buf)] = decode(buf)
       }
 
       return result
@@ -296,6 +294,30 @@ function msgpack() {
     } else {
       throw new Error('not implemented yet')
     }
+  }
+
+  function encodeObject(obj) {
+    var acc = []
+      , length = 0
+      , key
+      , header
+
+    for (key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        ++length
+        acc.push(encode(key))
+        acc.push(encode(obj[key]))
+      }
+    }
+
+    if (length < 16) {
+      header = new Buffer(1)
+      header[0] = 0x80 | length
+    }
+
+    acc.unshift(header)
+
+    return bl(acc)
   }
 
   return {
