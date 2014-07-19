@@ -77,10 +77,14 @@ function msgpack() {
       if (obj.length < 16) {
         buf = new Buffer(1)
         buf[0] = 0x90 | obj.length
-      } else {
+      } else if (obj.length < 65536) {
         buf = new Buffer(3)
         buf[0] = 0xdc
         buf.writeUInt16BE(obj.length, 1)
+      } else {
+        buf = new Buffer(5)
+        buf[0] = 0xdd
+        buf.writeUInt32BE(obj.length, 1)
       }
 
       buf = obj.reduce(function(acc, obj) {
@@ -245,6 +249,18 @@ function msgpack() {
         result = []
         length = buf.readUInt16BE(1)
         buf.consume(3)
+
+        for (i = 0; i < length; i++) {
+          result.push(decode(buf))
+        }
+
+        return result
+
+      case 0xdd:
+        // array up to 2^16 elements - 2 bytes
+        result = []
+        length = buf.readUInt32BE(1)
+        buf.consume(5)
 
         for (i = 0; i < length; i++) {
           result.push(decode(buf))
