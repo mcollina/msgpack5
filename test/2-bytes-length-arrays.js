@@ -13,13 +13,13 @@ function build(size) {
   return array
 }
 
-test('encode/decode arrays up to 255 elements', function(t) {
+test('encode/decode arrays up to 0xffff elements', function(t) {
 
   var encoder = msgpack()
     , all     = []
     , i
 
-  for(i = 16; i < 0xff; i += 5) {
+  for(i = 16; i < 0xffff; i += 4242) {
     all.push(build(i))
   }
 
@@ -29,9 +29,9 @@ test('encode/decode arrays up to 255 elements', function(t) {
     t.test('encoding an array with ' + array.length + ' elements', function(t) {
       var buf = encoder.encode(array)
       // the array is full of 1-byte integers
-      t.equal(buf.length, 2 + array.length, 'must have the right length');
+      t.equal(buf.length, 3 + array.length, 'must have the right length');
       t.equal(buf.readUInt8(0), 0xdc, 'must have the proper header');
-      t.equal(buf.readUInt8(1), array.length, 'must include the array length');
+      t.equal(buf.readUInt16BE(1), array.length, 'must include the array length');
       t.end()
     })
 

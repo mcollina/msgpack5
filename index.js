@@ -78,9 +78,9 @@ function msgpack() {
         buf = new Buffer(1)
         buf[0] = 0x90 | obj.length
       } else {
-        buf = new Buffer(2)
+        buf = new Buffer(3)
         buf[0] = 0xdc
-        buf[1] = obj.length
+        buf.writeUInt16BE(obj.length, 1)
       }
 
       buf = obj.reduce(function(acc, obj) {
@@ -241,10 +241,10 @@ function msgpack() {
         buf.consume(6 + buf.readUInt32BE(1))
         return result
       case 0xdc:
-        // array up to 2^8 elements
+        // array up to 2^16 elements - 2 bytes
         result = []
-        length = buf.readUInt8(1)
-        buf.consume(2)
+        length = buf.readUInt16BE(1)
+        buf.consume(3)
 
         for (i = 0; i < length; i++) {
           result.push(decode(buf))
