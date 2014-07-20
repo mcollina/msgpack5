@@ -242,15 +242,25 @@ function msgpack() {
         }
 
         return result
-
       case 0xdd:
-        // array up to 2^16 elements - 2 bytes
+        // array up to 2^32 elements - 4 bytes
         result = []
         length = buf.readUInt32BE(1)
         buf.consume(5)
 
         for (i = 0; i < length; i++) {
           result.push(decode(buf))
+        }
+
+        return result
+      case 0xde:
+        // maps up to 2^16 elements - 2 bytes
+        result = []
+        length = buf.readUInt16BE(1)
+        buf.consume(3)
+
+        for (i = 0; i < length; i++) {
+          result[decode(buf)] = decode(buf)
         }
 
         return result
@@ -313,6 +323,10 @@ function msgpack() {
     if (length < 16) {
       header = new Buffer(1)
       header[0] = 0x80 | length
+    } else {
+      header = new Buffer(3)
+      header[0] = 0xde
+      header.writeUInt16BE(length, 1)
     }
 
     acc.unshift(header)

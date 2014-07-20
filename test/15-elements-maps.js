@@ -46,7 +46,6 @@ test('encode/decode maps up to 15 elements', function(t) {
     var length = Object.keys(map).length
     t.test('encoding a map with ' + length + ' elements of ' + map[100], function(t) {
       var buf = encoder.encode(map)
-      // the map is full of 1-byte integers
       t.equal(buf.length, computeLength(map), 'must have the right length');
       t.equal(buf.readUInt8(0) & 0xf0, 0x80, 'must have the proper header');
       t.equal(buf.readUInt8(0) & 0x0f, length, 'must include the map length');
