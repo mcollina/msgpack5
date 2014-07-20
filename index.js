@@ -264,6 +264,8 @@ function msgpack() {
         }
 
         return result
+      case 0xdf:
+        throw new Error('map too big to decode in JS')
     }
 
     if ((first & 0xf0) === 0x90) {
