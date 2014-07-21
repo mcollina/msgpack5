@@ -272,6 +272,10 @@ function msgpack() {
       case 0xd4:
         buf.consume(1)
         return decodeFixExt(buf, 1)
+
+      case 0xd5:
+        buf.consume(1)
+        return decodeFixExt(buf, 2)
     }
 
     if ((first & 0xf0) === 0x90) {
@@ -358,7 +362,7 @@ function msgpack() {
   function encodeExt(obj) {
     var i
       , encoded
-      , header
+      , header = new Buffer(2)
 
     for (i = 0; i < types.length; i++) {
       if (obj instanceof types[i]) {
@@ -372,8 +376,10 @@ function msgpack() {
     }
 
     if (encoded.length === 1) {
-      header = new Buffer(2)
       header[0] = 0xd4
+      header[1] = types[i]._msgpackType
+    } else if (encoded.length === 2) {
+      header[0] = 0xd5
       header[1] = types[i]._msgpackType
     }
 
