@@ -1,23 +1,6 @@
-msgpack5
-========
 
-A msgpack v5 implementation for node.js, with prototype-based extension points.
 
-This library was built as the data format for
-[JSChan](http://npm.im/jschan).
-
-Install
--------
-
-```bash
-npm install msgpack5 --save
-```
-
-Usage
------
-
-```js
-var msgpack = require('msgpack5')() // namespace our extensions
+var msgpack = require('./')() // namespace our extensions
   , assert  = require('assert')
   , a       = new MyType(2, 'a')
   , encode  = msgpack.encode
@@ -59,20 +42,3 @@ function mytipeDecode(data) {
 
   return result
 }
-```
-
-Disclaimer
-----------
-
-This library is built fully on JS and on [bl](http://npm.im/bl) to
-simplify the code. Every improvement that keeps the same API is welcome.
-
-Acknowledgements
-----------------
-
-This project was kindly sponsored by [nearForm](http://nearform.com).
-
-License
--------
-
-MIT
