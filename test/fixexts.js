@@ -11,17 +11,17 @@ test('encode/decode 1 byte fixext data', function(t) {
     this.data = data
   }
 
-  MyType.msgpackEncode = function(obj) {
+  function mytipeEncode(obj) {
     var buf = new Buffer(1)
     buf.writeUInt8(obj.data, 0)
     return buf
   }
 
-  MyType.msgpackDecode = function(data) {
+  function mytipeDecode(data) {
     return new MyType(data.readUInt8(0))
   }
 
-  encoder.register(0x42, MyType)
+  encoder.register(0x42, MyType, mytipeEncode, mytipeDecode)
 
   all.push(new MyType(0))
   all.push(new MyType(1))
@@ -65,17 +65,17 @@ test('encode/decode 2 bytes fixext data', function(t) {
     this.data = data
   }
 
-  MyType.msgpackEncode = function(obj) {
+  function mytipeEncode(obj) {
     var buf = new Buffer(2)
     buf.writeUInt16BE(obj.data, 0)
     return buf
   }
 
-  MyType.msgpackDecode = function(data) {
+  function mytipeDecode(data) {
     return new MyType(data.readUInt16BE(0))
   }
 
-  encoder.register(0x42, MyType)
+  encoder.register(0x42, MyType, mytipeEncode, mytipeDecode)
 
   all.push(new MyType(0))
   all.push(new MyType(1))
@@ -119,17 +119,17 @@ test('encode/decode 4 bytes fixext data', function(t) {
     this.data = data
   }
 
-  MyType.msgpackEncode = function(obj) {
+  function mytipeEncode(obj) {
     var buf = new Buffer(4)
     buf.writeUInt32BE(obj.data, 0)
     return buf
   }
 
-  MyType.msgpackDecode = function(data) {
+  function mytipeDecode(data) {
     return new MyType(data.readUInt32BE(0))
   }
 
-  encoder.register(0x44, MyType)
+  encoder.register(0x44, MyType, mytipeEncode, mytipeDecode)
 
   all.push(new MyType(0))
   all.push(new MyType(1))
@@ -173,18 +173,18 @@ test('encode/decode 8 bytes fixext data', function(t) {
     this.data = data
   }
 
-  MyType.msgpackEncode = function(obj) {
+  function mytipeEncode(obj) {
     var buf = new Buffer(8)
     buf.writeUInt32BE(obj.data / 2, 0)
     buf.writeUInt32BE(obj.data / 2, 4)
     return buf
   }
 
-  MyType.msgpackDecode = function(data) {
+  function mytipeDecode(data) {
     return new MyType(data.readUInt32BE(0) + data.readUInt32BE(4))
   }
 
-  encoder.register(0x44, MyType)
+  encoder.register(0x44, MyType, mytipeEncode, mytipeDecode)
 
   all.push(new MyType(2))
   all.push(new MyType(4))
@@ -229,7 +229,7 @@ test('encode/decode 16 bytes fixext data', function(t) {
     this.data = data
   }
 
-  MyType.msgpackEncode = function(obj) {
+  function mytipeEncode(obj) {
     var buf = new Buffer(16)
     buf.writeUInt32BE(obj.data / 4, 0)
     buf.writeUInt32BE(obj.data / 4, 4)
@@ -238,11 +238,11 @@ test('encode/decode 16 bytes fixext data', function(t) {
     return buf
   }
 
-  MyType.msgpackDecode = function(data) {
+  function mytipeDecode(data) {
     return new MyType(data.readUInt32BE(0) + data.readUInt32BE(4) + data.readUInt32BE(8) + data.readUInt32BE(12))
   }
 
-  encoder.register(0x46, MyType)
+  encoder.register(0x46, MyType, mytipeEncode, mytipeDecode)
 
   all.push(new MyType(4))
   all.push(new MyType(8))

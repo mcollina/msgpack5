@@ -348,15 +348,18 @@ function msgpack() {
     return bl(acc)
   }
 
-  function register(type, constructor) {
+  function register(type, constructor, encode, decode) {
     assert(type > 0, 'must have a type > 0')
     assert(constructor, 'must have a constructor')
-    assert(constructor.msgpackDecode, 'must have a msgpackDecode function')
-    assert(constructor.msgpackEncode, 'must have a msgpackEncode function')
+    assert(decode, 'must have a decode function')
+    assert(encode, 'must have an encode function')
 
-    constructor._msgpackType = type
-
-    types.push(constructor)
+    types.push({
+      type: type,
+      constructor: constructor,
+      encode: encode,
+      decode: decode
+    })
 
     return this
   }
@@ -367,8 +370,8 @@ function msgpack() {
       , header = new Buffer(2)
 
     for (i = 0; i < types.length; i++) {
-      if (obj instanceof types[i]) {
-        encoded = types[i].msgpackEncode(obj)
+      if (obj instanceof types[i].constructor) {
+        encoded = types[i].encode(obj)
         break;
       }
     }
@@ -389,7 +392,7 @@ function msgpack() {
       header[0] = 0xd8
     }
 
-    header[1] = types[i]._msgpackType
+    header[1] = types[i].type
 
     return bl().append(header).append(encoded)
   }
@@ -399,13 +402,11 @@ function msgpack() {
       , i
       , toDecode
 
-    console.log(buf.length, size)
-
     for (i = 0; i < types.length; i++) {
-      if (type === types[i]._msgpackType) {
+      if (type === types[i].type) {
         toDecode = buf.slice(2, size + 2)
         buf.consume(size + 2)
-        return types[i].msgpackDecode(toDecode)
+        return types[i].decode(toDecode)
       }
     }
 
