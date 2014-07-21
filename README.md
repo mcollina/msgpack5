@@ -1,4 +1,4 @@
-msgpack5
+msgpack5&nbsp;&nbsp;[![Build Status](https://travis-ci.org/mcollina/mosca.png)](https://travis-ci.org/mcollina/mosca)
 ========
 
 A msgpack v5 implementation for node.js, with prototype-based extension points.
