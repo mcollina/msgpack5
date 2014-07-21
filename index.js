@@ -276,6 +276,8 @@ function msgpack() {
         return decodeFixExt(buf, 4)
       case 0xd7:
         return decodeFixExt(buf, 8)
+      case 0xd8:
+        return decodeFixExt(buf, 16)
     }
 
     if ((first & 0xf0) === 0x90) {
@@ -383,6 +385,8 @@ function msgpack() {
       header[0] = 0xd6
     } else if (encoded.length === 8) {
       header[0] = 0xd7
+    } else if (encoded.length === 16) {
+      header[0] = 0xd8
     }
 
     header[1] = types[i]._msgpackType
@@ -394,6 +398,8 @@ function msgpack() {
     var type = buf.readUInt8(1)
       , i
       , toDecode
+
+    console.log(buf.length, size)
 
     for (i = 0; i < types.length; i++) {
       if (type === types[i]._msgpackType) {

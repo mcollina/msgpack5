@@ -219,3 +219,63 @@ test('encode/decode 8 bytes fixext data', function(t) {
 
   t.end()
 })
+
+test('encode/decode 16 bytes fixext data', function(t) {
+
+  var encoder = msgpack()
+    , all     = []
+
+  function MyType(data) {
+    this.data = data
+  }
+
+  MyType.msgpackEncode = function(obj) {
+    var buf = new Buffer(16)
+    buf.writeUInt32BE(obj.data / 4, 0)
+    buf.writeUInt32BE(obj.data / 4, 4)
+    buf.writeUInt32BE(obj.data / 4, 8)
+    buf.writeUInt32BE(obj.data / 4, 12)
+    return buf
+  }
+
+  MyType.msgpackDecode = function(data) {
+    return new MyType(data.readUInt32BE(0) + data.readUInt32BE(4) + data.readUInt32BE(8) + data.readUInt32BE(12))
+  }
+
+  encoder.register(0x46, MyType)
+
+  all.push(new MyType(4))
+  all.push(new MyType(8))
+  all.push(new MyType(44))
+
+  all.forEach(function(orig) {
+    t.test('encoding a custom obj encoded as ' + orig.data, function(t) {
+      var buf = encoder.encode(orig)
+      t.equal(buf.length, 18, 'must have the right length')
+      t.equal(buf.readUInt8(0), 0xd8, 'must have the fixext header')
+      t.equal(buf.readUInt8(1), 0x46, 'must include the custom type id')
+      t.equal(buf.readUInt32BE(2) + buf.readUInt32BE(6) + buf.readUInt32BE(10) + buf.readUInt32BE(14), orig.data, 'must decode correctly')
+      t.end()
+    })
+
+    t.test('decoding a custom obj encoded as ' + orig.data, function(t) {
+      var buf = new Buffer(18)
+      buf[0] = 0xd8
+      buf[1] = 0x46
+      buf.writeUInt32BE(orig.data / 4, 2)
+      buf.writeUInt32BE(orig.data / 4, 6)
+      buf.writeUInt32BE(orig.data / 4, 10)
+      buf.writeUInt32BE(orig.data / 4, 14)
+      t.type(encoder.decode(buf), MyType, 'must have the correct prototype')
+      t.deepEqual(encoder.decode(buf), orig, 'must decode correctly')
+      t.end()
+    })
+
+    t.test('mirror test with a custom obj containing ' + orig.data, function(t) {
+      t.deepEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
+      t.end()
+    })
+  })
+
+  t.end()
+})
