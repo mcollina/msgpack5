@@ -5,6 +5,8 @@ var assert    = require('assert')
 
 function msgpack() {
 
+  var types = []
+
   function encode(obj) {
     var buf
       , len
@@ -79,7 +81,7 @@ function msgpack() {
         return acc
       }, bl().append(buf))
     } else if (typeof obj === 'object') {
-      buf = encodeObject(obj)
+      buf = encodeExt(obj) || encodeObject(obj)
     } else if (typeof obj === 'number') {
       if (isFloat(obj)) {
         return encodeFloat(obj)
@@ -266,6 +268,10 @@ function msgpack() {
         return result
       case 0xdf:
         throw new Error('map too big to decode in JS')
+
+      case 0xd4:
+        buf.consume(1)
+        return decodeFixExt(buf, 1)
     }
 
     if ((first & 0xf0) === 0x90) {
@@ -336,9 +342,61 @@ function msgpack() {
     return bl(acc)
   }
 
+  function register(type, constructor) {
+    assert(type > 0, 'must have a type > 0')
+    assert(constructor, 'must have a constructor')
+    assert(constructor.msgpackDecode, 'must have a msgpackDecode function')
+    assert(constructor.msgpackEncode, 'must have a msgpackEncode function')
+
+    constructor._msgpackType = type
+
+    types.push(constructor)
+
+    return this
+  }
+
+  function encodeExt(obj) {
+    var i
+      , encoded
+      , header
+
+    for (i = 0; i < types.length; i++) {
+      if (obj instanceof types[i]) {
+        encoded = types[i].msgpackEncode(obj)
+        break;
+      }
+    }
+
+    if (!encoded) {
+      return null
+    }
+
+    if (encoded.length === 1) {
+      header = new Buffer(2)
+      header[0] = 0xd4
+      header[1] = types[i]._msgpackType
+    }
+
+    return bl().append(header).append(encoded)
+  }
+
+  function decodeFixExt(buf, size) {
+    var type = buf.readUInt8(0)
+      , i
+
+    for (i = 0; i < types.length; i++) {
+      if (type === types[i]._msgpackType) {
+        return types[i].msgpackDecode(buf.slice(1, size + 1))
+      }
+    }
+
+    throw new Error('unable to find ext type ' + type)
+  }
+
   return {
     encode: encode,
-    decode: decode
+    decode: decode,
+    register: register
   }
 }
 
