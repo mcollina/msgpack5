@@ -268,14 +268,15 @@ function msgpack() {
         return result
       case 0xdf:
         throw new Error('map too big to decode in JS')
-
       case 0xd4:
         buf.consume(1)
         return decodeFixExt(buf, 1)
-
       case 0xd5:
         buf.consume(1)
         return decodeFixExt(buf, 2)
+      case 0xd6:
+        buf.consume(1)
+        return decodeFixExt(buf, 4)
     }
 
     if ((first & 0xf0) === 0x90) {
@@ -377,11 +378,12 @@ function msgpack() {
 
     if (encoded.length === 1) {
       header[0] = 0xd4
-      header[1] = types[i]._msgpackType
     } else if (encoded.length === 2) {
       header[0] = 0xd5
-      header[1] = types[i]._msgpackType
+    } else if (encoded.length === 4) {
+      header[0] = 0xd6
     }
+    header[1] = types[i]._msgpackType
 
     return bl().append(header).append(encoded)
   }
