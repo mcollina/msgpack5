@@ -144,6 +144,7 @@ function msgpack() {
       , i
       , length
       , result
+      , type
 
     switch (first) {
       case 0xc0:
@@ -278,6 +279,12 @@ function msgpack() {
         return decodeFixExt(buf, 8)
       case 0xd8:
         return decodeFixExt(buf, 16)
+      case 0xc7:
+        // ext up to 2^8 - 1 bytes
+        length  = buf.readUInt8(1)
+        type    = buf.readUInt8(2)
+        buf.consume(3)
+        return decodeExt(buf, type, length)
     }
 
     if ((first & 0xf0) === 0x90) {
@@ -367,7 +374,7 @@ function msgpack() {
   function encodeExt(obj) {
     var i
       , encoded
-      , header = new Buffer(2)
+      , headers = []
 
     for (i = 0; i < types.length; i++) {
       if (obj instanceof types[i].constructor) {
@@ -381,31 +388,41 @@ function msgpack() {
     }
 
     if (encoded.length === 1) {
-      header[0] = 0xd4
+      headers.push(0xd4)
     } else if (encoded.length === 2) {
-      header[0] = 0xd5
+      headers.push(0xd5)
     } else if (encoded.length === 4) {
-      header[0] = 0xd6
+      headers.push(0xd6)
     } else if (encoded.length === 8) {
-      header[0] = 0xd7
+      headers.push(0xd7)
     } else if (encoded.length === 16) {
-      header[0] = 0xd8
+      headers.push(0xd8)
+    } else if (encoded.length < 256) {
+      headers.push(0xc7)
+      headers.push(encoded.length)
     }
 
-    header[1] = types[i].type
+    headers.push(types[i].type)
 
-    return bl().append(header).append(encoded)
+    return bl().append(new Buffer(headers)).append(encoded)
   }
 
   function decodeFixExt(buf, size) {
     var type = buf.readUInt8(1)
-      , i
+
+    buf.consume(2)
+
+    return decodeExt(buf, type, size)
+  }
+
+  function decodeExt(buf, type, size) {
+    var i
       , toDecode
 
     for (i = 0; i < types.length; i++) {
       if (type === types[i].type) {
-        toDecode = buf.slice(2, size + 2)
-        buf.consume(size + 2)
+        toDecode = buf.slice(0, size)
+        buf.consume(size)
         return types[i].decode(toDecode)
       }
     }
