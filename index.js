@@ -236,37 +236,19 @@ function msgpack() {
         return result
       case 0xdc:
         // array up to 2^16 elements - 2 bytes
-        result = []
         length = buf.readUInt16BE(1)
         buf.consume(3)
-
-        for (i = 0; i < length; i++) {
-          result.push(decode(buf))
-        }
-
-        return result
+        return decodeArray(buf, length)
       case 0xdd:
         // array up to 2^32 elements - 4 bytes
-        result = []
         length = buf.readUInt32BE(1)
         buf.consume(5)
-
-        for (i = 0; i < length; i++) {
-          result.push(decode(buf))
-        }
-
-        return result
+        return decodeArray(buf, length)
       case 0xde:
         // maps up to 2^16 elements - 2 bytes
-        result = []
         length = buf.readUInt16BE(1)
         buf.consume(3)
-
-        for (i = 0; i < length; i++) {
-          result[decode(buf)] = decode(buf)
-        }
-
-        return result
+        return decodeMap(buf, length)
       case 0xdf:
         throw new Error('map too big to decode in JS')
       case 0xd4:
@@ -302,25 +284,13 @@ function msgpack() {
     if ((first & 0xf0) === 0x90) {
       // we have an array with less than 15 elements
       length = first & 0x0f
-      result = []
       buf.consume(1)
-
-      for (i = 0; i < length; i++) {
-        result.push(decode(buf))
-      }
-
-      return result
+      return decodeArray(buf, length)
     } else if ((first & 0xf0) === 0x80) {
       // we have a map with less than 15 elements
       length = first & 0x0f
-      result = {}
       buf.consume(1)
-
-      for (i = 0; i < length; i++) {
-        result[decode(buf)] = decode(buf)
-      }
-
-      return result
+      return decodeMap(buf, length)
     } else if ((first & 0xe0) === 0xa0) {
       result = buf.toString('utf8', 1, (first & 0x1f) + 1)
       buf.consume((first & 0x1f) + 1)
@@ -337,6 +307,23 @@ function msgpack() {
     } else {
       throw new Error('not implemented yet')
     }
+  }
+
+
+  function decodeArray(buf, length) {
+    var result = []
+    for (i = 0; i < length; i++) {
+      result.push(decode(buf))
+    }
+    return result
+  }
+
+  function decodeMap(buf, length) {
+    var result = {}
+    for (i = 0; i < length; i++) {
+      result[decode(buf)] = decode(buf)
+    }
+    return result
   }
 
   function encodeObject(obj) {
