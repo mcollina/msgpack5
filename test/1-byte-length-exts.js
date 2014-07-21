@@ -57,7 +57,7 @@ test('encode/decode variable ext data up to 0xff', function(t) {
     t.test('encoding a custom obj of length ' + orig.size, function(t) {
       var buf = encoder.encode(orig)
       t.equal(buf.length, 3 + orig.size, 'must have the right length')
-      t.equal(buf.readUInt8(0), 0xc7, 'must have the fixext header')
+      t.equal(buf.readUInt8(0), 0xc7, 'must have the ext header')
       t.equal(buf.readUInt8(1), orig.size, 'must include the data length')
       t.equal(buf.readUInt8(2), 0x42, 'must include the custom type id')
       t.equal(buf.toString('utf8', 3, 4), orig.value, 'must decode correctly')

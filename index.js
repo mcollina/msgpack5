@@ -285,6 +285,12 @@ function msgpack() {
         type    = buf.readUInt8(2)
         buf.consume(3)
         return decodeExt(buf, type, length)
+      case 0xc8:
+        // ext up to 2^8 - 1 bytes
+        length  = buf.readUInt16BE(1)
+        type    = buf.readUInt8(3)
+        buf.consume(4)
+        return decodeExt(buf, type, length)
     }
 
     if ((first & 0xf0) === 0x90) {
@@ -400,6 +406,10 @@ function msgpack() {
     } else if (encoded.length < 256) {
       headers.push(0xc7)
       headers.push(encoded.length)
+    } else if (encoded.length < 0x10000) {
+      headers.push(0xc8)
+      headers.push(encoded.length >> 8)
+      headers.push(encoded.length & 0x00ff)
     }
 
     headers.push(types[i].type)
