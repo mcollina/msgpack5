@@ -320,8 +320,10 @@ function msgpack() {
 
   function decodeMap(buf, length) {
     var result = {}
+      , key
     for (i = 0; i < length; i++) {
-      result[decode(buf)] = decode(buf)
+      key         = decode(buf)
+      result[key] = decode(buf)
     }
     return result
   }
@@ -351,7 +353,14 @@ function msgpack() {
 
     acc.unshift(header)
 
-    return bl(acc)
+    var result = acc.reduce(function(list, buf) {
+      // TODO remove the slicing after
+      // https://github.com/rvagg/bl/pull/12
+      // gets merged
+      return list.append(buf.slice(0, buf.length))
+    }, bl())
+
+    return result
   }
 
   function register(type, constructor, encode, decode) {
