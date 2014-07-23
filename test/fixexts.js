@@ -292,7 +292,6 @@ test('encode/decode fixext inside a map', function(t) {
   function mytypeEncode(obj) {
     var buf = new Buffer(4)
     buf.writeUInt32BE(obj.data, 0)
-    console.log(buf);
     return buf
   }
 
@@ -307,7 +306,6 @@ test('encode/decode fixext inside a map', function(t) {
   all.forEach(function(orig) {
     t.test('mirror test with a custom obj inside a map', function(t) {
       var encoded = encoder.encode(orig)
-      console.log(encoded)
       t.deepEqual(encoder.decode(encoded), orig, 'must stay the same')
       t.end()
     })

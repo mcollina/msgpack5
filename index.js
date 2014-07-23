@@ -354,10 +354,7 @@ function msgpack() {
     acc.unshift(header)
 
     var result = acc.reduce(function(list, buf) {
-      // TODO remove the slicing after
-      // https://github.com/rvagg/bl/pull/12
-      // gets merged
-      return list.append(buf.slice(0, buf.length))
+      return list.append(buf)
     }, bl())
 
     return result
