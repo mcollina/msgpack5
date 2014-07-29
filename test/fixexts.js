@@ -302,6 +302,12 @@ test('encode/decode fixext inside a map', function(t) {
   encoder.register(0x42, MyType, mytypeEncode, mytypeDecode)
 
   all.push({ ret: new MyType(42) })
+  all.push({ a: new MyType(42), b: new MyType(43) })
+  
+  all.push([1,2,3,4,5, 6].reduce(function(acc, key) {
+    acc[key] = new MyType(key)
+    return acc
+  }, {}))
 
   all.forEach(function(orig) {
     t.test('mirror test with a custom obj inside a map', function(t) {

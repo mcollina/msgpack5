@@ -1,7 +1,6 @@
 
 
 var msgpack = require('./')() // namespace our extensions
-  , assert  = require('assert')
   , a       = new MyType(2, 'a')
   , encode  = msgpack.encode
   , decode  = msgpack.decode

@@ -5,11 +5,9 @@ var test    = require('tap').test
 test('encoding/decoding 32-bits float numbers', function(t) {
   var encoder = msgpack()
     , allNum  = []
-    , i
 
   allNum.push(748365544534.2)
   allNum.push(-222111111000004.2)
-
 
   allNum.forEach(function(num) {
     t.test('encoding ' + num, function(t) {

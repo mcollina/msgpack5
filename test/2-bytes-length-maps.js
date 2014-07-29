@@ -26,8 +26,6 @@ function computeLength(mapLength) {
 test('encode/decode maps up to 15 elements', function(t) {
 
   var encoder = msgpack()
-    , all     = []
-    , i
 
   function doTest(length) {
     var map = build(length, 42)

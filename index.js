@@ -141,7 +141,6 @@ function msgpack() {
     }
 
     var first = buf.readUInt8(0)
-      , i
       , length
       , result
       , type
@@ -312,6 +311,8 @@ function msgpack() {
 
   function decodeArray(buf, length) {
     var result = []
+      , i
+
     for (i = 0; i < length; i++) {
       result.push(decode(buf))
     }
@@ -321,6 +322,8 @@ function msgpack() {
   function decodeMap(buf, length) {
     var result = {}
       , key
+      , i
+
     for (i = 0; i < length; i++) {
       key         = decode(buf)
       result[key] = decode(buf)

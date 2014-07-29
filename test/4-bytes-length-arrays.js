@@ -16,7 +16,6 @@ function build(size) {
 test('encode/decode arrays up to 0xffffffff elements', function(t) {
 
   var encoder = msgpack()
-    , i
 
   function doTest(array) {
     t.test('encoding an array with ' + array.length + ' elements', function(t) {

@@ -16,7 +16,6 @@ function build(size, value) {
 function computeLength(map) {
   var length    = 1 // the header
     , multi     = 5 // we have 4 bytes for each key, plus 1 byte for the value
-    , elements  = Object.keys(map)
 
   if (map[100] && typeof map[100] === 'string') {
     multi += map[100].length

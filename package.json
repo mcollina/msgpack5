@@ -4,7 +4,8 @@
   "description": "A msgpack v5 implementation for node.js, with extension points",
   "main": "index.js",
   "scripts": {
-    "test": "tap test/*"
+    "test": "tap test/*",
+    "jshint": "jshint *.js test/*"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
   },
   "homepage": "https://github.com/mcollina/msgpack5",
   "devDependencies": {
+    "jshint": "^2.5.2",
     "pre-commit": "0.0.9",
     "tap": "^0.4.11"
   },
