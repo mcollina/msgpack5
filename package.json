@@ -7,6 +7,10 @@
     "test": "tap test/*",
     "jshint": "jshint *.js test/*"
   },
+  "pre-commit": [
+    "jshint",
+    "test"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/mcollina/msgpack5.git"
