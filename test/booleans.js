@@ -1,5 +1,5 @@
 
-var test    = require('tap').test
+var test    = require('tape').test
   , msgpack = require('../')
 
 test('encode/decode booleans', function(t) {

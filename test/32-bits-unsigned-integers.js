@@ -1,5 +1,5 @@
 
-var test    = require('tap').test
+var test    = require('tape').test
   , msgpack = require('../')
 
 test('encoding/decoding 32-bits big-endian unsigned integers', function(t) {

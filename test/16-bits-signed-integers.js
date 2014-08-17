@@ -1,5 +1,5 @@
 
-var test    = require('tap').test
+var test    = require('tape').test
   , msgpack = require('../')
 
 test('encoding/decoding 16-bits big-endian signed integers', function(t) {

@@ -1,5 +1,5 @@
 
-var test    = require('tap').test
+var test    = require('tape').test
   , msgpack = require('../')
 
 test('encode/decode 1 byte fixext data', function(t) {
@@ -43,7 +43,7 @@ test('encode/decode 1 byte fixext data', function(t) {
       buf[1] = 0x42
       buf.writeUInt8(orig.data, 2)
       t.deepEqual(encoder.decode(buf), orig, 'must decode correctly')
-      t.type(encoder.decode(buf), MyType, 'must have the correct prototype')
+      t.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
       t.end()
     })
 
@@ -97,7 +97,7 @@ test('encode/decode 2 bytes fixext data', function(t) {
       buf[1] = 0x42
       buf.writeUInt16BE(orig.data, 2)
       t.deepEqual(encoder.decode(buf), orig, 'must decode correctly')
-      t.type(encoder.decode(buf), MyType, 'must have the correct prototype')
+      t.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
       t.end()
     })
 
@@ -151,7 +151,7 @@ test('encode/decode 4 bytes fixext data', function(t) {
       buf[1] = 0x44
       buf.writeUInt32BE(orig.data, 2)
       t.deepEqual(encoder.decode(buf), orig, 'must decode correctly')
-      t.type(encoder.decode(buf), MyType, 'must have the correct prototype')
+      t.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
       t.end()
     })
 
@@ -207,7 +207,7 @@ test('encode/decode 8 bytes fixext data', function(t) {
       buf.writeUInt32BE(orig.data / 2, 2)
       buf.writeUInt32BE(orig.data / 2, 6)
       t.deepEqual(encoder.decode(buf), orig, 'must decode correctly')
-      t.type(encoder.decode(buf), MyType, 'must have the correct prototype')
+      t.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
       t.end()
     })
 
@@ -266,7 +266,7 @@ test('encode/decode 16 bytes fixext data', function(t) {
       buf.writeUInt32BE(orig.data / 4, 6)
       buf.writeUInt32BE(orig.data / 4, 10)
       buf.writeUInt32BE(orig.data / 4, 14)
-      t.type(encoder.decode(buf), MyType, 'must have the correct prototype')
+      t.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
       t.deepEqual(encoder.decode(buf), orig, 'must decode correctly')
       t.end()
     })
@@ -363,7 +363,7 @@ test('encode/decode 8 bytes fixext data', function(t) {
       buf.writeUInt32BE(orig.data / 2, 2)
       buf.writeUInt32BE(orig.data / 2, 6)
       t.deepEqual(encoder.decode(buf), orig, 'must decode correctly')
-      t.type(encoder.decode(buf), MyType, 'must have the correct prototype')
+      t.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
       t.end()
     })
 
@@ -422,7 +422,7 @@ test('encode/decode 16 bytes fixext data', function(t) {
       buf.writeUInt32BE(orig.data / 4, 6)
       buf.writeUInt32BE(orig.data / 4, 10)
       buf.writeUInt32BE(orig.data / 4, 14)
-      t.type(encoder.decode(buf), MyType, 'must have the correct prototype')
+      t.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
       t.deepEqual(encoder.decode(buf), orig, 'must decode correctly')
       t.end()
     })

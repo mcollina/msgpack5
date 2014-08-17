@@ -1,5 +1,5 @@
 
-var test    = require('tap').test
+var test    = require('tape').test
   , msgpack = require('../')
 
 test('encode/decode variable ext data up between 0x0100 and 0xffff', function(t) {

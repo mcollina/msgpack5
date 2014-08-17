@@ -1,5 +1,5 @@
 
-var test    = require('tap').test
+var test    = require('tape').test
   , msgpack = require('../')
 
 test('encode/decode 2^16 <-> (2^32 - 1) bytes strings', function(t) {
