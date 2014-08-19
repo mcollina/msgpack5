@@ -2,6 +2,7 @@
 var assert    = require('assert')
   , bl        = require('bl')
   , TOLERANCE = 0.1
+  , streams   = require('./lib/streams')
 
 function msgpack() {
 
@@ -451,7 +452,9 @@ function msgpack() {
   return {
     encode: encode,
     decode: decode,
-    register: register
+    register: register,
+    encoder: streams.encoder,
+    decoder: streams.decoder
   }
 }
 
