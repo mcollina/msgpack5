@@ -61,6 +61,69 @@ function mytipeDecode(data) {
 }
 ```
 
+API
+---
+
+<a name="api"></a>
+## API
+
+  * <a href="#msgpack"><code><b>msgpack()</b></code></a>
+  * <a href="#encode"><code>msgpack().<b>encode()</b></code></a>
+  * <a href="#decode"><code>msgpack().<b>decode()</b></code></a>
+  * <a href="#register"><code>msgpack().<b>register()</b></code></a>
+  * <a href="#encoder"><code>msgpack().<b>encoder()</b></code></a>
+  * <a href="#decoder"><code>msgpack().<b>decoder()</b></code></a>
+
+-------------------------------------------------------
+<a name="msgpack"></a>
+### msgpack()
+
+Creates a new instance on which you can register new types for being
+encoded.
+
+-------------------------------------------------------
+<a name="encode"></a>
+### encode(object)
+
+Encodes `object` in msgpack, returns a [bl](http://npm.im/bl).
+
+-------------------------------------------------------
+<a name="decode"></a>
+### decode(buf)
+
+Decodes buf from in msgpack. `buf` can be a `Buffer` or a [bl](http://npm.im/bl) instance.
+
+-------------------------------------------------------
+<a name="register"></a>
+### register(type, constructor, encode, decode)
+
+Register a new custom objet type for being automatically encoded and
+decoded. The arguments are:
+
+- `type`, is a positive integer identificating the type once serialized
+- `constructor`, the function that will be used to match the objects
+  with `instanceof`
+- `encode`, a function that will be called to encode an object in binary
+  form
+- `decode`, a function that will be called to decode the object from
+  binary form
+
+-------------------------------------------------------
+<a name="encoder"></a>
+### encoder(opts)
+
+Builds a stream in object mode that encodes msgpack. By default it writes
+an 4 byte length header containing the message length as a UInt32BE. This
+ header can be disabled by passing `{ header: false }` as an option.
+
+-------------------------------------------------------
+<a name="decoder"></a>
+### decoder(opts)
+
+Builds a stream in object mode that decodes msgpack. By default it expects
+msgpack to have a 4 byte length header containing the packaged length as
+a UInt32BE. This header can be disabled by passing `{ header: false }` as an option.
+
 Disclaimer
 ----------
 
