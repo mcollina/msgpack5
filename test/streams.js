@@ -97,3 +97,89 @@ test('end-to-end without headers', function(t) {
 
   encoder.end()
 })
+
+test('encoding error wrapped', function(t) {
+  t.plan(1)
+
+  var pack    = msgpack()
+    , encoder = pack.encoder()
+    , data    = new MyType()
+
+  function MyType() {
+  }
+
+  function mytypeEncode() {
+    throw new Error('muahha')
+  }
+
+  function mytypeDecode() {
+  }
+
+  pack.register(0x42, MyType, mytypeEncode, mytypeDecode)
+
+  encoder.on('error', function(err) {
+    t.equal(err.message, 'muahha')
+  })
+
+  encoder.end(data)
+})
+
+test('decoding error wrapped', function(t) {
+  t.plan(1)
+
+  var pack    = msgpack()
+    , encoder = pack.encoder()
+    , decoder = pack.decoder()
+    , data    = new MyType()
+
+  function MyType() {
+  }
+
+  function mytypeEncode() {
+    return new Buffer(0)
+  }
+
+  function mytypeDecode() {
+    throw new Error('muahha')
+  }
+
+  pack.register(0x42, MyType, mytypeEncode, mytypeDecode)
+
+  decoder.on('error', function(err) {
+    t.equal(err.message, 'muahha')
+  })
+
+  encoder.end(data)
+
+  encoder.pipe(decoder)
+})
+
+test('decoding error wrapped', function(t) {
+  t.plan(1)
+
+  var pack    = msgpack()
+    , encoder = pack.encoder({ header: false })
+    , decoder = pack.decoder({ header: false })
+    , data    = new MyType()
+
+  function MyType() {
+  }
+
+  function mytypeEncode() {
+    return new Buffer(0)
+  }
+
+  function mytypeDecode() {
+    throw new Error('muahha')
+  }
+
+  pack.register(0x42, MyType, mytypeEncode, mytypeDecode)
+
+  decoder.on('error', function(err) {
+    t.equal(err.message, 'muahha')
+  })
+
+  encoder.end(data)
+
+  encoder.pipe(decoder)
+})
