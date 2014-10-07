@@ -6,7 +6,8 @@ var assert    = require('assert')
 
 function msgpack() {
 
-  var types = []
+  var encodingTypes = []
+    , decodingTypes = []
 
   function encode(obj) {
     var buf
@@ -364,18 +365,54 @@ function msgpack() {
     return result
   }
 
-  function register(type, constructor, encode, decode) {
-    assert(type > 0, 'must have a type > 0')
-    assert(constructor, 'must have a constructor')
-    assert(decode, 'must have a decode function')
+  function registerEncoder(check, encode) {
+    assert(check, 'must have an encode function')
     assert(encode, 'must have an encode function')
 
-    types.push({
-      type: type,
-      constructor: constructor,
-      encode: encode,
-      decode: decode
+    encodingTypes.push({
+        check: check
+      , encode: encode
     })
+
+    return this
+  }
+
+  function registerDecoder(type, decode) {
+    assert(type > 0, 'must have a type > 0')
+    assert(decode, 'must have a decode function')
+
+    decodingTypes.push({
+        type: type
+      , decode: decode
+    })
+
+    return this
+  }
+
+  function register(type, constructor, encode, decode) {
+    assert(constructor, 'must have a constructor')
+    assert(encode, 'must have an encode function')
+    assert(type > 0, 'must have a type > 0')
+    assert(decode, 'must have a decode function')
+
+    function check(obj) {
+      return (obj instanceof constructor)
+    }
+
+    function reEncode(obj) {
+      var buf = bl()
+        , header = new Buffer(1)
+
+      header.writeInt8(type, 0)
+
+      buf.append(header)
+      buf.append(encode(obj))
+
+      return buf
+    }
+
+    this.registerEncoder(check, reEncode)
+    this.registerDecoder(type, decode)
 
     return this
   }
@@ -383,11 +420,12 @@ function msgpack() {
   function encodeExt(obj) {
     var i
       , encoded
+      , length = -1
       , headers = []
 
-    for (i = 0; i < types.length; i++) {
-      if (obj instanceof types[i].constructor) {
-        encoded = types[i].encode(obj)
+    for (i = 0; i < encodingTypes.length; i++) {
+      if (encodingTypes[i].check(obj)) {
+        encoded = encodingTypes[i].encode(obj)
         break;
       }
     }
@@ -396,32 +434,34 @@ function msgpack() {
       return null
     }
 
-    if (encoded.length === 1) {
+    // we subtract 1 because the length does not
+    // include the type
+    length = encoded.length - 1
+
+    if (length === 1) {
       headers.push(0xd4)
-    } else if (encoded.length === 2) {
+    } else if (length === 2) {
       headers.push(0xd5)
-    } else if (encoded.length === 4) {
+    } else if (length === 4) {
       headers.push(0xd6)
-    } else if (encoded.length === 8) {
+    } else if (length === 8) {
       headers.push(0xd7)
-    } else if (encoded.length === 16) {
+    } else if (length === 16) {
       headers.push(0xd8)
-    } else if (encoded.length < 256) {
+    } else if (length < 256) {
       headers.push(0xc7)
-      headers.push(encoded.length)
-    } else if (encoded.length < 0x10000) {
+      headers.push(length)
+    } else if (length < 0x10000) {
       headers.push(0xc8)
-      headers.push(encoded.length >> 8)
-      headers.push(encoded.length & 0x00ff)
+      headers.push(length >> 8)
+      headers.push(length & 0x00ff)
     } else {
       headers.push(0xc9)
-      headers.push(encoded.length >> 24)
-      headers.push((encoded.length >> 16) & 0x000000ff)
-      headers.push((encoded.length >> 8) & 0x000000ff)
-      headers.push(encoded.length & 0x000000ff)
+      headers.push(length >> 24)
+      headers.push((length >> 16) & 0x000000ff)
+      headers.push((length >> 8) & 0x000000ff)
+      headers.push(length & 0x000000ff)
     }
-
-    headers.push(types[i].type)
 
     return bl().append(new Buffer(headers)).append(encoded)
   }
@@ -438,11 +478,11 @@ function msgpack() {
     var i
       , toDecode
 
-    for (i = 0; i < types.length; i++) {
-      if (type === types[i].type) {
+    for (i = 0; i < decodingTypes.length; i++) {
+      if (type === decodingTypes[i].type) {
         toDecode = buf.slice(0, size)
         buf.consume(size)
-        return types[i].decode(toDecode)
+        return decodingTypes[i].decode(toDecode)
       }
     }
 
@@ -450,11 +490,13 @@ function msgpack() {
   }
 
   return {
-    encode: encode,
-    decode: decode,
-    register: register,
-    encoder: streams.encoder,
-    decoder: streams.decoder
+      encode: encode
+    , decode: decode
+    , register: register
+    , registerEncoder: registerEncoder
+    , registerDecoder: registerDecoder
+    , encoder: streams.encoder
+    , decoder: streams.decoder
   }
 }
 
