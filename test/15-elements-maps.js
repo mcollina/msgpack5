@@ -60,3 +60,13 @@ test('encode/decode maps up to 15 elements', function(t) {
   t.end()
 
 })
+
+test('do not encode undefined in a map', function(t) {
+  var instance = msgpack()
+    , expected = { hello: 'world' }
+    , toEncode = { a: undefined, hello: 'world' }
+    , buf      = instance.encode(toEncode)
+
+  t.deepEqual(expected, instance.decode(buf), 'must ignore undefined')
+  t.end()
+})
