@@ -70,6 +70,8 @@ API
   * <a href="#msgpack"><code><b>msgpack()</b></code></a>
   * <a href="#encode"><code>msgpack().<b>encode()</b></code></a>
   * <a href="#decode"><code>msgpack().<b>decode()</b></code></a>
+  * <a href="#registerEncoder"><code>msgpack().<b>registerEncoder()</b></code></a>
+  * <a href="#registerDecoder"><code>msgpack().<b>registerDecoder()</b></code></a>
   * <a href="#register"><code>msgpack().<b>register()</b></code></a>
   * <a href="#encoder"><code>msgpack().<b>encoder()</b></code></a>
   * <a href="#decoder"><code>msgpack().<b>decoder()</b></code></a>
@@ -94,8 +96,33 @@ Encodes `object` in msgpack, returns a [bl](http://npm.im/bl).
 Decodes buf from in msgpack. `buf` can be a `Buffer` or a [bl](http://npm.im/bl) instance.
 
 -------------------------------------------------------
+<a name="registerEncoder"></a>
+### registerEncoder(check(obj), encode(obj))
+
+Register a new custom object type for being automatically encoded.
+The arguments are:
+
+- `check`, a function that will be called to check if the passed
+  object should be encoded with the `encode` function
+- `encode`, a function that will be called to encode an object in binary
+  form; this function __must__ return a `Buffer` which include the same type
+  for [registerDecoder](#registerDecoder).
+
+-------------------------------------------------------
+<a name="registerDecoder"></a>
+### registerDecoder(type, decode(buf))
+
+Register a new custom objet type for being automatically decoded.
+The arguments are:
+
+- `type`, is a positive integer identificating the type once serialized
+- `decode`, a function that will be called to decode the object from
+  the passed `Buffer`
+
+
+-------------------------------------------------------
 <a name="register"></a>
-### register(type, constructor, encode, decode)
+### register(type, constructor, encode(obj), decode(buf))
 
 Register a new custom objet type for being automatically encoded and
 decoded. The arguments are:
@@ -104,9 +131,14 @@ decoded. The arguments are:
 - `constructor`, the function that will be used to match the objects
   with `instanceof`
 - `encode`, a function that will be called to encode an object in binary
-  form
+  form; this function __must__ return a `Buffer` that can be
+  deserialized by the `decode` function
 - `decode`, a function that will be called to decode the object from
-  binary form
+  the passed `Buffer`
+
+This is just a commodity that calls
+[`registerEncoder`](#registerEncoder) and
+[`registerDecoder`](#registerDecoder) internally.
 
 -------------------------------------------------------
 <a name="encoder"></a>
