@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/mcollina/msgpack5",
   "devDependencies": {
+    "bl": "^0.9.3",
     "faucet": "0.0.1",
     "jshint": "^2.5.2",
     "pre-commit": "0.0.9",
