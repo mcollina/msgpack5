@@ -207,7 +207,8 @@ test('concatenated buffers work', function(t) {
   })
 
   encoder.once('finish', function() {
-    decoder.write(bl.slice())
+    var buf = bl.slice()
+    decoder.write(buf)
   })
 
   encoder.end()
