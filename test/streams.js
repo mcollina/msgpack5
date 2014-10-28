@@ -1,6 +1,7 @@
 
 var test        = require('tape').test
   , msgpack     = require('../')
+  , BufferList  = require('bl')
 
 test('must send an object through', function(t) {
   t.plan(1)
@@ -182,4 +183,33 @@ test('decoding error wrapped', function(t) {
   encoder.end(data)
 
   encoder.pipe(decoder)
+})
+
+test('concatenated buffers work', function(t) {
+  var pack    = msgpack()
+    , encoder = pack.encoder()
+    , decoder = pack.decoder()
+    , data    = [
+        { hello: 1 }
+      , { hello: 2 }
+      , { hello: 3 }
+    ]
+
+  t.plan(data.length)
+
+  var bl = new BufferList()
+  encoder.on('data', bl.append.bind(bl))
+
+  data.forEach(encoder.write.bind(encoder))
+
+  decoder.on('data', function(d) {
+    t.deepEqual(d, data.shift())
+  })
+
+  encoder.once('finish', function() {
+    var buf = bl.slice()
+    decoder.write(buf)
+  })
+
+  encoder.end()
 })
