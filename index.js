@@ -339,7 +339,9 @@ function msgpack() {
       , header
 
     for (key in obj) {
-      if (obj.hasOwnProperty(key) && obj[key] !== undefined) {
+      if (obj.hasOwnProperty(key) &&
+          obj[key] !== undefined &&
+          "function" !== typeof obj[key] ) {
         ++length
         acc.push(encode(key))
         acc.push(encode(obj[key]))
