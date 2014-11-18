@@ -70,3 +70,17 @@ test('do not encode undefined in a map', function(t) {
   t.deepEqual(expected, instance.decode(buf), 'must ignore undefined')
   t.end()
 })
+
+test('encode/decode map with buf, ints and strings', function(t) {
+  var map = {
+          topic: 'hello'
+        , qos: 1
+        , payload: new Buffer("world")
+        , messageId: '42'
+        , ttl: 1416309270167
+      }
+    , pack = msgpack()
+
+  t.deepEqual(pack.decode(pack.encode(map)), map)
+  t.end()
+})

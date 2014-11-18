@@ -223,7 +223,7 @@ function msgpack() {
       case 0xc4:
         // buffers up to 2^8 - 1 bytes
         result = buf.slice(2, 2 + buf.readUInt8(1))
-        buf.consume(3 + buf.readUInt8(1))
+        buf.consume(2 + buf.readUInt8(1))
         return result
       case 0xc5:
         // buffers up to 2^16 - 1 bytes
@@ -309,7 +309,6 @@ function msgpack() {
       throw new Error('not implemented yet')
     }
   }
-
 
   function decodeArray(buf, length) {
     var result = []
