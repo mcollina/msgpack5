@@ -136,7 +136,7 @@ function msgpack() {
   }
 
   function decode(buf) {
-    assert(buf.length >= 0, 'must not be empty')
+    assert(buf.length > 0, 'must not be empty')
 
     if (!(buf instanceof bl)) {
       buf = bl().append(buf)
