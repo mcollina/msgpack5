@@ -208,17 +208,17 @@ function msgpack() {
       case 0xd9:
         // strings up to 2^8 - 1 bytes
         result = buf.toString('utf8', 2, 2 + buf.readUInt8(1))
-        buf.consume(3 + buf.readUInt8(1))
+        buf.consume(2 + buf.readUInt8(1))
         return result
       case 0xda:
         // strings up to 2^16 - 2 bytes
         result = buf.toString('utf8', 3, 3 + buf.readUInt16BE(1))
-        buf.consume(4 + buf.readUInt16BE(1))
+        buf.consume(3 + buf.readUInt16BE(1))
         return result
       case 0xdb:
         // strings up to 2^32 - 4 bytes
         result = buf.toString('utf8', 5, 5 + buf.readUInt32BE(1))
-        buf.consume(6 + buf.readUInt32BE(1))
+        buf.consume(5 + buf.readUInt32BE(1))
         return result
       case 0xc4:
         // buffers up to 2^8 - 1 bytes
