@@ -379,7 +379,7 @@ function msgpack() {
   }
 
   function registerDecoder(type, decode) {
-    assert(type > 0, 'must have a type > 0')
+    assert(type >= 0, 'must have a non-negative type')
     assert(decode, 'must have a decode function')
 
     decodingTypes.push({
@@ -393,7 +393,7 @@ function msgpack() {
   function register(type, constructor, encode, decode) {
     assert(constructor, 'must have a constructor')
     assert(encode, 'must have an encode function')
-    assert(type > 0, 'must have a type > 0')
+    assert(type >= 0, 'must have a non-negative type')
     assert(decode, 'must have a decode function')
 
     function check(obj) {
