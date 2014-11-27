@@ -1,10 +1,7 @@
 msgpack5&nbsp;&nbsp;[![Build Status](https://travis-ci.org/mcollina/msgpack5.png)](https://travis-ci.org/mcollina/msgpack5)
 ========
 
-A msgpack v5 implementation for node.js, with prototype-based extension points.
-
-This library was built as the data format for
-[JSChan](http://npm.im/jschan).
+A msgpack v5 implementation for node.js, with extension point support.
 
 Install
 -------
@@ -18,7 +15,6 @@ Usage
 
 ```js
 var msgpack = require('msgpack5')() // namespace our extensions
-  , assert  = require('assert')
   , a       = new MyType(2, 'a')
   , encode  = msgpack.encode
   , decode  = msgpack.decode
@@ -115,7 +111,7 @@ The arguments are:
 Register a new custom objet type for being automatically decoded.
 The arguments are:
 
-- `type`, is a positive integer identificating the type once serialized
+- `type`, is a greater than zero integer identificating the type once serialized
 - `decode`, a function that will be called to decode the object from
   the passed `Buffer`
 
@@ -127,7 +123,7 @@ The arguments are:
 Register a new custom objet type for being automatically encoded and
 decoded. The arguments are:
 
-- `type`, is a positive integer identificating the type once serialized
+- `type`, is a greater than zero integer identificating the type once serialized
 - `constructor`, the function that will be used to match the objects
   with `instanceof`
 - `encode`, a function that will be called to encode an object in binary
@@ -166,6 +162,10 @@ Acknowledgements
 ----------------
 
 This project was kindly sponsored by [nearForm](http://nearform.com).
+
+
+This library was originally built as the data format for
+[JSChan](http://npm.im/jschan).
 
 License
 -------
