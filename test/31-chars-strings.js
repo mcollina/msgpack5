@@ -1,0 +1,42 @@
+
+
+var test    = require('tape').test
+  , msgpack = require('../')
+
+test('encode/decode strings with max 31 of length', function(t) {
+
+  var encoder = msgpack()
+    , all     = []
+    , i
+
+  // build base
+  for (i = 'a'; i.length < 32; i += 'a') {
+    all.push(i)
+  }
+
+  all.forEach(function(str) {
+    t.test('encoding a string of length ' + str.length, function(t) {
+      var buf = encoder.encode(str)
+      t.equal(buf.length, 1 + Buffer.byteLength(str), 'must be the proper length')
+      t.equal(buf.readUInt8(0) & 0xe0, 0xa0, 'must have the proper header');
+      t.equal(buf.readUInt8(0) & 0x1f, Buffer.byteLength(str), 'must include the str length');
+      t.equal(buf.toString('utf8', 1, Buffer.byteLength(str) + 2), str, 'must decode correctly');
+      t.end()
+    })
+
+    t.test('decoding a string of length ' + str.length, function(t) {
+      var buf = new Buffer(1 + Buffer.byteLength(str))
+      buf[0] = 0xa0 | Buffer.byteLength(str)
+      buf.write(str, 1)
+      t.equal(encoder.decode(buf), str, 'must decode correctly');
+      t.end()
+    })
+
+    t.test('mirror test a string of length ' + str.length, function(t) {
+      t.equal(encoder.decode(encoder.encode(str)), str, 'must stay the same');
+      t.end()
+    })
+  })
+
+  t.end()
+})

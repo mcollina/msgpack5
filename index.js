@@ -228,12 +228,12 @@ function msgpack() {
       case 0xc5:
         // buffers up to 2^16 - 1 bytes
         result = buf.slice(3, 3 + buf.readUInt16BE(1))
-        buf.consume(4 + buf.readUInt16BE(1))
+        buf.consume(3 + buf.readUInt16BE(1))
         return result
       case 0xc6:
         // buffers up to 2^32 - 1 bytes
         result = buf.slice(5, 5 + buf.readUInt32BE(1))
-        buf.consume(6 + buf.readUInt32BE(1))
+        buf.consume(5 + buf.readUInt32BE(1))
         return result
       case 0xdc:
         // array up to 2^16 elements - 2 bytes
