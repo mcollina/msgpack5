@@ -45,3 +45,24 @@ test('msgpack level encoding get', function(t) {
     })
   })
 })
+
+test('msgpack level encoding mirror', function(t) {
+  t.plan(4)
+
+  var pack  = msgpack()
+    , db    = level('foo', {
+        valueEncoding: pack
+      })
+    , obj   = { my: 'obj' }
+
+  db.put('hello', obj, function(err) {
+    t.error(err, 'putting has no errors')
+    db.get('hello', function(err, result) {
+      t.error(err, 'get has no error')
+      t.deepEqual(result, obj)
+      db.close(function() {
+        t.pass('db closed')
+      })
+    })
+  })
+})
