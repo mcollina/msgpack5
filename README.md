@@ -10,6 +10,21 @@ Install
 npm install msgpack5 --save
 ```
 
+for browser
+-----------
+
+```
+	npm run build
+```
+
+then in html file
+
+```
+<script type="text/javascript" 
+        src="./msgpack5_bundle.min.js">
+</script>
+```
+
 Usage
 -----
 
