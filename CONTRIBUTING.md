@@ -1,9 +1,9 @@
 Contributing
 ============
 
-The main development is on GitHub at http://github.com/mcollina/mosca.
+The main development is on GitHub at http://github.com/mcollina/msgpack5.
 In order to contribute, fork the repo on github and send a pull requests with topic branches.
-Do not forget to provide specs for your contribution.
+Do not forget to provide tests for your contribution.
 
 Contact the lead dev
 --------------------
