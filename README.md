@@ -167,6 +167,29 @@ Builds a stream in object mode that decodes msgpack. By default it expects
 msgpack to have a 4 byte length header containing the packaged length as
 a UInt32BE. This header can be disabled by passing `{ header: false }` as an option.
 
+LevelUp Support
+---------------
+
+__msgpack5__ can be used as a LevelUp
+[`valueEncoding`](https://github.com/rvagg/node-levelup#leveluplocation-options-callback) straight away:
+
+```js
+var level = require('level')
+  , pack  = msgpack()
+  , db    = level('foo', {
+      valueEncoding: pack
+    })
+  , obj   = { my: 'obj' }
+
+db.put('hello', obj, function(err) {
+  db.get('hello', function(err, result) {
+    console.log(result)
+    db.close()
+  })
+})
+
+```
+
 Disclaimer
 ----------
 

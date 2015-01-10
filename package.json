@@ -37,6 +37,8 @@
     "browserify": "^6.3.3",
     "faucet": "0.0.1",
     "jshint": "^2.5.2",
+    "level": "^0.18.0",
+    "level-test": "^1.6.6",
     "pre-commit": "0.0.9",
     "tap": "^0.4.11",
     "tape": "^2.14.0",
@@ -57,7 +59,7 @@
     ]
   },
   "dependencies": {
-    "bl": "^0.9.0",
+    "bl": "^0.9.3",
     "inherits": "^2.0.1",
     "readable-stream": "^1.0.27-1"
   }

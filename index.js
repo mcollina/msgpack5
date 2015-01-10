@@ -9,7 +9,7 @@ function msgpack() {
   var encodingTypes = []
     , decodingTypes = []
 
-  function encode(obj) {
+  function encode(obj, avoidSlice) {
     var buf
       , len
 
@@ -79,7 +79,7 @@ function msgpack() {
       }
 
       buf = obj.reduce(function(acc, obj) {
-        acc.append(encode(obj))
+        acc.append(encode(obj, true))
         return acc
       }, bl().append(buf))
     } else if (typeof obj === 'object') {
@@ -132,7 +132,10 @@ function msgpack() {
     if (!buf)
       throw new Error('not implemented yet')
 
-    return buf
+    if (avoidSlice)
+      return buf
+    else
+      return buf.slice()
   }
 
   function decode(buf) {
@@ -343,8 +346,8 @@ function msgpack() {
           obj[key] !== undefined &&
           "function" !== typeof obj[key] ) {
         ++length
-        acc.push(encode(key))
-        acc.push(encode(obj[key]))
+        acc.push(encode(key, true))
+        acc.push(encode(obj[key], true))
       }
     }
 
@@ -498,6 +501,10 @@ function msgpack() {
     , registerDecoder: registerDecoder
     , encoder: streams.encoder
     , decoder: streams.decoder
+
+    // needed for levelup support
+    , buffer: true
+    , type: 'msgpack5'
   }
 }
 
