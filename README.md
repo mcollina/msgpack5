@@ -1,7 +1,7 @@
 msgpack5&nbsp;&nbsp;[![Build Status](https://travis-ci.org/mcollina/msgpack5.png)](https://travis-ci.org/mcollina/msgpack5)
 ========
 
-A msgpack v5 implementation for node.js, with extension point support.
+A msgpack v5 implementation for node.js and the browser, with extension point support.
 
 Install
 -------
@@ -10,20 +10,6 @@ Install
 npm install msgpack5 --save
 ```
 
-for browser
------------
-
-```
-	npm run build
-```
-
-then in html file
-
-```
-<script type="text/javascript" 
-        src="./msgpack5_bundle.min.js">
-</script>
-```
 
 Usage
 -----
@@ -70,6 +56,28 @@ function mytipeDecode(data) {
 
   return result
 }
+```
+
+In the Browser
+-----------
+
+This library is compatible with [Browserify](http://npm.im/browserify).
+
+If you want to use standalone, grab the file in the `dist` folder of
+this repo, and use in your own HTML page, the module will expose a
+`msgpack5` global.
+
+
+```
+<script type="text/javascript"
+        src="./msgpack5.min.js">
+</script>
+```
+
+### To build
+
+```
+	npm run build
 ```
 
 API

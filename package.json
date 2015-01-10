@@ -1,14 +1,14 @@
 {
   "name": "msgpack5",
-  "version": "1.3.5",
-  "description": "A msgpack v5 implementation for node.js, with extension points",
+  "version": "1.4.0",
+  "description": "A msgpack v5 implementation for node.js and the browser, with extension points",
   "main": "index.js",
   "scripts": {
     "test": "tape test/* | faucet",
     "jshint": "jshint *.js test/*",
     "build": "npm run browserify && npm run dist",
-    "browserify": "node_modules/.bin/browserify index.js -o dist/msgpack5_bundle.js",
-    "dist": "node_modules/.bin/uglifyjs dist/msgpack5_bundle.js -o dist/msgpack5_bundle.min.js",
+    "browserify": "node_modules/.bin/browserify index.js -o dist/msgpack5.js -s msgpack5",
+    "dist": "node_modules/.bin/uglifyjs dist/msgpack5.js -o dist/msgpack5.min.js",
     "test-browser": "browserify  -r bl:inherits:readable-stream test/* | testling -u"
   },
   "pre-commit": [
