@@ -9,7 +9,7 @@
     "build": "npm run browserify && npm run dist",
     "browserify": "node_modules/.bin/browserify index.js -o dist/msgpack5_bundle.js",
     "dist": "node_modules/.bin/uglifyjs dist/msgpack5_bundle.js -o dist/msgpack5_bundle.min.js",
-		"test-browser": "browserify  -r bl:inherits:readable-stream test/* | testling"
+    "test-browser": "browserify  -r bl:inherits:readable-stream test/* | testling -u"
   },
   "pre-commit": [
     "jshint",
@@ -40,9 +40,10 @@
     "pre-commit": "0.0.9",
     "tap": "^0.4.11",
     "tape": "^2.14.0",
+    "testling": "^1.7.1",
     "uglify-js": "^2.4.15"
   },
-	"testling": {
+  "testling": {
     "files": "test/*.js",
     "browsers": [
       "ie/6..latest",

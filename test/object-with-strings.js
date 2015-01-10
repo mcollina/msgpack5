@@ -15,15 +15,17 @@ test('encode/decode map with multiple short buffers', function(t) {
   t.end()
 })
 
-test('encode/decode map with all files in this directory', function(t) {
+if (process.title !== "browser") {
+  test('encode/decode map with all files in this directory', function(t) {
 
-  var files = fs.readdirSync(__dirname)
-    , map = files.reduce(function(acc, file) {
-        acc[file] = fs.readFileSync(__dirname + '/' + file).toString('utf8')
-        return acc
-      }, {})
-    , pack = msgpack()
+    var files = fs.readdirSync(__dirname)
+      , map = files.reduce(function(acc, file) {
+          acc[file] = fs.readFileSync(__dirname + '/' + file).toString('utf8')
+          return acc
+        }, {})
+      , pack = msgpack()
 
-  t.deepEqual(pack.decode(pack.encode(map)), map)
-  t.end()
-})
+    t.deepEqual(pack.decode(pack.encode(map)), map)
+    t.end()
+  })
+}
