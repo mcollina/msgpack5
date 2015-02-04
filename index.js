@@ -36,6 +36,14 @@ function msgpack() {
     , 0xc5: 3
     , 0xc6: 5
     , 0xde: 3
+    , 0xd4: 3
+    , 0xd5: 4
+    , 0xd6: 6
+    , 0xd7: 10
+    , 0xd8: 18
+    , 0xc7: 3
+    , 0xc8: 4
+    , 0xc9: 6
   }
 
   function checkMinBufferSize(first, length) {
@@ -360,18 +368,21 @@ function msgpack() {
         // ext up to 2^8 - 1 bytes
         length  = buf.readUInt8(1)
         type    = buf.readUInt8(2)
+        checkDataSize(length, buf.length, 3)
         buf.consume(3)
         return decodeExt(buf, type, length)
       case 0xc8:
         // ext up to 2^16 - 1 bytes
         length  = buf.readUInt16BE(1)
         type    = buf.readUInt8(3)
+        checkDataSize(length, buf.length, 4)
         buf.consume(4)
         return decodeExt(buf, type, length)
       case 0xc9:
         // ext up to 2^32 - 1 bytes
         length  = buf.readUInt32BE(1)
         type    = buf.readUInt8(5)
+        checkDataSize(length, buf.length, 6)
         buf.consume(6)
         return decodeExt(buf, type, length)
     }

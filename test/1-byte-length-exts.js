@@ -1,6 +1,7 @@
 
 var test    = require('tape').test
   , msgpack = require('../')
+  , bl      = require('bl')
 
 test('encode/decode variable ext data up to 0xff', function(t) {
 
@@ -68,6 +69,29 @@ test('encode/decode variable ext data up to 0xff', function(t) {
       t.deepEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
       t.end()
     })
+  })
+
+  t.test('decoding an incomplete variable ext data up to 0xff', function(t) {
+    var obj = encoder.encode(new MyType(250, 'a'))
+    var buf = new Buffer(obj.length)
+    buf[0] = 0xc7
+    buf.writeUInt8(obj.length + 2, 1) // set bigger size
+    obj.copy(buf, 2, 2, obj.length)
+    buf = bl().append(buf)
+    var origLength = buf.length
+    t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+    t.equals(buf.length, origLength, "must not consume any byte")
+    t.end()
+  })
+
+  t.test('decoding an incomplete header of variable ext data up to 0xff', function(t) {
+    var buf = new Buffer(2)
+    buf[0] = 0xc7
+    buf = bl().append(buf)
+    var origLength = buf.length
+    t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+    t.equals(buf.length, origLength, "must not consume any byte")
+    t.end()
   })
 
   t.end()
