@@ -19,6 +19,47 @@ function msgpack() {
   var encodingTypes = []
     , decodingTypes = []
 
+  var minBufferSizes = {
+      0xcc: 2
+    , 0xcd: 3
+    , 0xce: 5
+    , 0xcf: 9
+    , 0xd0: 2
+    , 0xd1: 3
+    , 0xd2: 5
+    , 0xca: 5
+    , 0xcb: 9
+    , 0xd9: 2
+    , 0xda: 3
+    , 0xdb: 5
+    , 0xc4: 2
+    , 0xc5: 3
+    , 0xc6: 5
+    , 0xde: 3
+  }
+
+  function checkMinBufferSize(first, length) {
+    var size = minBufferSizes[first]
+    if (size && length < size) {
+      throw new IncompleteBufferError(util.format("buffer size %d is less than %d.", length, size))
+    }
+  }
+
+  function checkDataSize(dataLength, bufLength, headerLength) {
+    if (bufLength < headerLength + dataLength) {
+      throw new IncompleteBufferError(util.format("incomplete data. data length: %d, buffer length: %d", dataLength, bufLength - headerLength))
+    }
+  }
+
+  // try to decode the buf. If an error occurs, don't consume any byte
+  function tryDecode(buf, dataLength, headerLength, decode) {
+    var dupBuf = buf.duplicate()
+    dupBuf.consume(headerLength)
+    var result = decode(dupBuf, dataLength);
+    buf.consume(buf.length - dupBuf.length)
+    return result
+  }
+
   function encode(obj, avoidSlice) {
     var buf
       , len
@@ -149,7 +190,9 @@ function msgpack() {
   }
 
   function decode(buf) {
-    assert(buf.length > 0, 'must not be empty')
+    if (buf.length <= 0) {
+      throw new IncompleteBufferError('must not be empty')
+    }
 
     if (!(buf instanceof bl)) {
       buf = bl().append(buf)
@@ -160,6 +203,8 @@ function msgpack() {
       , result
       , type
       , dupBuf
+
+    checkMinBufferSize(first, buf.length)
 
     switch (first) {
       case 0xc0:
@@ -221,63 +266,45 @@ function msgpack() {
         return result
       case 0xd9:
         // strings up to 2^8 - 1 bytes
-        if (buf.length < 2) {
-          throw new IncompleteBufferError(util.format("buffer size %d is less than 2.", buf.length))
-        }
-
         length = buf.readUInt8(1)
-        if (buf.length >= 2 + length) {
-          result = buf.toString('utf8', 2, 2 + length)
-          buf.consume(2 + length)
-          return result
-        } else {
-          throw new IncompleteBufferError(util.format("incomplete string. string length: %d, buffer length: %d", length, buf.length - 2))
-        }
-        break
+        checkDataSize(length, buf.length, 2)
+        result = buf.toString('utf8', 2, 2 + length)
+        buf.consume(2 + length)
+        return result
       case 0xda:
         // strings up to 2^16 - 2 bytes
-        if (buf.length < 3) {
-          throw new IncompleteBufferError(util.format("buffer length %d is less than 3.", buf.length))
-        }
-
         length = buf.readUInt16BE(1)
-        if (buf.length >= 3 + length) {
-          result = buf.toString('utf8', 3, 3 + length)
-          buf.consume(3 + length)
-          return result
-        } else {
-          throw new IncompleteBufferError(util.format("incomplete string. string length: %d, buffer length: %d", length, buf.length - 3))
-        }
-        break
+        checkDataSize(length, buf.length, 3)
+        result = buf.toString('utf8', 3, 3 + length)
+        buf.consume(3 + length)
+        return result
       case 0xdb:
         // strings up to 2^32 - 4 bytes
-        if (buf.length < 5) {
-          throw new IncompleteBufferError(util.format("buffer length %d is less than 5.", buf.length))
-        }
-
         length = buf.readUInt32BE(1)
-        if (buf.length >= 5 + length) {
-          result = buf.toString('utf8', 5, 5 + length)
-          buf.consume(5 + length)
-          return result
-        } else {
-          throw new IncompleteBufferError(util.format("incomplete string. string length: %d, buffer length: %d", length, buf.length - 5))
-        }
-        break
+        checkDataSize(length, buf.length, 5)
+        result = buf.toString('utf8', 5, 5 + length)
+        buf.consume(5 + length)
+        return result
       case 0xc4:
         // buffers up to 2^8 - 1 bytes
-        result = buf.slice(2, 2 + buf.readUInt8(1))
-        buf.consume(2 + buf.readUInt8(1))
+        length = buf.readUInt8(1)
+        checkDataSize(length, buf.length, 2)
+        result = buf.slice(2, 2 + length)
+        buf.consume(2 + length)
         return result
       case 0xc5:
         // buffers up to 2^16 - 1 bytes
-        result = buf.slice(3, 3 + buf.readUInt16BE(1))
-        buf.consume(3 + buf.readUInt16BE(1))
+        length = buf.readUInt16BE(1)
+        checkDataSize(length, buf.length, 3)
+        result = buf.slice(3, 3 + length)
+        buf.consume(3 + length)
         return result
       case 0xc6:
         // buffers up to 2^32 - 1 bytes
-        result = buf.slice(5, 5 + buf.readUInt32BE(1))
-        buf.consume(5 + buf.readUInt32BE(1))
+        length = buf.readUInt32BE(1)
+        checkDataSize(length, buf.length, 5)
+        result = buf.slice(5, 5 + length)
+        buf.consume(5 + length)
         return result
       case 0xdc:
         // array up to 2^16 elements - 2 bytes
@@ -316,8 +343,7 @@ function msgpack() {
       case 0xde:
         // maps up to 2^16 elements - 2 bytes
         length = buf.readUInt16BE(1)
-        buf.consume(3)
-        return decodeMap(buf, length)
+        return tryDecode(buf, length, 3, decodeMap)
       case 0xdf:
         throw new Error('map too big to decode in JS')
       case 0xd4:
@@ -353,30 +379,18 @@ function msgpack() {
     if ((first & 0xf0) === 0x90) {
       // we have an array with less than 15 elements
       length = first & 0x0f
-      dupBuf = buf.duplicate()
-      try {
-        dupBuf.consume(1)
-        result = decodeArray(dupBuf, length);
-        buf.consume(buf.length - dupBuf.length)
-        return result
-      } catch (e) {
-        throw new IncompleteBufferError(util.format(e.message))
-      }
+      return tryDecode(buf, length, 1, decodeArray)
     } else if ((first & 0xf0) === 0x80) {
       // we have a map with less than 15 elements
       length = first & 0x0f
-      buf.consume(1)
-      return decodeMap(buf, length)
+      return tryDecode(buf, length, 1, decodeMap)
     } else if ((first & 0xe0) === 0xa0) {
       // fixstr up to 31 bytes
       length = first & 0x1f
-      if (buf.length >= length + 1) {
-        result = buf.toString('utf8', 1, length + 1)
-        buf.consume(length + 1)
-        return result
-      } else {
-        throw new IncompleteBufferError(util.format("incomplete string. string length: %d, buffer length: %d", length, buf.length - 1))
-      }
+      checkDataSize(length, buf.length, 1)
+      result = buf.toString('utf8', 1, length + 1)
+      buf.consume(length + 1)
+      return result
     } else if (first > 0xe0) {
       // 5 bits negative ints
       result = - (~0xe0 & first)

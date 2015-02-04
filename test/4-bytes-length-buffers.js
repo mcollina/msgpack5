@@ -1,6 +1,7 @@
 
 var test    = require('tape').test
   , msgpack = require('../')
+  , bl      = require('bl')
 
 function build(size) {
   var buf
@@ -45,5 +46,30 @@ test('encode/decode 2^32-1 bytes buffers', function(t) {
     })
   })
 
+  t.end()
+})
+
+test('decoding a chopped 2^32-1 bytes buffer', function(t) {
+  var encoder = msgpack()
+  var orig = build(Math.pow(2,18))
+  var buf = new Buffer(5 + orig.length)
+  buf[0] = 0xc6
+  buf[1] = Math.pow(2,32) - 1 // set bigger size
+  orig.copy(buf, 5)
+  buf = bl().append(buf)
+  var origLength = buf.length
+  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+  t.equals(buf.length, origLength, "must not consume any byte")
+  t.end()
+})
+
+test('decoding an incomplete header of 2^32-1 bytes buffer', function(t) {
+  var encoder = msgpack()
+  var buf = new Buffer(4)
+  buf[0] = 0xc6
+  buf = bl().append(buf)
+  var origLength = buf.length
+  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+  t.equals(buf.length, origLength, "must not consume any byte")
   t.end()
 })

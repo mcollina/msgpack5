@@ -1,8 +1,9 @@
 
 var test    = require('tape').test
   , msgpack = require('../')
+  , bl      = require('bl')
 
-test('encoding/decoding 32-bits float numbers', function(t) {
+test('encoding/decoding 64-bits float numbers', function(t) {
   var encoder = msgpack()
     , allNum  = []
 
@@ -36,5 +37,16 @@ test('encoding/decoding 32-bits float numbers', function(t) {
     })
   })
 
+  t.end()
+})
+
+test('decoding an incomplete 64-bits float numbers', function(t) {
+  var encoder = msgpack()
+  var buf = new Buffer(8)
+  buf[0] = 0xcb
+  buf = bl().append(buf)
+  var origLength = buf.length
+  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+  t.equals(buf.length, origLength, "must not consume any byte")
   t.end()
 })
