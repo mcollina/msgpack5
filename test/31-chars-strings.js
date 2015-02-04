@@ -2,6 +2,7 @@
 
 var test    = require('tape').test
   , msgpack = require('../')
+  , bl      = require('bl')
 
 test('encode/decode strings with max 31 of length', function(t) {
 
@@ -38,5 +39,18 @@ test('encode/decode strings with max 31 of length', function(t) {
     })
   })
 
+  t.end()
+})
+
+test('decoding a chopped string', function(t) {
+  var encoder = msgpack()
+  var str = 'aaa'
+  var buf = new Buffer(1 + Buffer.byteLength(str))
+  buf[0] = 0xa0 | Buffer.byteLength(str) + 2 // set bigger size
+  buf.write(str, 1)
+  buf = bl().append(buf)
+  var origLength = buf.length
+  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+  t.equals(buf.length, origLength, "must not consume any byte")
   t.end()
 })

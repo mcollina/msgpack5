@@ -3,8 +3,18 @@ var assert    = require('assert')
   , bl        = require('bl')
   , TOLERANCE = 0.1
   , streams   = require('./lib/streams')
+  , util      = require('util')
 
 function msgpack() {
+
+  var IncompleteBufferError = function(message) {
+    Error.call(this); //super constructor
+    Error.captureStackTrace(this, this.constructor); //super helper method to include stack trace in error object
+    this.name = this.constructor.name
+    this.message = message || "unable to decode"
+  }
+
+  util.inherits(IncompleteBufferError, Error)
 
   var encodingTypes = []
     , decodingTypes = []
@@ -149,6 +159,7 @@ function msgpack() {
       , length
       , result
       , type
+      , dupBuf
 
     switch (first) {
       case 0xc0:
@@ -210,19 +221,49 @@ function msgpack() {
         return result
       case 0xd9:
         // strings up to 2^8 - 1 bytes
-        result = buf.toString('utf8', 2, 2 + buf.readUInt8(1))
-        buf.consume(2 + buf.readUInt8(1))
-        return result
+        if (buf.length < 2) {
+          throw new IncompleteBufferError(util.format("buffer size %d is less than 2.", buf.length))
+        }
+
+        length = buf.readUInt8(1)
+        if (buf.length >= 2 + length) {
+          result = buf.toString('utf8', 2, 2 + length)
+          buf.consume(2 + length)
+          return result
+        } else {
+          throw new IncompleteBufferError(util.format("incomplete string. string length: %d, buffer length: %d", length, buf.length - 2))
+        }
+        break
       case 0xda:
         // strings up to 2^16 - 2 bytes
-        result = buf.toString('utf8', 3, 3 + buf.readUInt16BE(1))
-        buf.consume(3 + buf.readUInt16BE(1))
-        return result
+        if (buf.length < 3) {
+          throw new IncompleteBufferError(util.format("buffer length %d is less than 3.", buf.length))
+        }
+
+        length = buf.readUInt16BE(1)
+        if (buf.length >= 3 + length) {
+          result = buf.toString('utf8', 3, 3 + length)
+          buf.consume(3 + length)
+          return result
+        } else {
+          throw new IncompleteBufferError(util.format("incomplete string. string length: %d, buffer length: %d", length, buf.length - 3))
+        }
+        break
       case 0xdb:
         // strings up to 2^32 - 4 bytes
-        result = buf.toString('utf8', 5, 5 + buf.readUInt32BE(1))
-        buf.consume(5 + buf.readUInt32BE(1))
-        return result
+        if (buf.length < 5) {
+          throw new IncompleteBufferError(util.format("buffer length %d is less than 5.", buf.length))
+        }
+
+        length = buf.readUInt32BE(1)
+        if (buf.length >= 5 + length) {
+          result = buf.toString('utf8', 5, 5 + length)
+          buf.consume(5 + length)
+          return result
+        } else {
+          throw new IncompleteBufferError(util.format("incomplete string. string length: %d, buffer length: %d", length, buf.length - 5))
+        }
+        break
       case 0xc4:
         // buffers up to 2^8 - 1 bytes
         result = buf.slice(2, 2 + buf.readUInt8(1))
@@ -240,14 +281,38 @@ function msgpack() {
         return result
       case 0xdc:
         // array up to 2^16 elements - 2 bytes
+        if (buf.length < 3) {
+          throw new IncompleteBufferError(util.format("buffer length %d is less than 3.", buf.length))
+        }
+
         length = buf.readUInt16BE(1)
-        buf.consume(3)
-        return decodeArray(buf, length)
+        dupBuf = buf.duplicate()
+        try {
+          dupBuf.consume(3)
+          result = decodeArray(dupBuf, length);
+          buf.consume(buf.length - dupBuf.length)
+          return result
+        } catch (e) {
+          throw new IncompleteBufferError(util.format(e.message))
+        }
+        break
       case 0xdd:
         // array up to 2^32 elements - 4 bytes
+        if (buf.length < 5) {
+          throw new IncompleteBufferError(util.format("buffer length %d is less than 5.", buf.length))
+        }
+
         length = buf.readUInt32BE(1)
-        buf.consume(5)
-        return decodeArray(buf, length)
+        dupBuf = buf.duplicate()
+        try {
+          dupBuf.consume(5)
+          result = decodeArray(dupBuf, length);
+          buf.consume(buf.length - dupBuf.length)
+          return result
+        } catch (e) {
+          throw new IncompleteBufferError(util.format(e.message))
+        }
+        break
       case 0xde:
         // maps up to 2^16 elements - 2 bytes
         length = buf.readUInt16BE(1)
@@ -288,17 +353,30 @@ function msgpack() {
     if ((first & 0xf0) === 0x90) {
       // we have an array with less than 15 elements
       length = first & 0x0f
-      buf.consume(1)
-      return decodeArray(buf, length)
+      dupBuf = buf.duplicate()
+      try {
+        dupBuf.consume(1)
+        result = decodeArray(dupBuf, length);
+        buf.consume(buf.length - dupBuf.length)
+        return result
+      } catch (e) {
+        throw new IncompleteBufferError(util.format(e.message))
+      }
     } else if ((first & 0xf0) === 0x80) {
       // we have a map with less than 15 elements
       length = first & 0x0f
       buf.consume(1)
       return decodeMap(buf, length)
     } else if ((first & 0xe0) === 0xa0) {
-      result = buf.toString('utf8', 1, (first & 0x1f) + 1)
-      buf.consume((first & 0x1f) + 1)
-      return result
+      // fixstr up to 31 bytes
+      length = first & 0x1f
+      if (buf.length >= length + 1) {
+        result = buf.toString('utf8', 1, length + 1)
+        buf.consume(length + 1)
+        return result
+      } else {
+        throw new IncompleteBufferError(util.format("incomplete string. string length: %d, buffer length: %d", length, buf.length - 1))
+      }
     } else if (first > 0xe0) {
       // 5 bits negative ints
       result = - (~0xe0 & first)
@@ -505,6 +583,7 @@ function msgpack() {
     // needed for levelup support
     , buffer: true
     , type: 'msgpack5'
+    , IncompleteBufferError: IncompleteBufferError
   }
 }
 
