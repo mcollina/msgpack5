@@ -114,6 +114,8 @@ Encodes `object` in msgpack, returns a [bl](http://npm.im/bl).
 
 Decodes buf from in msgpack. `buf` can be a `Buffer` or a [bl](http://npm.im/bl) instance.
 
+In order to support a stream interface, a user must pass in a [bl](http://npm.im/bl) instance.
+
 -------------------------------------------------------
 <a name="registerEncoder"></a>
 ### registerEncoder(check(obj), encode(obj))
