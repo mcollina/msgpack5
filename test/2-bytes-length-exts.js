@@ -1,6 +1,7 @@
 
 var test    = require('tape').test
   , msgpack = require('../')
+  , bl      = require('bl')
 
 test('encode/decode variable ext data up between 0x0100 and 0xffff', function(t) {
 
@@ -52,6 +53,29 @@ test('encode/decode variable ext data up between 0x0100 and 0xffff', function(t)
       t.deepEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
       t.end()
     })
+  })
+
+  t.test('decoding an incomplete variable ext data up between 0x0100 and 0xffff', function(t) {
+    var obj = encoder.encode(new MyType(0xfff0, 'a'))
+    var buf = new Buffer(obj.length)
+    buf[0] = 0xc8
+    buf.writeUInt16BE(obj.length + 2, 1) // set bigger size
+    obj.copy(buf, 3, 3, obj.length)
+    buf = bl().append(buf)
+    var origLength = buf.length
+    t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+    t.equals(buf.length, origLength, "must not consume any byte")
+    t.end()
+  })
+
+  t.test('decoding an incomplete header of variable ext data up between 0x0100 and 0xffff', function(t) {
+    var buf = new Buffer(3)
+    buf[0] = 0xc8
+    buf = bl().append(buf)
+    var origLength = buf.length
+    t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+    t.equals(buf.length, origLength, "must not consume any byte")
+    t.end()
   })
 
   t.end()

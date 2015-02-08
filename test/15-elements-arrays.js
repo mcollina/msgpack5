@@ -1,6 +1,7 @@
 
 var test    = require('tape').test
   , msgpack = require('../')
+  , bl      = require('bl')
 
 function build(size, obj) {
   var array = []
@@ -59,4 +60,24 @@ test('encode/decode arrays up to 15 elements', function(t) {
 
   t.end()
 
+})
+
+test('decoding an incomplete array', function(t) {
+  var encoder = msgpack()
+
+  var array = ['a', 'b', 'c']
+  var size = computeLength(array)
+  var buf = new Buffer(size)
+  buf[0] = 0x90 | array.length + 2 // set bigger size
+  var pos = 1
+  for (var i = 0; i < array.length; i++) {
+    var obj = encoder.encode(array[i], true)
+    obj.copy(buf, pos)
+    pos += obj.length
+  }
+  buf = bl().append(buf)
+  var origLength = buf.length
+  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+  t.equals(origLength, buf.length, "must not consume any byte")
+  t.end()
 })

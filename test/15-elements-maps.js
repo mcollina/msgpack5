@@ -1,6 +1,7 @@
 
 var test    = require('tape').test
   , msgpack = require('../')
+  , bl      = require('bl')
 
 function build(size, value) {
   var map = {}
@@ -82,5 +83,18 @@ test('encode/decode map with buf, ints and strings', function(t) {
     , pack = msgpack()
 
   t.deepEqual(pack.decode(pack.encode(map)), map)
+  t.end()
+})
+
+test('decoding a chopped map', function(t) {
+  var encoder = msgpack()
+  var map = encoder.encode({"a": "b", "c": "d", "e": "f"})
+  var buf = new Buffer(map.length)
+  buf[0] = 0x80 | 5 // set bigger size
+  map.copy(buf, 1, 1, map.length)
+  buf = bl().append(buf)
+  var origLength = buf.length
+  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+  t.equals(buf.length, origLength, "must not consume any byte")
   t.end()
 })

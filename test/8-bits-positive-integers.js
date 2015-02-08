@@ -1,6 +1,7 @@
 
 var test    = require('tape').test
   , msgpack = require('../')
+  , bl      = require('bl')
 
 test('encoding/decoding 8-bits integers', function(t) {
   var encoder = msgpack()
@@ -32,5 +33,16 @@ test('encoding/decoding 8-bits integers', function(t) {
     })
   })
 
+  t.end()
+})
+
+test('decoding an incomplete 8-bits unsigned integer', function(t) {
+  var encoder = msgpack()
+  var buf = new Buffer(1)
+  buf[0] = 0xcc
+  buf = bl().append(buf)
+  var origLength = buf.length
+  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+  t.equals(buf.length, origLength, "must not consume any byte")
   t.end()
 })

@@ -1,6 +1,7 @@
 
 var test    = require('tape').test
   , msgpack = require('../')
+  , bl      = require('bl')
 
 test('encode/decode 1 byte fixext data', function(t) {
 
@@ -303,7 +304,7 @@ test('encode/decode fixext inside a map', function(t) {
 
   all.push({ ret: new MyType(42) })
   all.push({ a: new MyType(42), b: new MyType(43) })
-  
+
   all.push([1,2,3,4,5, 6].reduce(function(acc, key) {
     acc[key] = new MyType(key)
     return acc
@@ -431,6 +432,61 @@ test('encode/decode 16 bytes fixext data', function(t) {
       t.deepEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
       t.end()
     })
+  })
+
+  t.test('decoding an incomplete 1 byte fixext data', function(t) {
+    var encoder = msgpack()
+    var buf = new Buffer(2)
+    buf[0] = 0xd4
+    buf = bl().append(buf)
+    var origLength = buf.length
+    t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+    t.equals(buf.length, origLength, "must not consume any byte")
+    t.end()
+  })
+
+  t.test('decoding an incomplete 2 byte fixext data', function(t) {
+    var encoder = msgpack()
+    var buf = new Buffer(3)
+    buf[0] = 0xd5
+    buf = bl().append(buf)
+    var origLength = buf.length
+    t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+    t.equals(buf.length, origLength, "must not consume any byte")
+    t.end()
+  })
+
+  t.test('decoding an incomplete 4 byte fixext data', function(t) {
+    var encoder = msgpack()
+    var buf = new Buffer(5)
+    buf[0] = 0xd6
+    buf = bl().append(buf)
+    var origLength = buf.length
+    t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+    t.equals(buf.length, origLength, "must not consume any byte")
+    t.end()
+  })
+
+  t.test('decoding an incomplete 8 byte fixext data', function(t) {
+    var encoder = msgpack()
+    var buf = new Buffer(9)
+    buf[0] = 0xd7
+    buf = bl().append(buf)
+    var origLength = buf.length
+    t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+    t.equals(buf.length, origLength, "must not consume any byte")
+    t.end()
+  })
+
+  t.test('decoding an incomplete 16 byte fixext data', function(t) {
+    var encoder = msgpack()
+    var buf = new Buffer(17)
+    buf[0] = 0xd8
+    buf = bl().append(buf)
+    var origLength = buf.length
+    t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+    t.equals(buf.length, origLength, "must not consume any byte")
+    t.end()
   })
 
   t.end()
