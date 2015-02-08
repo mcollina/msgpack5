@@ -1,6 +1,7 @@
 
 var test    = require('tape').test
   , msgpack = require('../')
+  , bl      = require('bl')
 
 function build(size) {
   var array = []
@@ -37,5 +38,37 @@ test('encode/decode arrays up to 0xffffffff elements', function(t) {
   doTest(build(0xffff + 42))
   // unable to test bigger arrays do to out of memory errors
 
+  t.end()
+})
+
+test('decoding an incomplete array', function(t) {
+  var encoder = msgpack()
+
+  var array = build(0xffff + 42)
+  var buf = new Buffer(5 + array.length)
+  buf[0] = 0xdd
+  buf.writeUInt32BE(array.length + 10, 1) // set bigger size
+  var pos = 5
+  for (var i = 0; i < array.length; i++) {
+    var obj = encoder.encode(array[i], true)
+    obj.copy(buf, pos)
+    pos += obj.length
+  }
+  buf = bl().append(buf)
+  var origLength = buf.length
+  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+  t.equals(buf.length, origLength, "must not consume any byte")
+  t.end()
+})
+
+test('decoding an incomplete header', function(t) {
+  var encoder = msgpack()
+
+  var buf = new Buffer(4)
+  buf[0] = 0xdd
+  buf = bl().append(buf)
+  var origLength = buf.length
+  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+  t.equals(buf.length, origLength, "must not consume any byte")
   t.end()
 })

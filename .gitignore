@@ -1,6 +1,7 @@
 # Logs
 logs
 *.log
+.idea
 
 # Runtime data
 pids

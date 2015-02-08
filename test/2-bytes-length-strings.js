@@ -1,6 +1,7 @@
 
 var test    = require('tape').test
   , msgpack = require('../')
+  , bl      = require('bl')
 
 test('encode/decode 2^8 <-> (2^16-1) bytes strings', function(t) {
 
@@ -49,5 +50,32 @@ test('encode/decode 2^8 <-> (2^16-1) bytes strings', function(t) {
     })
   })
 
+  t.end()
+})
+
+test('decoding a chopped string', function(t) {
+  var encoder = msgpack()
+  var str;
+  for (str = 'a'; str.length < 0xff + 100; str += 'a') {
+  }
+  var buf = new Buffer(3 + Buffer.byteLength(str))
+  buf[0] = 0xda
+  buf.writeUInt16BE(Buffer.byteLength(str) + 10, 1) // set bigger size
+  buf.write(str, 3)
+  buf = bl().append(buf)
+  var origLength = buf.length
+  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+  t.equals(buf.length, origLength, "must not consume any byte")
+  t.end()
+})
+
+test('decoding an incomplete header of a string', function(t) {
+  var encoder = msgpack()
+  var buf = new Buffer(2)
+  buf[0] = 0xda
+  buf = bl().append(buf)
+  var origLength = buf.length
+  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
+  t.equals(buf.length, origLength, "must not consume any byte")
   t.end()
 })
