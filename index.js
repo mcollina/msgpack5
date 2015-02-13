@@ -162,7 +162,7 @@ function msgpack() {
       } else {
          if (obj > -32) {
           buf = new Buffer(1)
-          buf[0] = 0xe0 | -obj
+          buf[0] = 0x100 + obj
         } else if (obj >= -128) {
           buf = new Buffer(2)
           buf[0] = 0xd0
@@ -396,7 +396,7 @@ function msgpack() {
       }
     }  else if (first > 0xe0) {
       // 5 bits negative ints
-      result = -(~0xe0 & first)
+      result = first - 0x100
       return buildDecodeResult(result, 1)
     } else if (first < 0x80) {
       // 7-bits positive ints

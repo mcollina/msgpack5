@@ -15,12 +15,12 @@ test('encoding/decoding 5-bits negative ints', function(t) {
     t.test('encoding ' + num, function(t) {
       var buf = encoder.encode(num)
       t.equal(buf.length, 1, 'must have 1 byte')
-      t.equal(- (~0xe0 & buf[0]), num, 'must decode correctly');
+      t.equal(buf[0], num + 0x100, 'must encode correctly');
       t.end()
     })
 
     t.test('decoding' + num, function(t) {
-      var buf = new Buffer([0xe0 | -num])
+      var buf = new Buffer([num + 0x100])
       t.equal(encoder.decode(buf), num, 'must decode correctly');
       t.end()
     })

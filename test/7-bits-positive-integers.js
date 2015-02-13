@@ -19,7 +19,7 @@ test('encoding/decoding 7-bits positive ints', function(t) {
       t.end()
     })
 
-    t.test('decoding' + num, function(t) {
+    t.test('decoding ' + num, function(t) {
       var buf = new Buffer([num])
       t.equal(encoder.decode(buf), num, 'must decode correctly');
       t.end()
