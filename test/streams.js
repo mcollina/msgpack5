@@ -43,21 +43,6 @@ test('must send three objects through', function(t) {
   encoder.end()
 })
 
-test('ignore deprecated header support in encoder', function(t) {
-  t.plan(1)
-
-  var pack    = msgpack()
-    , encoder = pack.encoder({ header: true })
-    , data    = { hello: 'world' }
-    , encoded = pack.encode(data)
-
-  encoder.once('data', function(chunk) {
-    t.equal(chunk.toString('hex'), encoded.toString('hex'))
-  })
-
-  encoder.end(data)
-})
-
 test('end-to-end', function(t) {
   var pack    = msgpack()
     , encoder = pack.encoder()
