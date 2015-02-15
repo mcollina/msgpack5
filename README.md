@@ -163,19 +163,15 @@ This is just a commodity that calls
 
 -------------------------------------------------------
 <a name="encoder"></a>
-### encoder(opts)
+### encoder()
 
-Builds a stream in object mode that encodes msgpack. By default it writes
-an 4 byte length header containing the message length as a UInt32BE. This
- header can be disabled by passing `{ header: false }` as an option.
+Builds a stream in object mode that encodes msgpack.
 
 -------------------------------------------------------
 <a name="decoder"></a>
-### decoder(opts)
+### decoder()
 
-Builds a stream in object mode that decodes msgpack. By default it expects
-msgpack to have a 4 byte length header containing the packaged length as
-a UInt32BE. This header can be disabled by passing `{ header: false }` as an option.
+Builds a stream in object mode that decodes msgpack.
 
 LevelUp Support
 ---------------
