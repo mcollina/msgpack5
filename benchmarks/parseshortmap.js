@@ -1,9 +1,9 @@
 
-var msgpack = require('./')()
+var msgpack = require('../')()
   , bl      = require('bl')
   , msg     = bl(msgpack.encode({ hello: 'world' }))
   , decode  = msgpack.decode
-  , max     = 100000
+  , max     = 1000000
   , start
   , stop
   , i
