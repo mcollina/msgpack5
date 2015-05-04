@@ -22,6 +22,7 @@ test('encoding/decoding 64-bits big-endian unsigned integers', function(t) {
       for (var k = 7; k >= 0; k--) {
            result += (buf.readUInt8(k + 1) * Math.pow(2 , (8 *(7-k))));
        }
+      t.equal(result, num, 'must decode correctly');
       t.end()
     })
 
