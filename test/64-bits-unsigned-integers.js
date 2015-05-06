@@ -6,12 +6,10 @@ var test    = require('tape').test
 test('encoding/decoding 64-bits big-endian unsigned integers', function(t) {
   var encoder = msgpack()
     , allNum  = []
-    , base    = 0xffffffff
 
   allNum.push(0xffffffff)
 
   allNum.push(0xffffffffeeeee)
-
 
   allNum.forEach(function(num) {
     t.test('encoding ' + num, function(t) {
