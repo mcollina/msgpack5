@@ -6,10 +6,11 @@ var assert      = require('assert')
   , buildEncode = require('./lib/encoder')
   , TypedNumber = require('./lib/typed_number').TypedNumber
 
-function msgpack() {
+function msgpack(opts) {
 
   var encodingTypes = []
     , decodingTypes = []
+    , options = opts || {}
 
   function registerEncoder(check, encode) {
     assert(check, 'must have an encode function')
@@ -65,7 +66,7 @@ function msgpack() {
 
   return {
       encode: buildEncode(encodingTypes)
-    , decode: buildDecode(decodingTypes)
+    , decode: buildDecode(decodingTypes, options)
     , register: register
     , registerEncoder: registerEncoder
     , registerDecoder: registerDecoder
