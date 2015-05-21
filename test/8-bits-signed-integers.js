@@ -8,7 +8,7 @@ test('encoding/decoding 8-bits big-endian signed integers', function(t) {
     , allNum  = []
     , i
 
-  for (i = 32; i <= 128; i++) {
+  for (i = 33; i <= 128; i++) {
     allNum.push(-i)
   }
 

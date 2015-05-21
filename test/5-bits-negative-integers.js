@@ -7,21 +7,9 @@ test('encoding/decoding 5-bits negative ints', function(t) {
     , allNum  = []
     , i
 
-  for (i = 1; i < 32; i++) {
+  for (i = 1; i <= 32; i++) {
     allNum.push(-i)
   }
-
-  t.test('encoding negative 32', function(t) {
-    var buf = encoder.encode(-0)
-    t.equal(buf.length, 1, 'must have 1 byte')
-    t.equal(buf[0], 0x0, 'must encode correctly')
-    t.end()
-  })
-  t.test('decoding negative 32', function(t) {
-    var buf = encoder.decode(new Buffer([0xe0]))
-    t.equal(buf, -32, 'must decode correctly')
-    t.end()
-  })
 
   allNum.forEach(function(num) {
     t.test('encoding ' + num, function(t) {
