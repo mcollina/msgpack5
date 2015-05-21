@@ -4,6 +4,7 @@ var assert      = require('assert')
   , streams     = require('./lib/streams')
   , buildDecode = require('./lib/decoder')
   , buildEncode = require('./lib/encoder')
+  , TypedNumber = require('./lib/typed_number').TypedNumber
 
 function msgpack() {
 
@@ -70,6 +71,7 @@ function msgpack() {
     , registerDecoder: registerDecoder
     , encoder: streams.encoder
     , decoder: streams.decoder
+    , TypedNumber: TypedNumber
 
     // needed for levelup support
     , buffer: true
