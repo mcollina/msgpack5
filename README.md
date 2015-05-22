@@ -196,6 +196,29 @@ db.put('hello', obj, function(err) {
 
 ```
 
+Support for typed numbers
+-------------------------
+
+When you use Message Pack to communicate with a typed language like Java that has more than one type for numbers, the default configuration of this library might be problematic for you:
+
+When you receive and decode the double `1.1` from a Java API, it will be converted to the JavaScript number `1.1`. When you encode it again, it will be encoded as a float (not a double). This will lead to another type being returned from the Java decoder than the Java developer expected.
+
+To solve this, you can activate the option `typedNumbers`:
+
+```js
+var encoder = msgpack({ typedNumbers: true })
+```
+
+This will return numbers wrapped in a `TypedNumber`. A `TypedNumber` has a `value` which is the number itself and a `type`. This information will be used again when you encode the value. You can also use `TypedNumber` when sending information to the API:
+
+```js
+var encoder = msgpack({ typedNumbers: true })
+  , TypedNumber = encoder.TypedNumber
+  , typedDouble = new TypedNumber(12, 'double')
+
+buf = encoder.encode(typedDouble) // buf will now be encoded as a double
+```
+
 Disclaimer
 ----------
 

@@ -4,11 +4,13 @@ var assert      = require('assert')
   , streams     = require('./lib/streams')
   , buildDecode = require('./lib/decoder')
   , buildEncode = require('./lib/encoder')
+  , TypedNumber = require('./lib/typed_number').TypedNumber
 
-function msgpack() {
+function msgpack(opts) {
 
   var encodingTypes = []
     , decodingTypes = []
+    , options = opts || {}
 
   function registerEncoder(check, encode) {
     assert(check, 'must have an encode function')
@@ -64,12 +66,13 @@ function msgpack() {
 
   return {
       encode: buildEncode(encodingTypes)
-    , decode: buildDecode(decodingTypes)
+    , decode: buildDecode(decodingTypes, options)
     , register: register
     , registerEncoder: registerEncoder
     , registerDecoder: registerDecoder
     , encoder: streams.encoder
     , decoder: streams.decoder
+    , TypedNumber: TypedNumber
 
     // needed for levelup support
     , buffer: true
