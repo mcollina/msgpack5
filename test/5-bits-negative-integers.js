@@ -7,7 +7,7 @@ test('encoding/decoding 5-bits negative ints', function(t) {
     , allNum  = []
     , i
 
-  for (i = 1; i < 32; i++) {
+  for (i = 1; i <= 32; i++) {
     allNum.push(-i)
   }
 
