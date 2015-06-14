@@ -196,6 +196,13 @@ db.put('hello', obj, function(err) {
 
 ```
 
+Related projects
+----------------
+
+- [msgpack5rpc](http://npmjs.com/package/msgpack5rpc): An implementation of the
+  [msgpack-rpc spec](https://github.com/msgpack-rpc/msgpack-rpc/blob/master/spec.md)
+  on top of this library.
+
 Disclaimer
 ----------
 
