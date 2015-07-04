@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/mcollina/msgpack5",
   "devDependencies": {
-    "browserify": "^6.3.3",
+    "browserify": "^10.2.4",
     "faucet": "0.0.1",
     "jshint": "^2.5.2",
     "level": "^0.18.0",
