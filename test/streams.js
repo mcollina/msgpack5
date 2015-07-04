@@ -32,13 +32,13 @@ test('must send three objects through', function(t) {
 
   t.plan(data.length)
 
-  encoder.pipe(decoder)
-
   decoder.on('data', function(chunk) {
     t.deepEqual(chunk, data.shift())
   })
 
   data.forEach(encoder.write.bind(encoder))
+
+  encoder.pipe(decoder)
 
   encoder.end()
 })
@@ -55,8 +55,6 @@ test('end-to-end', function(t) {
 
   t.plan(data.length)
 
-  encoder.pipe(decoder)
-
   decoder.on('data', function(chunk) {
     t.deepEqual(chunk, data.shift())
   })
@@ -64,6 +62,8 @@ test('end-to-end', function(t) {
   data.forEach(encoder.write.bind(encoder))
 
   encoder.end()
+
+  encoder.pipe(decoder)
 })
 
 test('encoding error wrapped', function(t) {
