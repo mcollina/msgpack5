@@ -97,10 +97,14 @@ API
 
 -------------------------------------------------------
 <a name="msgpack"></a>
-### msgpack()
+### msgpack(options(obj))
 
 Creates a new instance on which you can register new types for being
 encoded.
+
+options:
+
+- `forceFloat64`, a boolean to that forces all floats to be encoded as 64-bits floats. Defaults is false.
 
 -------------------------------------------------------
 <a name="encode"></a>

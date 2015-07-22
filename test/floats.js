@@ -22,7 +22,8 @@ test('encoding/decoding 32-bits float numbers', function(t) {
     })
 
     t.test('forceFloat64 encoding ' + num, function(t) {
-      var buf = encoder.encode(num, false, true)
+      var enc = msgpack({ forceFloat64: true })
+        , buf = enc.encode(num)
         , dec = buf.readDoubleBE(1)
       t.equal(buf.length, 9, 'must have 9 bytes')
       t.equal(buf[0], 0xcb, 'must have the proper header');
