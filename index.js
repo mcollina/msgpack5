@@ -5,10 +5,12 @@ var assert      = require('assert')
   , buildDecode = require('./lib/decoder')
   , buildEncode = require('./lib/encoder')
 
-function msgpack() {
+function msgpack(options) {
 
   var encodingTypes = []
     , decodingTypes = []
+
+  options = options ? options : { forceFloat64: false }
 
   function registerEncoder(check, encode) {
     assert(check, 'must have an encode function')
@@ -63,7 +65,7 @@ function msgpack() {
   }
 
   return {
-      encode: buildEncode(encodingTypes)
+      encode: buildEncode(encodingTypes, options.forceFloat64)
     , decode: buildDecode(decodingTypes)
     , register: register
     , registerEncoder: registerEncoder
