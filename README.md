@@ -137,7 +137,7 @@ The arguments are:
 <a name="registerDecoder"></a>
 ### registerDecoder(type, decode(buf))
 
-Register a new custom objet type for being automatically decoded.
+Register a new custom object type for being automatically decoded.
 The arguments are:
 
 - `type`, is a greater than zero integer identificating the type once serialized
@@ -149,7 +149,7 @@ The arguments are:
 <a name="register"></a>
 ### register(type, constructor, encode(obj), decode(buf))
 
-Register a new custom objet type for being automatically encoded and
+Register a new custom object type for being automatically encoded and
 decoded. The arguments are:
 
 - `type`, is a greater than zero integer identificating the type once serialized
