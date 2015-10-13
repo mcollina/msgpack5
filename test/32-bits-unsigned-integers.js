@@ -13,6 +13,7 @@ test('encoding/decoding 32-bits big-endian unsigned integers', function(t) {
   }
 
   allNum.push(0xfffffffe)
+  allNum.push(0xffffffff)
 
   allNum.forEach(function(num) {
     t.test('encoding ' + num, function(t) {

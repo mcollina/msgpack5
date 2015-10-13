@@ -7,7 +7,7 @@ test('encoding/decoding 64-bits big-endian unsigned integers', function(t) {
   var encoder = msgpack()
     , allNum  = []
 
-  allNum.push(0xffffffff)
+  allNum.push(0x0000000100000000)
 
   allNum.push(0xffffffffeeeee)
 
