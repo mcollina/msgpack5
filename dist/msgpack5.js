@@ -728,7 +728,7 @@ function write64BitInt(buf, offset, num) {
 
   var lo = num % 4294967296
     , hi = num / 4294967296
-  buf.writeUInt32BE(hi, offset + 0)
+  buf.writeUInt32BE(Math.floor(hi), offset + 0)
   buf.writeUInt32BE(lo, offset + 4)
 
   if (negate) {
