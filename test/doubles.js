@@ -9,12 +9,14 @@ test('encoding/decoding 64-bits float numbers', function(t) {
 
   allNum.push(748365544534.2)
   allNum.push(-222111111000004.2)
+  allNum.push(9007199254740992)
+  allNum.push(-9007199254740992)
 
   allNum.forEach(function(num) {
     t.test('encoding ' + num, function(t) {
       var buf = encoder.encode(num)
         , dec = buf.readDoubleBE(1)
-      t.equal(buf.length, 9, 'must have 5 bytes')
+      t.equal(buf.length, 9, 'must have 9 bytes')
       t.equal(buf[0], 0xcb, 'must have the proper header');
       t.true(Math.abs(dec - num) < 0.1, 'must decode correctly');
       t.end()
