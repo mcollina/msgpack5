@@ -1,54 +1,50 @@
+var assert = require('assert')
+var bl = require('bl')
+var streams = require('./lib/streams')
+var buildDecode = require('./lib/decoder')
+var buildEncode = require('./lib/encoder')
 
-var assert      = require('assert')
-  , bl          = require('bl')
-  , streams     = require('./lib/streams')
-  , buildDecode = require('./lib/decoder')
-  , buildEncode = require('./lib/encoder')
-
-function msgpack(options) {
-
+function msgpack (options) {
   var encodingTypes = []
-    , decodingTypes = []
+  var decodingTypes = []
 
-  options = options ? options : { forceFloat64: false }
+  options = options || { forceFloat64: false }
 
-  function registerEncoder(check, encode) {
+  function registerEncoder (check, encode) {
     assert(check, 'must have an encode function')
     assert(encode, 'must have an encode function')
 
     encodingTypes.push({
-        check: check
-      , encode: encode
+      check: check, encode: encode
     })
 
     return this
   }
 
-  function registerDecoder(type, decode) {
+  function registerDecoder (type, decode) {
     assert(type >= 0, 'must have a non-negative type')
     assert(decode, 'must have a decode function')
 
     decodingTypes.push({
-        type: type
-      , decode: decode
+      type: type, decode: decode
     })
 
     return this
   }
 
-  function register(type, constructor, encode, decode) {
+  function register (type, constructor, encode, decode) {
     assert(constructor, 'must have a constructor')
     assert(encode, 'must have an encode function')
     assert(type >= 0, 'must have a non-negative type')
     assert(decode, 'must have a decode function')
 
-    function check(obj) {
+    function check (obj) {
       return (obj instanceof constructor)
     }
 
-    function reEncode(obj) {
+    function reEncode (obj) {
       var buf = bl()
-        , header = new Buffer(1)
+      var header = new Buffer(1)
 
       header.writeInt8(type, 0)
 
@@ -65,18 +61,17 @@ function msgpack(options) {
   }
 
   return {
-      encode: buildEncode(encodingTypes, options.forceFloat64)
-    , decode: buildDecode(decodingTypes)
-    , register: register
-    , registerEncoder: registerEncoder
-    , registerDecoder: registerDecoder
-    , encoder: streams.encoder
-    , decoder: streams.decoder
-
+    encode: buildEncode(encodingTypes, options.forceFloat64),
+    decode: buildDecode(decodingTypes),
+    register: register,
+    registerEncoder: registerEncoder,
+    registerDecoder: registerDecoder,
+    encoder: streams.encoder,
+    decoder: streams.decoder,
     // needed for levelup support
-    , buffer: true
-    , type: 'msgpack5'
-    , IncompleteBufferError: buildDecode.IncompleteBufferError
+    buffer: true,
+    type: 'msgpack5',
+    IncompleteBufferError: buildDecode.IncompleteBufferError
   }
 }
 

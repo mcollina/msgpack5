@@ -4,7 +4,7 @@
   "description": "A msgpack v5 implementation for node.js and the browser, with extension points",
   "main": "index.js",
   "scripts": {
-    "test": "tape test/* | faucet",
+    "test": "standard && tape test/* | faucet",
     "jshint": "jshint *.js test/*",
     "build": "npm run browserify && npm run dist",
     "browserify": "node_modules/.bin/browserify index.js -o dist/msgpack5.js -s msgpack5",
@@ -39,9 +39,16 @@
     "jshint": "^2.5.2",
     "level-test": "^2.0.0",
     "pre-commit": "1.0.10",
+    "standard": "^6.0.4",
     "tape": "^4.0.0",
     "testling": "^1.7.1",
     "uglify-js": "^2.4.15"
+  },
+  "standard": {
+    "ignore": [
+      "dist/",
+      "test/"
+    ]
   },
   "testling": {
     "files": "test/*.js",
