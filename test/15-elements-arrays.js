@@ -1,22 +1,23 @@
+'use strict'
 
-var test    = require('tape').test
-  , msgpack = require('../')
-  , bl      = require('bl')
+var test = require('tape').test
+var msgpack = require('../')
+var bl = require('bl')
 
-function build(size, obj) {
+function build (size, obj) {
   var array = []
-    , i
+  var i
 
-  for(i = 0; i < size; i++) {
+  for (i = 0; i < size; i++) {
     array.push(obj)
   }
 
   return array
 }
 
-function computeLength(array) {
+function computeLength (array) {
   var length = 1 // the header
-    , multi  = 1
+  var multi = 1
 
   if (array[0] && typeof array[0] === 'string') {
     multi += array[0].length
@@ -27,42 +28,39 @@ function computeLength(array) {
   return length
 }
 
-test('encode/decode arrays up to 15 elements', function(t) {
-
+test('encode/decode arrays up to 15 elements', function (t) {
   var encoder = msgpack()
-    , all     = []
-    , i
+  var all = []
+  var i
 
-  for(i = 0; i < 16; i++) {
+  for (i = 0; i < 16; i++) {
     all.push(build(i, 42))
   }
 
-
-  for(i = 0; i < 16; i++) {
+  for (i = 0; i < 16; i++) {
     all.push(build(i, 'aaa'))
   }
 
-  all.forEach(function(array) {
-    t.test('encoding an array with ' + array.length + ' elements of ' + array[0], function(t) {
+  all.forEach(function (array) {
+    t.test('encoding an array with ' + array.length + ' elements of ' + array[0], function (t) {
       var buf = encoder.encode(array)
       // the array is full of 1-byte integers
-      t.equal(buf.length, computeLength(array), 'must have the right length');
-      t.equal(buf.readUInt8(0) & 0xf0, 0x90, 'must have the proper header');
-      t.equal(buf.readUInt8(0) & 0x0f, array.length, 'must include the array length');
+      t.equal(buf.length, computeLength(array), 'must have the right length')
+      t.equal(buf.readUInt8(0) & 0xf0, 0x90, 'must have the proper header')
+      t.equal(buf.readUInt8(0) & 0x0f, array.length, 'must include the array length')
       t.end()
     })
 
-    t.test('mirror test for an array of length ' + array.length + ' with ' + array[0], function(t) {
-      t.deepEqual(encoder.decode(encoder.encode(array)), array, 'must stay the same');
+    t.test('mirror test for an array of length ' + array.length + ' with ' + array[0], function (t) {
+      t.deepEqual(encoder.decode(encoder.encode(array)), array, 'must stay the same')
       t.end()
     })
   })
 
   t.end()
-
 })
 
-test('decoding an incomplete array', function(t) {
+test('decoding an incomplete array', function (t) {
   var encoder = msgpack()
 
   var array = ['a', 'b', 'c']
@@ -77,7 +75,9 @@ test('decoding an incomplete array', function(t) {
   }
   buf = bl().append(buf)
   var origLength = buf.length
-  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
-  t.equals(origLength, buf.length, "must not consume any byte")
+  t.throws(function () {
+    encoder.decode(buf)
+  }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
+  t.equals(origLength, buf.length, 'must not consume any byte')
   t.end()
 })

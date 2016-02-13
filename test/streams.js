@@ -1,38 +1,39 @@
+'use strict'
 
-var test        = require('tape').test
-  , msgpack     = require('../')
-  , BufferList  = require('bl')
+var test = require('tape').test
+var msgpack = require('../')
+var BufferList = require('bl')
 
-test('must send an object through', function(t) {
+test('must send an object through', function (t) {
   t.plan(1)
 
-  var pack    = msgpack()
-    , encoder = pack.encoder()
-    , decoder = pack.decoder()
-    , data    = { hello: 'world' }
+  var pack = msgpack()
+  var encoder = pack.encoder()
+  var decoder = pack.decoder()
+  var data = { hello: 'world' }
 
   encoder.pipe(decoder)
 
-  decoder.on('data', function(chunk) {
+  decoder.on('data', function (chunk) {
     t.deepEqual(chunk, data)
   })
 
   encoder.end(data)
 })
 
-test('must send three objects through', function(t) {
-  var pack    = msgpack()
-    , encoder = pack.encoder()
-    , decoder = pack.decoder()
-    , data    = [
-        { hello: 1 }
-      , { hello: 2 }
-      , { hello: 3 }
-    ]
+test('must send three objects through', function (t) {
+  var pack = msgpack()
+  var encoder = pack.encoder()
+  var decoder = pack.decoder()
+  var data = [
+    { hello: 1 },
+    { hello: 2 },
+    { hello: 3 }
+  ]
 
   t.plan(data.length)
 
-  decoder.on('data', function(chunk) {
+  decoder.on('data', function (chunk) {
     t.deepEqual(chunk, data.shift())
   })
 
@@ -43,19 +44,19 @@ test('must send three objects through', function(t) {
   encoder.end()
 })
 
-test('end-to-end', function(t) {
-  var pack    = msgpack()
-    , encoder = pack.encoder()
-    , decoder = pack.decoder()
-    , data    = [
-        { hello: 1 }
-      , { hello: 2 }
-      , { hello: 3 }
-    ]
+test('end-to-end', function (t) {
+  var pack = msgpack()
+  var encoder = pack.encoder()
+  var decoder = pack.decoder()
+  var data = [
+    { hello: 1 },
+    { hello: 2 },
+    { hello: 3 }
+  ]
 
   t.plan(data.length)
 
-  decoder.on('data', function(chunk) {
+  decoder.on('data', function (chunk) {
     t.deepEqual(chunk, data.shift())
   })
 
@@ -66,54 +67,54 @@ test('end-to-end', function(t) {
   encoder.pipe(decoder)
 })
 
-test('encoding error wrapped', function(t) {
+test('encoding error wrapped', function (t) {
   t.plan(1)
 
-  var pack    = msgpack()
-    , encoder = pack.encoder()
-    , data    = new MyType()
+  var pack = msgpack()
+  var encoder = pack.encoder()
+  var data = new MyType()
 
-  function MyType() {
+  function MyType () {
   }
 
-  function mytypeEncode() {
+  function mytypeEncode () {
     throw new Error('muahha')
   }
 
-  function mytypeDecode() {
+  function mytypeDecode () {
   }
 
   pack.register(0x42, MyType, mytypeEncode, mytypeDecode)
 
-  encoder.on('error', function(err) {
+  encoder.on('error', function (err) {
     t.equal(err.message, 'muahha')
   })
 
   encoder.end(data)
 })
 
-test('decoding error wrapped', function(t) {
+test('decoding error wrapped', function (t) {
   t.plan(1)
 
-  var pack    = msgpack()
-    , encoder = pack.encoder()
-    , decoder = pack.decoder()
-    , data    = new MyType()
+  var pack = msgpack()
+  var encoder = pack.encoder()
+  var decoder = pack.decoder()
+  var data = new MyType()
 
-  function MyType() {
+  function MyType () {
   }
 
-  function mytypeEncode() {
+  function mytypeEncode () {
     return new Buffer(0)
   }
 
-  function mytypeDecode() {
+  function mytypeDecode () {
     throw new Error('muahha')
   }
 
   pack.register(0x42, MyType, mytypeEncode, mytypeDecode)
 
-  decoder.on('error', function(err) {
+  decoder.on('error', function (err) {
     t.equal(err.message, 'muahha')
   })
 
@@ -122,28 +123,28 @@ test('decoding error wrapped', function(t) {
   encoder.pipe(decoder)
 })
 
-test('decoding error wrapped', function(t) {
+test('decoding error wrapped', function (t) {
   t.plan(1)
 
-  var pack    = msgpack()
-    , encoder = pack.encoder({ header: false })
-    , decoder = pack.decoder({ header: false })
-    , data    = new MyType()
+  var pack = msgpack()
+  var encoder = pack.encoder({ header: false })
+  var decoder = pack.decoder({ header: false })
+  var data = new MyType()
 
-  function MyType() {
+  function MyType () {
   }
 
-  function mytypeEncode() {
+  function mytypeEncode () {
     return new Buffer(0)
   }
 
-  function mytypeDecode() {
+  function mytypeDecode () {
     throw new Error('muahha')
   }
 
   pack.register(0x42, MyType, mytypeEncode, mytypeDecode)
 
-  decoder.on('error', function(err) {
+  decoder.on('error', function (err) {
     t.equal(err.message, 'muahha')
   })
 
@@ -152,15 +153,15 @@ test('decoding error wrapped', function(t) {
   encoder.pipe(decoder)
 })
 
-test('concatenated buffers work', function(t) {
-  var pack    = msgpack()
-    , encoder = pack.encoder()
-    , decoder = pack.decoder()
-    , data    = [
-        { hello: 1 }
-      , { hello: 2 }
-      , { hello: 3 }
-    ]
+test('concatenated buffers work', function (t) {
+  var pack = msgpack()
+  var encoder = pack.encoder()
+  var decoder = pack.decoder()
+  var data = [
+    { hello: 1 },
+    { hello: 2 },
+    { hello: 3 }
+  ]
 
   t.plan(data.length)
 
@@ -169,11 +170,11 @@ test('concatenated buffers work', function(t) {
 
   data.forEach(encoder.write.bind(encoder))
 
-  decoder.on('data', function(d) {
+  decoder.on('data', function (d) {
     t.deepEqual(d, data.shift())
   })
 
-  encoder.once('finish', function() {
+  encoder.once('finish', function () {
     var buf = bl.slice()
     decoder.write(buf)
   })

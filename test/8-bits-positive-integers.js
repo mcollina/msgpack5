@@ -1,34 +1,34 @@
+'use strict'
 
-var test    = require('tape').test
-  , msgpack = require('../')
-  , bl      = require('bl')
+var test = require('tape').test
+var msgpack = require('../')
+var bl = require('bl')
 
-test('encoding/decoding 8-bits integers', function(t) {
+test('encoding/decoding 8-bits integers', function (t) {
   var encoder = msgpack()
-    , allNum  = []
-    , i
+  var allNum = []
 
-  for (i = 128; i < 256; i++) {
+  for (var i = 128; i < 256; i++) {
     allNum.push(i)
   }
 
-  allNum.forEach(function(num) {
-    t.test('encoding ' + num, function(t) {
+  allNum.forEach(function (num) {
+    t.test('encoding ' + num, function (t) {
       var buf = encoder.encode(num)
       t.equal(buf.length, 2, 'must have 2 bytes')
-      t.equal(buf[0], 0xcc, 'must have the proper header');
-      t.equal(buf[1], num, 'must decode correctly');
+      t.equal(buf[0], 0xcc, 'must have the proper header')
+      t.equal(buf[1], num, 'must decode correctly')
       t.end()
     })
 
-    t.test('decoding ' + num, function(t) {
+    t.test('decoding ' + num, function (t) {
       var buf = new Buffer([0xcc, num])
-      t.equal(encoder.decode(buf), num, 'must decode correctly');
+      t.equal(encoder.decode(buf), num, 'must decode correctly')
       t.end()
     })
 
-    t.test('mirror test ' + num, function(t) {
-      t.equal(encoder.decode(encoder.encode(num)), num, 'must stay the same');
+    t.test('mirror test ' + num, function (t) {
+      t.equal(encoder.decode(encoder.encode(num)), num, 'must stay the same')
       t.end()
     })
   })
@@ -36,13 +36,15 @@ test('encoding/decoding 8-bits integers', function(t) {
   t.end()
 })
 
-test('decoding an incomplete 8-bits unsigned integer', function(t) {
+test('decoding an incomplete 8-bits unsigned integer', function (t) {
   var encoder = msgpack()
   var buf = new Buffer(1)
   buf[0] = 0xcc
   buf = bl().append(buf)
   var origLength = buf.length
-  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
-  t.equals(buf.length, origLength, "must not consume any byte")
+  t.throws(function () {
+    encoder.decode(buf)
+  }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
+  t.equals(buf.length, origLength, 'must not consume any byte')
   t.end()
 })

@@ -1,28 +1,28 @@
+'use strict'
 
-var test    = require('tape').test
-  , msgpack = require('../')
+var test = require('tape').test
+var msgpack = require('../')
 
-test('encode/decode ext with a custom object check', function(t) {
-
+test('encode/decode ext with a custom object check', function (t) {
   var encoder = msgpack()
-    , all     = []
+  var all = []
 
-  function MyType(data) {
+  function MyType (data) {
     this.data = data
   }
 
-  function checkForMyType(obj) {
+  function checkForMyType (obj) {
     return obj instanceof MyType
   }
 
-  function mytypeEncode(obj) {
+  function mytypeEncode (obj) {
     var buf = new Buffer(2)
     buf.writeUInt8(0x42, 0)
     buf.writeUInt8(obj.data, 1)
     return buf
   }
 
-  function mytypeDecode(data) {
+  function mytypeDecode (data) {
     return new MyType(data.readUInt8(0))
   }
 
@@ -33,8 +33,8 @@ test('encode/decode ext with a custom object check', function(t) {
   all.push(new MyType(1))
   all.push(new MyType(42))
 
-  all.forEach(function(orig) {
-    t.test('encoding a custom obj encoded as ' + orig.data, function(t) {
+  all.forEach(function (orig) {
+    t.test('encoding a custom obj encoded as ' + orig.data, function (t) {
       var buf = encoder.encode(orig)
       t.equal(buf.length, 3, 'must have the right length')
       t.equal(buf.readUInt8(0), 0xd4, 'must have the fixext header')
@@ -43,7 +43,7 @@ test('encode/decode ext with a custom object check', function(t) {
       t.end()
     })
 
-    t.test('decoding a custom obj encoded as ' + orig.data, function(t) {
+    t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
       var buf = new Buffer(3)
       buf[0] = 0xd4
       buf[1] = 0x42
@@ -53,7 +53,7 @@ test('encode/decode ext with a custom object check', function(t) {
       t.end()
     })
 
-    t.test('mirror test with a custom obj containing ' + orig.data, function(t) {
+    t.test('mirror test with a custom obj containing ' + orig.data, function (t) {
       t.deepEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
       t.end()
     })

@@ -1,39 +1,39 @@
+'use strict'
 
-var test    = require('tape').test
-  , msgpack = require('../')
-  , bl      = require('bl')
+var test = require('tape').test
+var msgpack = require('../')
+var bl = require('bl')
 
-test('encoding/decoding 32-bits big-endian unsigned integers', function(t) {
+test('encoding/decoding 32-bits big-endian unsigned integers', function (t) {
   var encoder = msgpack()
-    , allNum  = []
-    , i
+  var allNum = []
 
-  for (i = 65536; i < 0xffffffff; i += 102350237) {
+  for (var i = 65536; i < 0xffffffff; i += 102350237) {
     allNum.push(i)
   }
 
   allNum.push(0xfffffffe)
   allNum.push(0xffffffff)
 
-  allNum.forEach(function(num) {
-    t.test('encoding ' + num, function(t) {
+  allNum.forEach(function (num) {
+    t.test('encoding ' + num, function (t) {
       var buf = encoder.encode(num)
       t.equal(buf.length, 5, 'must have 5 bytes')
-      t.equal(buf[0], 0xce, 'must have the proper header');
-      t.equal(buf.readUInt32BE(1), num, 'must decode correctly');
+      t.equal(buf[0], 0xce, 'must have the proper header')
+      t.equal(buf.readUInt32BE(1), num, 'must decode correctly')
       t.end()
     })
 
-    t.test('decoding ' + num, function(t) {
+    t.test('decoding ' + num, function (t) {
       var buf = new Buffer(5)
       buf[0] = 0xce
       buf.writeUInt32BE(num, 1)
-      t.equal(encoder.decode(buf), num, 'must decode correctly');
+      t.equal(encoder.decode(buf), num, 'must decode correctly')
       t.end()
     })
 
-    t.test('mirror test ' + num, function(t) {
-      t.equal(encoder.decode(encoder.encode(num)), num, 'must stay the same');
+    t.test('mirror test ' + num, function (t) {
+      t.equal(encoder.decode(encoder.encode(num)), num, 'must stay the same')
       t.end()
     })
   })
@@ -41,13 +41,15 @@ test('encoding/decoding 32-bits big-endian unsigned integers', function(t) {
   t.end()
 })
 
-test('decoding an incomplete 32-bits big-endian unsigned integer', function(t) {
+test('decoding an incomplete 32-bits big-endian unsigned integer', function (t) {
   var encoder = msgpack()
   var buf = new Buffer(4)
   buf[0] = 0xce
   buf = bl().append(buf)
   var origLength = buf.length
-  t.throws(function() {encoder.decode(buf)}, encoder.IncompleteBufferError, "must throw IncompleteBufferError")
-  t.equals(buf.length, origLength, "must not consume any byte")
+  t.throws(function () {
+    encoder.decode(buf)
+  }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
+  t.equals(buf.length, origLength, 'must not consume any byte')
   t.end()
 })

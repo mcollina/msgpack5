@@ -5,14 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "standard && tape test/* | faucet",
-    "jshint": "jshint *.js test/*",
     "build": "npm run browserify && npm run dist",
     "browserify": "node_modules/.bin/browserify index.js -o dist/msgpack5.js -s msgpack5",
     "dist": "node_modules/.bin/uglifyjs dist/msgpack5.js -o dist/msgpack5.min.js",
     "test-browser": "browserify test/* | testling -u"
   },
   "pre-commit": [
-    "jshint",
     "test"
   ],
   "repository": {
@@ -46,8 +44,7 @@
   },
   "standard": {
     "ignore": [
-      "dist/",
-      "test/"
+      "dist/"
     ]
   },
   "testling": {
