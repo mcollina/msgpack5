@@ -8,7 +8,10 @@ function msgpack (options) {
   var encodingTypes = []
   var decodingTypes = []
 
-  options = options || { forceFloat64: false }
+  options = options || {
+    forceFloat64: false,
+    compatibilityMode: false
+  }
 
   function registerEncoder (check, encode) {
     assert(check, 'must have an encode function')
@@ -61,7 +64,7 @@ function msgpack (options) {
   }
 
   return {
-    encode: buildEncode(encodingTypes, options.forceFloat64),
+    encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode),
     decode: buildDecode(decodingTypes),
     register: register,
     registerEncoder: registerEncoder,

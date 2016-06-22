@@ -104,7 +104,8 @@ encoded.
 
 options:
 
-- `forceFloat64`, a boolean to that forces all floats to be encoded as 64-bits floats. Defaults is false.
+- `forceFloat64`, a boolean to that forces all floats to be encoded as 64-bits floats. Defaults to false.
+- `compatibilityMode`, a boolean that enables "compatibility mode" which doesn't use str 8 format. Defaults to false.
 
 -------------------------------------------------------
 <a name="encode"></a>
