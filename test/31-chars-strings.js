@@ -9,7 +9,7 @@ test('encode/decode strings with max 31 of length', function (t) {
   var all = []
 
   // build base
-  for (var i = 'a'; i.length < 32; i += 'a') {
+  for (var i = ''; i.length < 32; i += 'a') {
     all.push(i)
   }
 
@@ -26,7 +26,9 @@ test('encode/decode strings with max 31 of length', function (t) {
     t.test('decoding a string of length ' + str.length, function (t) {
       var buf = new Buffer(1 + Buffer.byteLength(str))
       buf[0] = 0xa0 | Buffer.byteLength(str)
-      buf.write(str, 1)
+      if (str.length > 0) {
+        buf.write(str, 1)
+      }
       t.equal(encoder.decode(buf), str, 'must decode correctly')
       t.end()
     })
