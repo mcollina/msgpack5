@@ -37,7 +37,7 @@
     "jshint": "^2.5.2",
     "level-test": "^2.0.0",
     "pre-commit": "1.0.10",
-    "standard": "^6.0.4",
+    "standard": "^8.0.0",
     "tape": "^4.0.0",
     "testling": "^1.7.1",
     "uglify-js": "^2.4.15"
