@@ -84,6 +84,7 @@ API
 ---
 
 <a name="api"></a>
+
 ## API
 
   * <a href="#msgpack"><code><b>msgpack()</b></code></a>
@@ -97,6 +98,7 @@ API
 
 -------------------------------------------------------
 <a name="msgpack"></a>
+
 ### msgpack(options(obj))
 
 Creates a new instance on which you can register new types for being
@@ -109,12 +111,14 @@ options:
 
 -------------------------------------------------------
 <a name="encode"></a>
+
 ### encode(object)
 
 Encodes `object` in msgpack, returns a [bl](http://npm.im/bl).
 
 -------------------------------------------------------
 <a name="decode"></a>
+
 ### decode(buf)
 
 Decodes buf from in msgpack. `buf` can be a `Buffer` or a [bl](http://npm.im/bl) instance.
@@ -123,6 +127,7 @@ In order to support a stream interface, a user must pass in a [bl](http://npm.im
 
 -------------------------------------------------------
 <a name="registerEncoder"></a>
+
 ### registerEncoder(check(obj), encode(obj))
 
 Register a new custom object type for being automatically encoded.
@@ -136,6 +141,7 @@ The arguments are:
 
 -------------------------------------------------------
 <a name="registerDecoder"></a>
+
 ### registerDecoder(type, decode(buf))
 
 Register a new custom object type for being automatically decoded.
@@ -148,6 +154,7 @@ The arguments are:
 
 -------------------------------------------------------
 <a name="register"></a>
+
 ### register(type, constructor, encode(obj), decode(buf))
 
 Register a new custom object type for being automatically encoded and
@@ -168,12 +175,14 @@ This is just a commodity that calls
 
 -------------------------------------------------------
 <a name="encoder"></a>
+
 ### encoder()
 
 Builds a stream in object mode that encodes msgpack.
 
 -------------------------------------------------------
 <a name="decoder"></a>
+
 ### decoder()
 
 Builds a stream in object mode that decodes msgpack.
