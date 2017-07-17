@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 var bl = require('bl')
@@ -7,7 +8,7 @@ var bl = require('bl')
 function build (size) {
   var buf
 
-  buf = new Buffer(size)
+  buf = Buffer.allocUnsafe(size)
   buf.fill('a')
 
   return buf
@@ -20,7 +21,7 @@ test('encode/decode 2^8-1 bytes buffers', function (t) {
   all.push(build(Math.pow(2, 8) - 1))
   all.push(build(Math.pow(2, 6) + 1))
   all.push(build(1))
-  all.push(new Buffer(0))
+  all.push(Buffer.allocUnsafe(0))
 
   all.forEach(function (orig) {
     t.test('encoding a buffer of length ' + orig.length, function (t) {
@@ -33,7 +34,7 @@ test('encode/decode 2^8-1 bytes buffers', function (t) {
     })
 
     t.test('decoding a buffer of length ' + orig.length, function (t) {
-      var buf = new Buffer(2 + orig.length)
+      var buf = Buffer.allocUnsafe(2 + orig.length)
       buf[0] = 0xc4
       buf[1] = orig.length
       orig.copy(buf, 2)
@@ -53,7 +54,7 @@ test('encode/decode 2^8-1 bytes buffers', function (t) {
 test('decoding a chopped 2^8-1 bytes buffer', function (t) {
   var encoder = msgpack()
   var orig = build(Math.pow(2, 6))
-  var buf = new Buffer(2 + orig.length)
+  var buf = Buffer.allocUnsafe(2 + orig.length)
   buf[0] = 0xc4
   buf[1] = Math.pow(2, 8) - 1 // set bigger size
   orig.copy(buf, 2)
@@ -68,7 +69,7 @@ test('decoding a chopped 2^8-1 bytes buffer', function (t) {
 
 test('decoding an incomplete header of 2^8-1 bytes buffer', function (t) {
   var encoder = msgpack()
-  var buf = new Buffer(1)
+  var buf = Buffer.allocUnsafe(1)
   buf[0] = 0xc4
   buf = bl().append(buf)
   var origLength = buf.length

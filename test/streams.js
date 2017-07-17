@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 var BufferList = require('bl')
@@ -105,7 +106,7 @@ test('decoding error wrapped', function (t) {
   }
 
   function mytypeEncode () {
-    return new Buffer(0)
+    return Buffer.allocUnsafe(0)
   }
 
   function mytypeDecode () {
@@ -135,7 +136,7 @@ test('decoding error wrapped', function (t) {
   }
 
   function mytypeEncode () {
-    return new Buffer(0)
+    return Buffer.allocUnsafe(0)
   }
 
   function mytypeDecode () {

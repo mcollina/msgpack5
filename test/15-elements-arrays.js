@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 var bl = require('bl')
@@ -65,7 +66,7 @@ test('decoding an incomplete array', function (t) {
 
   var array = ['a', 'b', 'c']
   var size = computeLength(array)
-  var buf = new Buffer(size)
+  var buf = Buffer.allocUnsafe(size)
   buf[0] = 0x90 | array.length + 2 // set bigger size
   var pos = 1
   for (var i = 0; i < array.length; i++) {

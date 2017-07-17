@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var fs = require('fs')
 var p = require('path')
@@ -7,9 +8,9 @@ var msgpack = require('../')
 
 test('encode/decode map with multiple short buffers', function (t) {
   var map = {
-    first: new Buffer('first'),
-    second: new Buffer('second'),
-    third: new Buffer('third')
+    first: Buffer.from('first'),
+    second: Buffer.from('second'),
+    third: Buffer.from('third')
   }
   var pack = msgpack()
 

@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 var bl = require('bl')
@@ -13,7 +14,7 @@ test('encode/decode 1 byte fixext data', function (t) {
   }
 
   function mytypeEncode (obj) {
-    var buf = new Buffer(1)
+    var buf = Buffer.allocUnsafe(1)
     buf.writeUInt8(obj.data, 0)
     return buf
   }
@@ -39,7 +40,7 @@ test('encode/decode 1 byte fixext data', function (t) {
     })
 
     t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
-      var buf = new Buffer(3)
+      var buf = Buffer.allocUnsafe(3)
       buf[0] = 0xd4
       buf[1] = 0x42
       buf.writeUInt8(orig.data, 2)
@@ -66,7 +67,7 @@ test('encode/decode 2 bytes fixext data', function (t) {
   }
 
   function mytypeEncode (obj) {
-    var buf = new Buffer(2)
+    var buf = Buffer.allocUnsafe(2)
     buf.writeUInt16BE(obj.data, 0)
     return buf
   }
@@ -92,7 +93,7 @@ test('encode/decode 2 bytes fixext data', function (t) {
     })
 
     t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
-      var buf = new Buffer(4)
+      var buf = Buffer.allocUnsafe(4)
       buf[0] = 0xd5
       buf[1] = 0x42
       buf.writeUInt16BE(orig.data, 2)
@@ -119,7 +120,7 @@ test('encode/decode 4 bytes fixext data', function (t) {
   }
 
   function mytypeEncode (obj) {
-    var buf = new Buffer(4)
+    var buf = Buffer.allocUnsafe(4)
     buf.writeUInt32BE(obj.data, 0)
     return buf
   }
@@ -145,7 +146,7 @@ test('encode/decode 4 bytes fixext data', function (t) {
     })
 
     t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
-      var buf = new Buffer(6)
+      var buf = Buffer.allocUnsafe(6)
       buf[0] = 0xd6
       buf[1] = 0x44
       buf.writeUInt32BE(orig.data, 2)
@@ -172,7 +173,7 @@ test('encode/decode 8 bytes fixext data', function (t) {
   }
 
   function mytypeEncode (obj) {
-    var buf = new Buffer(8)
+    var buf = Buffer.allocUnsafe(8)
     buf.writeUInt32BE(obj.data / 2, 0)
     buf.writeUInt32BE(obj.data / 2, 4)
     return buf
@@ -199,7 +200,7 @@ test('encode/decode 8 bytes fixext data', function (t) {
     })
 
     t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
-      var buf = new Buffer(10)
+      var buf = Buffer.allocUnsafe(10)
       buf[0] = 0xd7
       buf[1] = 0x44
       buf.writeUInt32BE(orig.data / 2, 2)
@@ -227,7 +228,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
   }
 
   function mytypeEncode (obj) {
-    var buf = new Buffer(16)
+    var buf = Buffer.allocUnsafe(16)
     buf.writeUInt32BE(obj.data / 4, 0)
     buf.writeUInt32BE(obj.data / 4, 4)
     buf.writeUInt32BE(obj.data / 4, 8)
@@ -256,7 +257,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
     })
 
     t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
-      var buf = new Buffer(18)
+      var buf = Buffer.allocUnsafe(18)
       buf[0] = 0xd8
       buf[1] = 0x46
       buf.writeUInt32BE(orig.data / 4, 2)
@@ -286,7 +287,7 @@ test('encode/decode fixext inside a map', function (t) {
   }
 
   function mytypeEncode (obj) {
-    var buf = new Buffer(4)
+    var buf = Buffer.allocUnsafe(4)
     buf.writeUInt32BE(obj.data, 0)
     return buf
   }
@@ -325,7 +326,7 @@ test('encode/decode 8 bytes fixext data', function (t) {
   }
 
   function mytypeEncode (obj) {
-    var buf = new Buffer(8)
+    var buf = Buffer.allocUnsafe(8)
     buf.writeUInt32BE(obj.data / 2, 0)
     buf.writeUInt32BE(obj.data / 2, 4)
     return buf
@@ -352,7 +353,7 @@ test('encode/decode 8 bytes fixext data', function (t) {
     })
 
     t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
-      var buf = new Buffer(10)
+      var buf = Buffer.allocUnsafe(10)
       buf[0] = 0xd7
       buf[1] = 0x44
       buf.writeUInt32BE(orig.data / 2, 2)
@@ -380,7 +381,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
   }
 
   function mytypeEncode (obj) {
-    var buf = new Buffer(16)
+    var buf = Buffer.allocUnsafe(16)
     buf.writeUInt32BE(obj.data / 4, 0)
     buf.writeUInt32BE(obj.data / 4, 4)
     buf.writeUInt32BE(obj.data / 4, 8)
@@ -409,7 +410,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
     })
 
     t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
-      var buf = new Buffer(18)
+      var buf = Buffer.allocUnsafe(18)
       buf[0] = 0xd8
       buf[1] = 0x46
       buf.writeUInt32BE(orig.data / 4, 2)
@@ -429,7 +430,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
 
   t.test('decoding an incomplete 1 byte fixext data', function (t) {
     var encoder = msgpack()
-    var buf = new Buffer(2)
+    var buf = Buffer.allocUnsafe(2)
     buf[0] = 0xd4
     buf = bl().append(buf)
     var origLength = buf.length
@@ -442,7 +443,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
 
   t.test('decoding an incomplete 2 byte fixext data', function (t) {
     var encoder = msgpack()
-    var buf = new Buffer(3)
+    var buf = Buffer.allocUnsafe(3)
     buf[0] = 0xd5
     buf = bl().append(buf)
     var origLength = buf.length
@@ -455,7 +456,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
 
   t.test('decoding an incomplete 4 byte fixext data', function (t) {
     var encoder = msgpack()
-    var buf = new Buffer(5)
+    var buf = Buffer.allocUnsafe(5)
     buf[0] = 0xd6
     buf = bl().append(buf)
     var origLength = buf.length
@@ -468,7 +469,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
 
   t.test('decoding an incomplete 8 byte fixext data', function (t) {
     var encoder = msgpack()
-    var buf = new Buffer(9)
+    var buf = Buffer.allocUnsafe(9)
     buf[0] = 0xd7
     buf = bl().append(buf)
     var origLength = buf.length
@@ -481,7 +482,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
 
   t.test('decoding an incomplete 16 byte fixext data', function (t) {
     var encoder = msgpack()
-    var buf = new Buffer(17)
+    var buf = Buffer.allocUnsafe(17)
     buf[0] = 0xd8
     buf = bl().append(buf)
     var origLength = buf.length

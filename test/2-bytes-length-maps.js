@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 var bl = require('bl')
@@ -57,7 +58,7 @@ test('encode/decode maps up to 2^16-1 elements', function (t) {
 test('decoding a chopped map', function (t) {
   var encoder = msgpack()
   var map = encoder.encode(build(Math.pow(2, 12) + 1, 42))
-  var buf = new Buffer(map.length)
+  var buf = Buffer.allocUnsafe(map.length)
   buf[0] = 0xde
   buf.writeUInt16BE(Math.pow(2, 16) - 1, 1) // set bigger size
   map.copy(buf, 3, 3, map.length)
@@ -72,7 +73,7 @@ test('decoding a chopped map', function (t) {
 
 test('decoding an incomplete header of a map', function (t) {
   var encoder = msgpack()
-  var buf = new Buffer(2)
+  var buf = Buffer.allocUnsafe(2)
   buf[0] = 0xde
   buf = bl().append(buf)
   var origLength = buf.length

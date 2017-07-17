@@ -31,15 +31,15 @@
   },
   "homepage": "https://github.com/mcollina/msgpack5",
   "devDependencies": {
-    "browserify": "^10.2.4",
+    "browserify": "^14.0.0",
     "faucet": "0.0.1",
-    "jshint": "^2.5.2",
-    "level-test": "^2.0.0",
-    "pre-commit": "1.0.10",
-    "standard": "^8.0.0",
-    "tape": "^4.0.0",
+    "jshint": "^2.9.5",
+    "level-test": "^2.0.3",
+    "pre-commit": "^1.2.2",
+    "standard": "^10.0.0",
+    "tape": "^4.7.0",
     "testling": "^1.7.1",
-    "uglify-js": "^2.4.15"
+    "uglify-js": "^3.0.0"
   },
   "standard": {
     "ignore": [
@@ -60,8 +60,9 @@
     ]
   },
   "dependencies": {
-    "bl": "^1.0.0",
-    "inherits": "^2.0.1",
-    "readable-stream": "^2.0.1"
+    "bl": "^1.2.1",
+    "inherits": "^2.0.3",
+    "readable-stream": "^2.3.3",
+    "safe-buffer": "^5.1.1"
   }
 }

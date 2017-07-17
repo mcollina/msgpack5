@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 
@@ -20,7 +21,7 @@ test('encoding/decoding 7-bits positive ints', function (t) {
     })
 
     t.test('decoding ' + num, function (t) {
-      var buf = new Buffer([num])
+      var buf = Buffer.from([num])
       t.equal(encoder.decode(buf), num, 'must decode correctly')
       t.end()
     })

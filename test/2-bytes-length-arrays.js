@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 var bl = require('bl')
@@ -50,7 +51,7 @@ test('decoding an incomplete array', function (t) {
   var encoder = msgpack()
 
   var array = build(0xffff / 2)
-  var buf = new Buffer(3 + array.length)
+  var buf = Buffer.allocUnsafe(3 + array.length)
   buf[0] = 0xdc
   buf.writeUInt16BE(array.length + 10, 1) // set bigger size
   var pos = 3
@@ -71,7 +72,7 @@ test('decoding an incomplete array', function (t) {
 test('decoding an incomplete header', function (t) {
   var encoder = msgpack()
 
-  var buf = new Buffer(2)
+  var buf = Buffer.allocUnsafe(2)
   buf[0] = 0xdc
   buf = bl().append(buf)
   var origLength = buf.length

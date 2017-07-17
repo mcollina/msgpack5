@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 var bl = require('bl')
@@ -33,7 +34,7 @@ test('encoding/decoding 32-bits float numbers', function (t) {
     })
 
     t.test('decoding ' + num, function (t) {
-      var buf = new Buffer(5)
+      var buf = Buffer.allocUnsafe(5)
       var dec
       buf[0] = 0xca
       buf.writeFloatBE(num, 1)
@@ -54,7 +55,7 @@ test('encoding/decoding 32-bits float numbers', function (t) {
 
 test('decoding an incomplete 32-bits float numbers', function (t) {
   var encoder = msgpack()
-  var buf = new Buffer(4)
+  var buf = Buffer.allocUnsafe(4)
   buf[0] = 0xca
   buf = bl().append(buf)
   var origLength = buf.length

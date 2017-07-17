@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 var bl = require('bl')
@@ -9,15 +10,15 @@ test('encode/decode 2^16 <-> (2^32 - 1) bytes strings', function (t) {
   var all = []
   var str
 
-  str = new Buffer(Math.pow(2, 16))
+  str = Buffer.allocUnsafe(Math.pow(2, 16))
   str.fill('a')
   all.push(str.toString())
 
-  str = new Buffer(Math.pow(2, 16) + 1)
+  str = Buffer.allocUnsafe(Math.pow(2, 16) + 1)
   str.fill('a')
   all.push(str.toString())
 
-  str = new Buffer(Math.pow(2, 20))
+  str = Buffer.allocUnsafe(Math.pow(2, 20))
   str.fill('a')
   all.push(str.toString())
 
@@ -32,7 +33,7 @@ test('encode/decode 2^16 <-> (2^32 - 1) bytes strings', function (t) {
     })
 
     t.test('decoding a string of length ' + str.length, function (t) {
-      var buf = new Buffer(5 + Buffer.byteLength(str))
+      var buf = Buffer.allocUnsafe(5 + Buffer.byteLength(str))
       buf[0] = 0xdb
       buf.writeUInt32BE(Buffer.byteLength(str), 1)
       buf.write(str, 5)
@@ -54,7 +55,7 @@ test('decoding a chopped string', function (t) {
   var str
   for (str = 'a'; str.length < 0xffff + 100; str += 'a') {
   }
-  var buf = new Buffer(5 + Buffer.byteLength(str))
+  var buf = Buffer.allocUnsafe(5 + Buffer.byteLength(str))
   buf[0] = 0xdb
   buf.writeUInt32BE(Buffer.byteLength(str) + 10, 1) // set bigger size
   buf.write(str, 5)
@@ -69,7 +70,7 @@ test('decoding a chopped string', function (t) {
 
 test('decoding an incomplete header of a string', function (t) {
   var encoder = msgpack()
-  var buf = new Buffer(4)
+  var buf = Buffer.allocUnsafe(4)
   buf[0] = 0xdb
   buf = bl().append(buf)
   var origLength = buf.length

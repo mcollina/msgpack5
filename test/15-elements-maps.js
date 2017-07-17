@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 var bl = require('bl')
@@ -74,7 +75,7 @@ test('encode/decode map with buf, ints and strings', function (t) {
   var map = {
     topic: 'hello',
     qos: 1,
-    payload: new Buffer('world'),
+    payload: Buffer.from('world'),
     messageId: '42',
     ttl: 1416309270167
   }
@@ -87,7 +88,7 @@ test('encode/decode map with buf, ints and strings', function (t) {
 test('decoding a chopped map', function (t) {
   var encoder = msgpack()
   var map = encoder.encode({'a': 'b', 'c': 'd', 'e': 'f'})
-  var buf = new Buffer(map.length)
+  var buf = Buffer.allocUnsafe(map.length)
   buf[0] = 0x80 | 5 // set bigger size
   map.copy(buf, 1, 1, map.length)
   buf = bl().append(buf)

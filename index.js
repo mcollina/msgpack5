@@ -1,3 +1,6 @@
+'use strict'
+
+var Buffer = require('safe-buffer').Buffer
 var assert = require('assert')
 var bl = require('bl')
 var streams = require('./lib/streams')
@@ -47,7 +50,7 @@ function msgpack (options) {
 
     function reEncode (obj) {
       var buf = bl()
-      var header = new Buffer(1)
+      var header = Buffer.allocUnsafe(1)
 
       header.writeInt8(type, 0)
 

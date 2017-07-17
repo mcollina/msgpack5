@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 
@@ -16,7 +17,7 @@ test('encode/decode ext with a custom object check', function (t) {
   }
 
   function mytypeEncode (obj) {
-    var buf = new Buffer(2)
+    var buf = Buffer.allocUnsafe(2)
     buf.writeUInt8(0x42, 0)
     buf.writeUInt8(obj.data, 1)
     return buf
@@ -44,7 +45,7 @@ test('encode/decode ext with a custom object check', function (t) {
     })
 
     t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
-      var buf = new Buffer(3)
+      var buf = Buffer.allocUnsafe(3)
       buf[0] = 0xd4
       buf[1] = 0x42
       buf.writeUInt8(orig.data, 2)

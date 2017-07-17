@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 var bl = require('bl')
@@ -14,7 +15,7 @@ test('encode/decode variable ext data up to 0xff', function (t) {
   }
 
   function mytipeEncode (obj) {
-    var buf = new Buffer(obj.size)
+    var buf = Buffer.allocUnsafe(obj.size)
     buf.fill(obj.value)
     return buf
   }
@@ -72,7 +73,7 @@ test('encode/decode variable ext data up to 0xff', function (t) {
 
   t.test('decoding an incomplete variable ext data up to 0xff', function (t) {
     var obj = encoder.encode(new MyType(250, 'a'))
-    var buf = new Buffer(obj.length)
+    var buf = Buffer.allocUnsafe(obj.length)
     buf[0] = 0xc7
     buf.writeUInt8(obj.length + 2, 1) // set bigger size
     obj.copy(buf, 2, 2, obj.length)
@@ -86,7 +87,7 @@ test('encode/decode variable ext data up to 0xff', function (t) {
   })
 
   t.test('decoding an incomplete header of variable ext data up to 0xff', function (t) {
-    var buf = new Buffer(2)
+    var buf = Buffer.allocUnsafe(2)
     buf[0] = 0xc7
     buf = bl().append(buf)
     var origLength = buf.length

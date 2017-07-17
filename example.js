@@ -1,3 +1,6 @@
+'use strict'
+
+var Buffer = require('safe-buffer').Buffer
 var msgpack = require('./')() // namespace our extensions
 var a = new MyType(2, 'a')
 var encode = msgpack.encode
@@ -22,7 +25,7 @@ function MyType (size, value) {
 }
 
 function mytipeEncode (obj) {
-  var buf = new Buffer(obj.size)
+  var buf = Buffer.allocUnsafe(obj.size)
   buf.fill(obj.value)
   return buf
 }

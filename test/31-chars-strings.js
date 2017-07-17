@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 var bl = require('bl')
@@ -24,7 +25,7 @@ test('encode/decode strings with max 31 of length', function (t) {
     })
 
     t.test('decoding a string of length ' + str.length, function (t) {
-      var buf = new Buffer(1 + Buffer.byteLength(str))
+      var buf = Buffer.allocUnsafe(1 + Buffer.byteLength(str))
       buf[0] = 0xa0 | Buffer.byteLength(str)
       if (str.length > 0) {
         buf.write(str, 1)
@@ -45,7 +46,7 @@ test('encode/decode strings with max 31 of length', function (t) {
 test('decoding a chopped string', function (t) {
   var encoder = msgpack()
   var str = 'aaa'
-  var buf = new Buffer(1 + Buffer.byteLength(str))
+  var buf = Buffer.allocUnsafe(1 + Buffer.byteLength(str))
   buf[0] = 0xa0 | Buffer.byteLength(str) + 2 // set bigger size
   buf.write(str, 1)
   buf = bl().append(buf)

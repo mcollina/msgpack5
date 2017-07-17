@@ -1,5 +1,6 @@
 'use strict'
 
+var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 var bl = require('bl')
@@ -35,7 +36,7 @@ test('encoding/decoding 64-bits big-endian unsigned integers', function (t) {
 
 test('decoding an incomplete 64-bits big-endian unsigned integer', function (t) {
   var encoder = msgpack()
-  var buf = new Buffer(8)
+  var buf = Buffer.allocUnsafe(8)
   buf[0] = 0xcf
   buf = bl().append(buf)
   var origLength = buf.length
