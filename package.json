@@ -21,8 +21,7 @@
     "msgpack",
     "extension",
     "v5",
-    "msgpack",
-    "v5",
+    "MessagePack",
     "ext"
   ],
   "author": "Matteo collina <hello@matteocollina.com>",
