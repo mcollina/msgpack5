@@ -1,14 +1,14 @@
 'use strict'
 
 var test = require('tape').test
-var level = require('level-test')()
+var level = require('memdb')
 var msgpack = require('../')
 
 test('msgpack level encoding put', function (t) {
   t.plan(4)
 
   var pack = msgpack()
-  var db = level('foo', {
+  var db = level({
     valueEncoding: pack
   })
   var obj = { my: 'obj' }
@@ -29,7 +29,7 @@ test('msgpack level encoding get', function (t) {
   t.plan(4)
 
   var pack = msgpack()
-  var db = level('foo', {
+  var db = level({
     valueEncoding: pack
   })
   var obj = { my: 'obj' }
@@ -51,7 +51,7 @@ test('msgpack level encoding mirror', function (t) {
   t.plan(4)
 
   var pack = msgpack()
-  var db = level('foo', {
+  var db = level({
     valueEncoding: pack
   })
   var obj = { my: 'obj' }
