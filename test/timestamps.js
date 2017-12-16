@@ -4,6 +4,26 @@ var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 
+test('timestamp disabling', function (t) {
+  var encoder = msgpack({disableTimestampEncoding: true})
+  var timestamps = [
+        [new Date('2018-01-02T03:04:05.000000000Z'), [0x80]]
+  ]
+
+  timestamps.forEach(function (testcase) {
+    var item = testcase[0]
+    var expected = testcase[1]
+
+    t.test('encoding ' + item.toString(), function (t) {
+      var buf = encoder.encode(item).slice()
+      t.equal(buf.length, expected.length, 'must have ' + expected.length + ' bytes')
+      t.equal(buf[0], expected[0], 'Should return 0x80 ({}) by default')
+      t.end()
+    })
+  })
+
+  t.end()
+})
 test('encoding/decoding timestamp 64', function (t) {
   var encoder = msgpack()
   var timestamps = [

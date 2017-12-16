@@ -13,7 +13,8 @@ function msgpack (options) {
 
   options = options || {
     forceFloat64: false,
-    compatibilityMode: false
+    compatibilityMode: false,
+    disableTimestampEncoding: false // if true, skips encoding Dates using the msgpack timestamp ext format (-1)
   }
 
   function registerEncoder (check, encode) {
@@ -67,7 +68,7 @@ function msgpack (options) {
   }
 
   return {
-    encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode),
+    encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode, options.disableTimestampEncoding),
     decode: buildDecode(decodingTypes),
     register: register,
     registerEncoder: registerEncoder,
