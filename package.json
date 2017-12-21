@@ -4,7 +4,7 @@
   "description": "A msgpack v5 implementation for node.js and the browser, with extension points",
   "main": "index.js",
   "scripts": {
-    "test": "standard && tape test/* | tap-spec",
+    "test": "standard && tape test/* | tap-mocha-reporter dot",
     "build": "npm run browserify && npm run dist",
     "browserify": "node_modules/.bin/browserify index.js -o dist/msgpack5.js -s msgpack5",
     "dist": "node_modules/.bin/uglifyjs dist/msgpack5.js -o dist/msgpack5.min.js",
@@ -36,7 +36,7 @@
     "memdb": "^1.3.1",
     "pre-commit": "^1.2.2",
     "standard": "^10.0.3",
-    "tap-spec": "^4.1.1",
+    "tap-mocha-reporter": "^3.0.6",
     "tape": "^4.8.0",
     "testling": "^1.7.1",
     "uglify-js": "^3.2.2"
