@@ -14,7 +14,8 @@ function msgpack (options) {
 
   options = options || {
     forceFloat64: false,
-    compatibilityMode: false
+    compatibilityMode: false,
+    disableTimestampEncoding: false // if true, skips encoding Dates using the msgpack timestamp ext format (-1)
   }
 
   function registerEncoder (check, encode) {
@@ -68,7 +69,7 @@ function msgpack (options) {
   }
 
   return {
-    encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode),
+    encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode, options.disableTimestampEncoding),
     decode: buildDecode(decodingTypes),
     register: register,
     registerEncoder: registerEncoder,
@@ -459,9 +460,33 @@ module.exports = function buildDecode (decodingTypes) {
   }
 
   function decodeFixExt (buf, offset, size) {
-    var type = buf.readUInt8(offset + 1)
-
+    var type = buf.readInt8(offset + 1) // Signed
     return decodeExt(buf, offset, type, size, 2)
+  }
+  function decodeTimestamp (buf, size, headerSize) {
+    var seconds, nanoseconds
+    nanoseconds = 0
+
+    switch (size) {
+      case 4:
+          // timestamp 32 stores the number of seconds that have elapsed since 1970-01-01 00:00:00 UTC in an 32-bit unsigned integer
+        seconds = buf.readUInt32BE()
+        break
+
+      case 8: // Timestamp 64 stores the number of seconds and nanoseconds that have elapsed
+                // since 1970-01-01 00:00:00 UTC in 32-bit unsigned integers, split 30/34 bits
+        var upper = buf.readUInt32BE()
+        var lower = buf.readUInt32BE(4)
+        nanoseconds = upper / 4
+        seconds = ((upper & 0x03) * Math.pow(2, 32)) + lower // If we use bitwise operators, we get truncated to 32bits
+        break
+
+      case 12:
+        throw new Error('timestamp 96 is not yet implemented')
+    }
+
+    var millis = (seconds * 1000) + Math.round(nanoseconds / 1E6)
+    return buildDecodeResult(new Date(millis), size + headerSize)
   }
 
   function decodeExt (buf, offset, type, size, headerSize) {
@@ -469,6 +494,16 @@ module.exports = function buildDecode (decodingTypes) {
       toDecode
 
     offset += headerSize
+
+    // Pre-defined
+    if (type < 0) { // Reserved for future extensions
+      switch (type) {
+        case -1: // Tiemstamp https://github.com/msgpack/msgpack/blob/master/spec.md#timestamp-extension-type
+          toDecode = buf.slice(offset, offset + size)
+          return decodeTimestamp(toDecode, size, headerSize)
+      }
+    }
+
     for (i = 0; i < decodingTypes.length; i++) {
       if (type === decodingTypes[i].type) {
         toDecode = buf.slice(offset, offset + size)
@@ -490,7 +525,7 @@ var Buffer = require('safe-buffer').Buffer
 var bl = require('bl')
 var TOLERANCE = 0.1
 
-module.exports = function buildEncode (encodingTypes, forceFloat64, compatibilityMode) {
+module.exports = function buildEncode (encodingTypes, forceFloat64, compatibilityMode, disableTimestampEncoding) {
   function encode (obj, avoidSlice) {
     var buf,
       len
@@ -531,7 +566,10 @@ module.exports = function buildEncode (encodingTypes, forceFloat64, compatibilit
         buf.writeUInt32BE(len, 1)
         buf.write(obj, 5)
       }
-    } else if (obj && obj.readUInt32LE) {
+    } else if (obj && (obj.readUInt32LE || obj instanceof Uint8Array)) {
+      if (obj instanceof Uint8Array) {
+        obj = Buffer.from(obj)
+      }
       // weird hack to support Buffer
       // and Buffer-like objects
       if (obj.length <= 0xff) {
@@ -567,6 +605,8 @@ module.exports = function buildEncode (encodingTypes, forceFloat64, compatibilit
         acc.append(encode(obj, true))
         return acc
       }, bl().append(buf))
+    } else if (!disableTimestampEncoding && typeof obj.getDate === 'function') {
+      return encodeDate(obj)
     } else if (typeof obj === 'object') {
       buf = encodeExt(obj) || encodeObject(obj)
     } else if (typeof obj === 'number') {
@@ -630,6 +670,35 @@ module.exports = function buildEncode (encodingTypes, forceFloat64, compatibilit
     } else {
       return buf.slice()
     }
+  }
+
+  function encodeDate (dt) {
+    var encoded
+    var millis = dt * 1
+    var seconds = Math.floor(millis / 1000)
+    var nanos = (millis - (seconds * 1000)) * 1E6
+
+    if (nanos || seconds > 0xFFFFFFFF) {
+        // Timestamp64
+      encoded = new Buffer(10)
+      encoded[0] = 0xd7
+      encoded[1] = -1
+
+      var upperNanos = ((nanos * 4))
+      var upperSeconds = seconds / Math.pow(2, 32)
+      var upper = (upperNanos + upperSeconds) & 0xFFFFFFFF
+      var lower = seconds & 0xFFFFFFFF
+
+      encoded.writeInt32BE(upper, 2)
+      encoded.writeInt32BE(lower, 6)
+    } else {
+        // Timestamp32
+      encoded = new Buffer(6)
+      encoded[0] = 0xd6
+      encoded[1] = -1
+      encoded.writeUInt32BE(Math.floor(millis / 1000), 2)
+    }
+    return bl().append(encoded)
   }
 
   function encodeExt (obj) {
@@ -1757,7 +1826,7 @@ module.exports = BufferList
 /*!
  * The buffer module from node.js, for the browser.
  *
- * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @author   Feross Aboukhadijeh <https://feross.org>
  * @license  MIT
  */
 /* eslint-disable no-proto */
@@ -1860,7 +1929,7 @@ function from (value, encodingOrOffset, length) {
     throw new TypeError('"value" argument must not be a number')
   }
 
-  if (value instanceof ArrayBuffer) {
+  if (isArrayBuffer(value)) {
     return fromArrayBuffer(value, encodingOrOffset, length)
   }
 
@@ -2120,7 +2189,7 @@ function byteLength (string, encoding) {
   if (Buffer.isBuffer(string)) {
     return string.length
   }
-  if (isArrayBufferView(string) || string instanceof ArrayBuffer) {
+  if (isArrayBufferView(string) || isArrayBuffer(string)) {
     return string.byteLength
   }
   if (typeof string !== 'string') {
@@ -3452,6 +3521,14 @@ function blitBuffer (src, dst, offset, length) {
   return i
 }
 
+// ArrayBuffers from another context (i.e. an iframe) do not pass the `instanceof` check
+// but they should be treated as valid. See: https://github.com/feross/buffer/issues/166
+function isArrayBuffer (obj) {
+  return obj instanceof ArrayBuffer ||
+    (obj != null && obj.constructor != null && obj.constructor.name === 'ArrayBuffer' &&
+      typeof obj.byteLength === 'number')
+}
+
 // Node 0.10 supports `ArrayBuffer` but lacks `ArrayBuffer.isView`
 function isArrayBufferView (obj) {
   return (typeof ArrayBuffer.isView === 'function') && ArrayBuffer.isView(obj)
@@ -3991,7 +4068,7 @@ if (typeof Object.create === 'function') {
 /*!
  * Determine if an object is a Buffer
  *
- * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @author   Feross Aboukhadijeh <https://feross.org>
  * @license  MIT
  */
 
