@@ -182,3 +182,23 @@ test('concatenated buffers work', function (t) {
 
   encoder.end()
 })
+
+test('nil processing works', function (t) {
+  t.plan(3)
+
+  var pack = msgpack()
+  var decoder = pack.decoder()
+  var decodedItemIndex = 0
+
+  decoder.on('data', function (chunk) {
+    decodedItemIndex++
+    t.deepEqual(chunk, decodedItemIndex === 1 ? null : false)
+  })
+
+  decoder.on('end', function () {
+    t.equal(decodedItemIndex, 2)
+  })
+
+  decoder.write(new Buffer([0xc0, 0xc2]))
+  decoder.end()
+})
