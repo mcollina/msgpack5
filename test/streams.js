@@ -188,11 +188,12 @@ test('nil processing works', function (t) {
 
   var pack = msgpack()
   var decoder = pack.decoder()
+  decoder.wrap = true
   var decodedItemIndex = 0
 
   decoder.on('data', function (chunk) {
     decodedItemIndex++
-    t.deepEqual(chunk, decodedItemIndex === 1 ? null : false)
+    t.deepEqual(chunk.value, decodedItemIndex === 1 ? null : false)
   })
 
   decoder.on('end', function () {
