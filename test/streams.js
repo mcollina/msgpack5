@@ -187,8 +187,7 @@ test('nil processing works', function (t) {
   t.plan(3)
 
   var pack = msgpack()
-  var decoder = pack.decoder()
-  decoder.wrap = true
+  var decoder = pack.decoder({wrap: true})
   var decodedItemIndex = 0
 
   decoder.on('data', function (chunk) {
