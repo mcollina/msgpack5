@@ -7,8 +7,7 @@
     "test": "standard && tape test/* | tap-mocha-reporter dot",
     "build": "npm run browserify && npm run dist",
     "browserify": "browserify index.js -o dist/msgpack5.js -s msgpack5",
-    "dist": "uglifyjs dist/msgpack5.js -o dist/msgpack5.min.js",
-    "test-browser": "browserify test/* | testling -u"
+    "dist": "uglifyjs dist/msgpack5.js -o dist/msgpack5.min.js"
   },
   "pre-commit": [
     "test"
@@ -31,37 +30,23 @@
   },
   "homepage": "https://github.com/mcollina/msgpack5",
   "devDependencies": {
-    "browserify": "^15.0.0",
+    "browserify": "^16.2.0",
     "memdb": "^1.3.1",
     "pre-commit": "^1.2.2",
-    "standard": "^10.0.3",
-    "tap-mocha-reporter": "^3.0.6",
-    "tape": "^4.8.0",
-    "testling": "^1.7.1",
-    "uglify-js": "^3.3.5"
+    "standard": "^11.0.1",
+    "tap-mocha-reporter": "^3.0.7",
+    "tape": "^4.9.0",
+    "uglify-js": "^3.3.25"
   },
   "standard": {
     "ignore": [
       "dist/"
     ]
   },
-  "testling": {
-    "files": "test/*.js",
-    "browsers": [
-      "ie/6..latest",
-      "chrome/22..latest",
-      "firefox/16..latest",
-      "safari/latest",
-      "opera/11.0..latest",
-      "iphone/6",
-      "ipad/6",
-      "android-browser/latest"
-    ]
-  },
   "dependencies": {
-    "bl": "^1.2.1",
+    "bl": "^2.0.0",
     "inherits": "^2.0.3",
-    "readable-stream": "^2.3.3",
-    "safe-buffer": "^5.1.1"
+    "readable-stream": "^2.3.6",
+    "safe-buffer": "^5.1.2"
   }
 }
