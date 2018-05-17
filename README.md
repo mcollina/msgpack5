@@ -177,16 +177,24 @@ This is just a commodity that calls
 -------------------------------------------------------
 <a name="encoder"></a>
 
-### encoder()
+### encoder(options)
 
 Builds a stream in object mode that encodes msgpack.
+
+Supported options:
+* `wrap`, objects should be passed to encoder in wrapped object {value: data}. Wrap option should be used if you need to pass null to encoder.
+
 
 -------------------------------------------------------
 <a name="decoder"></a>
 
-### decoder()
+### decoder(options)
 
 Builds a stream in object mode that decodes msgpack.
+
+Supported options:
+* `wrap`, decoded objects returned in wrapped object {value: data}. Wrap option should be used if stream contains msgpack nil.
+
 
 LevelUp Support
 ---------------

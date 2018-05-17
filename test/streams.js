@@ -182,3 +182,80 @@ test('concatenated buffers work', function (t) {
 
   encoder.end()
 })
+
+test('nil processing works', function (t) {
+  t.plan(3)
+
+  var pack = msgpack()
+  var decoder = pack.decoder({wrap: true})
+  var decodedItemIndex = 0
+
+  decoder.on('data', function (chunk) {
+    decodedItemIndex++
+    t.deepEqual(chunk.value, decodedItemIndex === 1 ? null : false)
+  })
+
+  decoder.on('end', function () {
+    t.equal(decodedItemIndex, 2)
+  })
+
+  decoder.write(new Buffer([0xc0, 0xc2]))
+  decoder.end()
+})
+
+test('encoder wrap mode works', function (t) {
+  t.plan(1)
+
+  var pack = msgpack()
+  var encoder = pack.encoder({wrap: true})
+  var decoder = pack.decoder()
+  var data = { hello: 'world' }
+  var wrappedData = {value: data}
+
+  encoder.pipe(decoder)
+
+  decoder.on('data', function (chunk) {
+    t.deepEqual(chunk, data)
+  })
+
+  encoder.end(wrappedData)
+})
+
+test('encoder/decoder wrap mode must send an object through', function (t) {
+  t.plan(1)
+
+  var pack = msgpack()
+  var encoder = pack.encoder({wrap: true})
+  var decoder = pack.decoder({wrap: true})
+  var data = {value: { hello: 'world' }}
+
+  encoder.pipe(decoder)
+
+  decoder.on('data', function (chunk) {
+    t.deepEqual(chunk, data)
+  })
+
+  encoder.end(data)
+})
+
+test('encoder pack null', function (t) {
+  t.plan(2)
+  var pack = msgpack()
+  var encoder = pack.encoder({wrap: true})
+  var decoder = pack.decoder({wrap: true})
+
+  encoder.pipe(decoder)
+
+  var decodedItemIndex = 0
+  decoder.on('data', function (chunk) {
+    decodedItemIndex++
+    t.deepEqual(chunk.value, null)
+  })
+
+  decoder.on('end', function () {
+    t.equal(decodedItemIndex, 1)
+  })
+
+  encoder.write({value: null})
+  encoder.end()
+})
