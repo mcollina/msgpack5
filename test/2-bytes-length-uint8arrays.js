@@ -34,7 +34,7 @@ test('encode/decode 2^8-1 Uint8Arrays', function (t) {
     })
 
     t.test('mirror test for an Uint8Array of length ' + array.byteLength + ' bytes', function (t) {
-      t.deepEqual(encoder.decode(encoder.encode(array)), new Buffer(array), 'must stay the same')
+      t.deepEqual(encoder.decode(encoder.encode(array)), Buffer.from(array), 'must stay the same')
       t.end()
     })
   })
