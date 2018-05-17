@@ -182,14 +182,7 @@ This is just a commodity that calls
 Builds a stream in object mode that encodes msgpack.
 
 Supported options:
-wrap.
-
-Objects should be passed to encoder builded with 
-encoder({wrap:true}) 
-in wrapped object 
-{value: data}.
-
-Wrap option should be used if you need to pass null to encoder.
+* `wrap`, objects should be passed to encoder in wrapped object {value: data}. Wrap option should be used if you need to pass null to encoder.
 
 
 -------------------------------------------------------
@@ -200,14 +193,7 @@ Wrap option should be used if you need to pass null to encoder.
 Builds a stream in object mode that decodes msgpack.
 
 Supported options:
-wrap.
-
-Decoded objects returned from decoder builded with 
-decoder({wrap:true}) 
-in wrapped object 
-{value: data}.
-
-Wrap option should be used if stream contains msgpack nil.
+* `wrap`, decoded objects returned in wrapped object {value: data}. Wrap option should be used if stream contains msgpack nil.
 
 
 LevelUp Support
