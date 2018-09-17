@@ -71,13 +71,13 @@ test('do not encode undefined in a map', function (t) {
   t.end()
 })
 
-test('do not encode NaN in a map', function (t) {
+test('throw error on NaN in a map', function (t) {
   var instance = msgpack()
-  var expected = { hello: 'world' }
   var toEncode = { a: NaN, hello: 'world' }
-  var buf = instance.encode(toEncode)
 
-  t.deepEqual(expected, instance.decode(buf), 'must ignore NaN')
+  t.throws(function () {
+    instance.encode(toEncode)
+  }, Error, 'must throw Error')
   t.end()
 })
 
