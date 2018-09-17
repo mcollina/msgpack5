@@ -1,6 +1,6 @@
 {
   "name": "msgpack5",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "A msgpack v5 implementation for node.js and the browser, with extension points",
   "main": "index.js",
   "scripts": {
@@ -35,8 +35,8 @@
     "pre-commit": "^1.2.2",
     "standard": "^11.0.1",
     "tap-mocha-reporter": "^3.0.7",
-    "tape": "^4.9.0",
-    "uglify-js": "^3.3.25"
+    "tape": "^4.9.1",
+    "uglify-js": "^3.4.9"
   },
   "standard": {
     "ignore": [
@@ -44,7 +44,7 @@
     ]
   },
   "dependencies": {
-    "bl": "^2.0.0",
+    "bl": "^2.0.1",
     "inherits": "^2.0.3",
     "readable-stream": "^2.3.6",
     "safe-buffer": "^5.1.2"
