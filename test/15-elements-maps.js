@@ -71,6 +71,16 @@ test('do not encode undefined in a map', function (t) {
   t.end()
 })
 
+test('throw error on NaN in a map', function (t) {
+  var instance = msgpack()
+  var toEncode = { a: NaN, hello: 'world' }
+
+  t.throws(function () {
+    instance.encode(toEncode)
+  }, Error, 'must throw Error')
+  t.end()
+})
+
 test('encode/decode map with buf, ints and strings', function (t) {
   var map = {
     topic: 'hello',
