@@ -71,6 +71,16 @@ test('do not encode undefined in a map', function (t) {
   t.end()
 })
 
+test('do not encode NaN in a map', function (t) {
+  var instance = msgpack()
+  var expected = { hello: 'world' }
+  var toEncode = { a: NaN, hello: 'world' }
+  var buf = instance.encode(toEncode)
+
+  t.deepEqual(expected, instance.decode(buf), 'must ignore NaN')
+  t.end()
+})
+
 test('encode/decode map with buf, ints and strings', function (t) {
   var map = {
     topic: 'hello',
