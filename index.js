@@ -9,7 +9,7 @@ var buildEncode = require('./lib/encoder')
 
 function msgpack (options) {
   var encodingTypes = []
-  var decodingTypes = []
+  var decodingTypes = Object.create(null)
 
   options = options || {
     forceFloat64: false,
@@ -24,9 +24,7 @@ function msgpack (options) {
     assert(check, 'must have an encode function')
     assert(encode, 'must have an encode function')
 
-    encodingTypes.push({
-      check: check, encode: encode
-    })
+    encodingTypes.push({ check, encode })
 
     return this
   }
@@ -34,11 +32,7 @@ function msgpack (options) {
   function registerDecoder (type, decode) {
     assert(type >= 0, 'must have a non-negative type')
     assert(decode, 'must have a decode function')
-
-    decodingTypes.push({
-      type: type, decode: decode
-    })
-
+    decodingTypes[type] = decode
     return this
   }
 
