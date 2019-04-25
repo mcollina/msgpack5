@@ -17,7 +17,6 @@ function msgpack (options) {
     // if true, skips encoding Dates using the msgpack
     // timestamp ext format (-1)
     disableTimestampEncoding: false
-    // transformUnsupported: function () { return .... }
   }
 
   function registerEncoder (check, encode) {
