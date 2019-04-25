@@ -28,3 +28,4 @@ spec.html spec.md
 
 package-lock.json
 yarn.lock
+dist
