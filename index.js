@@ -6,7 +6,7 @@ var bl = require('bl')
 var streams = require('./lib/streams')
 var buildDecode = require('./lib/decoder')
 var buildEncode = require('./lib/encoder')
-var { IncompleteBufferError } = require('./lib/helpers.js')
+var IncompleteBufferError = require('./lib/helpers.js').IncompleteBufferError
 
 function msgpack (options) {
   var encodingTypes = []

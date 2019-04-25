@@ -14,7 +14,7 @@ test('encoding/decoding 32-bits float numbers', function (t) {
   ]
 
   var float64 = [
-    2 ** 150,
+    Math.pow(2, 150),
     1.337,
     2.2
   ]
