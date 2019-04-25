@@ -65,7 +65,7 @@ function msgpack (options) {
   }
 
   return {
-    encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode, options.disableTimestampEncoding, options.transformUnsupported),
+    encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode, options.disableTimestampEncoding),
     decode: buildDecode(decodingTypes),
     register,
     registerEncoder,
