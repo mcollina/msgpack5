@@ -6,6 +6,7 @@ var bl = require('bl')
 var streams = require('./lib/streams')
 var buildDecode = require('./lib/decoder')
 var buildEncode = require('./lib/encoder')
+var { IncompleteBufferError } = require('./lib/helpers.js')
 
 function msgpack (options) {
   var encodingTypes = []
@@ -66,15 +67,15 @@ function msgpack (options) {
   return {
     encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode, options.disableTimestampEncoding, options.transformUnsupported),
     decode: buildDecode(decodingTypes),
-    register: register,
-    registerEncoder: registerEncoder,
-    registerDecoder: registerDecoder,
+    register,
+    registerEncoder,
+    registerDecoder,
     encoder: streams.encoder,
     decoder: streams.decoder,
     // needed for levelup support
     buffer: true,
     type: 'msgpack5',
-    IncompleteBufferError: buildDecode.IncompleteBufferError
+    IncompleteBufferError
   }
 }
 
