@@ -7,10 +7,13 @@ var streams = require('./lib/streams')
 var buildDecode = require('./lib/decoder')
 var buildEncode = require('./lib/encoder')
 var IncompleteBufferError = require('./lib/helpers.js').IncompleteBufferError
+var decodeTimestamp = require('./lib/helpers.js').decodeTimestamp
 
 function msgpack (options) {
   var encodingTypes = []
-  var decodingTypes = Object.create(null)
+  var decodingTypes = new Map()
+
+  decodingTypes.set(-1, decodeTimestamp)
 
   options = options || {
     forceFloat64: false,
@@ -32,7 +35,7 @@ function msgpack (options) {
   function registerDecoder (type, decode) {
     assert(type >= 0, 'must have a non-negative type')
     assert(decode, 'must have a decode function')
-    decodingTypes[type] = decode
+    decodingTypes.set(type, decode)
     return this
   }
 
@@ -65,7 +68,7 @@ function msgpack (options) {
   }
 
   return {
-    encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode, options.disableTimestampEncoding),
+    encode: buildEncode(encodingTypes, options),
     decode: buildDecode(decodingTypes),
     register,
     registerEncoder,
