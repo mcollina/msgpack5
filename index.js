@@ -6,24 +6,25 @@ var bl = require('bl')
 var streams = require('./lib/streams')
 var buildDecode = require('./lib/decoder')
 var buildEncode = require('./lib/encoder')
+var IncompleteBufferError = require('./lib/helpers.js').IncompleteBufferError
 
 function msgpack (options) {
   var encodingTypes = []
-  var decodingTypes = []
+  var decodingTypes = Object.create(null)
 
   options = options || {
     forceFloat64: false,
     compatibilityMode: false,
-    disableTimestampEncoding: false // if true, skips encoding Dates using the msgpack timestamp ext format (-1)
+    // if true, skips encoding Dates using the msgpack
+    // timestamp ext format (-1)
+    disableTimestampEncoding: false
   }
 
   function registerEncoder (check, encode) {
     assert(check, 'must have an encode function')
     assert(encode, 'must have an encode function')
 
-    encodingTypes.push({
-      check: check, encode: encode
-    })
+    encodingTypes.push({ check, encode })
 
     return this
   }
@@ -31,11 +32,7 @@ function msgpack (options) {
   function registerDecoder (type, decode) {
     assert(type >= 0, 'must have a non-negative type')
     assert(decode, 'must have a decode function')
-
-    decodingTypes.push({
-      type: type, decode: decode
-    })
-
+    decodingTypes[type] = decode
     return this
   }
 
@@ -70,15 +67,15 @@ function msgpack (options) {
   return {
     encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode, options.disableTimestampEncoding),
     decode: buildDecode(decodingTypes),
-    register: register,
-    registerEncoder: registerEncoder,
-    registerDecoder: registerDecoder,
+    register,
+    registerEncoder,
+    registerDecoder,
     encoder: streams.encoder,
     decoder: streams.decoder,
     // needed for levelup support
     buffer: true,
     type: 'msgpack5',
-    IncompleteBufferError: buildDecode.IncompleteBufferError
+    IncompleteBufferError
   }
 }
 
