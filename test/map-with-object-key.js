@@ -4,7 +4,7 @@ var Buffer = require('safe-buffer').Buffer
 var test = require('tape').test
 var msgpack = require('../')
 
-test('encode/decode map with multiple short buffers', function (t) {
+test('encode/decode map with multiple short buffers as both keys and values', function (t) {
   const first = Buffer.from('first')
   const second = Buffer.from('second')
   const third = Buffer.from('third')
