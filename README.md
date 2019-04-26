@@ -107,6 +107,7 @@ encoded.
 options:
 
 - `forceFloat64`, a boolean to that forces all floats to be encoded as 64-bits floats. Defaults to false.
+- `sortKeys`, a boolean to force a determinate keys order
 - `compatibilityMode`, a boolean that enables "compatibility mode" which doesn't use str 8 format. Defaults to false.
 - `disableTimestampEncoding`, a boolean that when set disables the encoding of Dates into the [timestamp extension type](https://github.com/msgpack/msgpack/blob/master/spec.md#timestamp-extension-type). Defaults to false.
 
