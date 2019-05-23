@@ -7,6 +7,7 @@ var streams = require('./lib/streams')
 var buildDecode = require('./lib/decoder')
 var buildEncode = require('./lib/encoder')
 var IncompleteBufferError = require('./lib/helpers.js').IncompleteBufferError
+var OutOfRangeError = require('./lib/helpers.js').OutOfRangeError
 
 function msgpack (options) {
   var encodingTypes = []
@@ -17,7 +18,11 @@ function msgpack (options) {
     compatibilityMode: false,
     // if true, skips encoding Dates using the msgpack
     // timestamp ext format (-1)
-    disableTimestampEncoding: false
+    disableTimestampEncoding: false,
+    // if true, will throw error when decoding a timestamp96 that
+    // is more precise, or greater than or lower than the number
+    // of seconds JavaScript Date can handle
+    timestamp96ThrowRangeEx: false
   }
 
   function registerEncoder (check, encode) {
@@ -66,7 +71,7 @@ function msgpack (options) {
 
   return {
     encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode, options.disableTimestampEncoding),
-    decode: buildDecode(decodingTypes),
+    decode: buildDecode(decodingTypes, options.timestamp96ThrowRangeEx),
     register,
     registerEncoder,
     registerDecoder,
@@ -75,7 +80,8 @@ function msgpack (options) {
     // needed for levelup support
     buffer: true,
     type: 'msgpack5',
-    IncompleteBufferError
+    IncompleteBufferError,
+    OutOfRangeError
   }
 }
 
