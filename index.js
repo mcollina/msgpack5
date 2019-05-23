@@ -21,7 +21,7 @@ function msgpack (options) {
     disableTimestampEncoding: false,
     // if true, will throw error when decoding a timestamp96 that
     // is more precise, or greater than or lower than the number
-    // of seconds JavaScript Date can handle
+    // of seconds JavaScript Date can handle or if nanoseconds > 999999999
     timestamp96ThrowRangeEx: false
   }
 
@@ -29,7 +29,7 @@ function msgpack (options) {
     assert(check, 'must have an encode function')
     assert(encode, 'must have an encode function')
 
-    encodingTypes.push({ check, encode })
+    encodingTypes.push({ check: check, encode: encode })
 
     return this
   }
@@ -72,16 +72,16 @@ function msgpack (options) {
   return {
     encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode, options.disableTimestampEncoding),
     decode: buildDecode(decodingTypes, options.timestamp96ThrowRangeEx),
-    register,
-    registerEncoder,
-    registerDecoder,
+    register: register,
+    registerEncoder: registerEncoder,
+    registerDecoder: registerDecoder,
     encoder: streams.encoder,
     decoder: streams.decoder,
     // needed for levelup support
     buffer: true,
     type: 'msgpack5',
-    IncompleteBufferError,
-    OutOfRangeError
+    IncompleteBufferError: IncompleteBufferError,
+    OutOfRangeError: OutOfRangeError
   }
 }
 
