@@ -7,10 +7,11 @@ var streams = require('./lib/streams')
 var buildDecode = require('./lib/decoder')
 var buildEncode = require('./lib/encoder')
 var IncompleteBufferError = require('./lib/helpers.js').IncompleteBufferError
+var DateCodec = require('./lib/codecs/DateCodec')
 
 function msgpack (options) {
   var encodingTypes = []
-  var decodingTypes = Object.create(null)
+  var decodingTypes = new Map()
 
   options = options || {
     forceFloat64: false,
@@ -18,6 +19,11 @@ function msgpack (options) {
     // if true, skips encoding Dates using the msgpack
     // timestamp ext format (-1)
     disableTimestampEncoding: false
+  }
+
+  decodingTypes.set(DateCodec.type, DateCodec.decode)
+  if (!options.disableTimestampEncoding) {
+    encodingTypes.push(DateCodec)
   }
 
   function registerEncoder (check, encode) {
@@ -32,7 +38,7 @@ function msgpack (options) {
   function registerDecoder (type, decode) {
     assert(type >= 0, 'must have a non-negative type')
     assert(decode, 'must have a decode function')
-    decodingTypes[type] = decode
+    decodingTypes.set(type, decode)
     return this
   }
 
@@ -65,7 +71,7 @@ function msgpack (options) {
   }
 
   return {
-    encode: buildEncode(encodingTypes, options.forceFloat64, options.compatibilityMode, options.disableTimestampEncoding),
+    encode: buildEncode(encodingTypes, options),
     decode: buildDecode(decodingTypes),
     register,
     registerEncoder,
