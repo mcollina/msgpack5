@@ -1,4 +1,4 @@
-msgpack5&nbsp;&nbsp;[![Build Status](https://travis-ci.org/mcollina/msgpack5.png)](https://travis-ci.org/mcollina/msgpack5)
+msgpack5&nbsp;&nbsp;[![CI](https://github.com/mcollina/msgpack5/workflows/CI/badge.svg)](https://github.com/mcollina/msgpack5/actions?query=workflow%3ACI)
 ========
 
 A msgpack v5 implementation for node.js and the browser, with extension point support.
