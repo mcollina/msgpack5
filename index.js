@@ -56,7 +56,7 @@ function msgpack (options) {
       var buf = bl()
       var header = Buffer.allocUnsafe(1)
 
-      header.writeInt8(type, 0)
+      header.writeUInt8(type, 0)
 
       buf.append(header)
       buf.append(encode(obj))
