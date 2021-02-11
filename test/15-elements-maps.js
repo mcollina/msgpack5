@@ -71,13 +71,21 @@ test('do not encode undefined in a map', function (t) {
   t.end()
 })
 
-test('throw error on NaN in a map', function (t) {
+test('encode NaN in a map', function (t) {
   var instance = msgpack()
   var toEncode = { a: NaN, hello: 'world' }
 
-  t.throws(function () {
-    instance.encode(toEncode)
-  }, Error, 'must throw Error')
+  const buf = instance.encode(toEncode)
+
+  t.assert(Object.is(instance.decode(buf).a, NaN))
+
+  const expected = {...toEncode}
+  delete toEncode.a
+  const actual = instance.decode(buf)
+  delete buf.a
+
+  t.deepEqual(actual, expected)
+
   t.end()
 })
 
