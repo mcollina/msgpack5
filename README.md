@@ -110,6 +110,7 @@ options:
 - `sortKeys`, a boolean to force a determinate keys order
 - `compatibilityMode`, a boolean that enables "compatibility mode" which doesn't use str 8 format. Defaults to false.
 - `disableTimestampEncoding`, a boolean that when set disables the encoding of Dates into the [timestamp extension type](https://github.com/msgpack/msgpack/blob/master/spec.md#timestamp-extension-type). Defaults to false.
+- `preferMap`, a boolean that forces all maps to be decoded to `Map`s rather than plain objects. This ensures that `decode(encode(new Map())) instanceof Map` and that iteration order is preserved. Defaults to false.
 
 -------------------------------------------------------
 <a name="encode"></a>
