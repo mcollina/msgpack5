@@ -33,11 +33,20 @@ test('user can still encode objects as ext maps', function (t) {
   const encoder = msgpack({preferMap: true})
   const tag = 0x42
 
+  // Polyfill Object.fromEntries for node 10
+  const fromEntries = Object.fromEntries || (iterable => {
+    const object = {}
+    for (const [property, value] of iterable) {
+      object[property] = value
+    }
+    return object
+  })
+
   encoder.register(
     tag,
     Object,
     obj => encoder.encode(new Map(Object.entries(obj))),
-    data => Object.fromEntries(encoder.decode(data))
+    data => fromEntries(encoder.decode(data))
   )
 
   const inputs = [
