@@ -18,7 +18,8 @@ function msgpack (options) {
     compatibilityMode: false,
     // if true, skips encoding Dates using the msgpack
     // timestamp ext format (-1)
-    disableTimestampEncoding: false
+    disableTimestampEncoding: false,
+    preferMap: false
   }
 
   decodingTypes.set(DateCodec.type, DateCodec.decode)
@@ -72,7 +73,7 @@ function msgpack (options) {
 
   return {
     encode: buildEncode(encodingTypes, options),
-    decode: buildDecode(decodingTypes),
+    decode: buildDecode(decodingTypes, options),
     register,
     registerEncoder,
     registerDecoder,
