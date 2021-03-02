@@ -199,7 +199,7 @@ test('nil processing works', function (t) {
     t.equal(decodedItemIndex, 2)
   })
 
-  decoder.write(new Buffer([0xc0, 0xc2]))
+  decoder.write(Buffer.from([0xc0, 0xc2]))
   decoder.end()
 })
 
