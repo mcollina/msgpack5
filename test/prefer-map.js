@@ -9,7 +9,7 @@ const map = new Map()
   .set('01', null)
 
 test('round-trip string-keyed Maps', function (t) {
-  const encoder = msgpack({preferMap: true})
+  const encoder = msgpack({ preferMap: true })
 
   for (const input of [new Map(), map]) {
     const result = encoder.decode(encoder.encode(input))
@@ -21,7 +21,7 @@ test('round-trip string-keyed Maps', function (t) {
 })
 
 test('preserve iteration order of string-keyed Maps', function (t) {
-  const encoder = msgpack({preferMap: true})
+  const encoder = msgpack({ preferMap: true })
   const decoded = encoder.decode(encoder.encode(map))
 
   t.deepEqual([...decoded.keys()], [...map.keys()])
@@ -30,7 +30,7 @@ test('preserve iteration order of string-keyed Maps', function (t) {
 })
 
 test('user can still encode objects as ext maps', function (t) {
-  const encoder = msgpack({preferMap: true})
+  const encoder = msgpack({ preferMap: true })
   const tag = 0x42
 
   // Polyfill Object.fromEntries for node 10
@@ -52,10 +52,10 @@ test('user can still encode objects as ext maps', function (t) {
   const inputs = [
     {},
     new Map(),
-    {foo: 'bar'},
+    { foo: 'bar' },
     new Map().set('foo', 'bar'),
     new Map().set(null, null),
-    {0: 'baz'},
+    { 0: 'baz' },
     ['baz']
   ]
 

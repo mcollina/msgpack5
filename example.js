@@ -1,16 +1,16 @@
 'use strict'
 
-var Buffer = require('safe-buffer').Buffer
-var msgpack = require('./')() // namespace our extensions
-var a = new MyType(2, 'a')
-var encode = msgpack.encode
-var decode = msgpack.decode
+const Buffer = require('safe-buffer').Buffer
+const msgpack = require('./')() // namespace our extensions
+const a = new MyType(2, 'a')
+const encode = msgpack.encode
+const decode = msgpack.decode
 
 msgpack.register(0x42, MyType, mytipeEncode, mytipeDecode)
 
-console.log(encode({ 'hello': 'world' }).toString('hex'))
+console.log(encode({ hello: 'world' }).toString('hex'))
 // 81a568656c6c6fa5776f726c64
-console.log(decode(encode({ 'hello': 'world' })))
+console.log(decode(encode({ hello: 'world' })))
 // { hello: 'world' }
 console.log(encode(a).toString('hex'))
 // d5426161
@@ -25,14 +25,14 @@ function MyType (size, value) {
 }
 
 function mytipeEncode (obj) {
-  var buf = Buffer.allocUnsafe(obj.size)
+  const buf = Buffer.allocUnsafe(obj.size)
   buf.fill(obj.value)
   return buf
 }
 
 function mytipeDecode (data) {
-  var result = new MyType(data.length, data.toString('utf8', 0, 1))
-  var i
+  const result = new MyType(data.length, data.toString('utf8', 0, 1))
+  let i
 
   for (i = 0; i < data.length; i++) {
     if (data.readUInt8(0) != data.readUInt8(i)) { // eslint-disable-line

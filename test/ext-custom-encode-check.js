@@ -1,12 +1,12 @@
 'use strict'
 
-var Buffer = require('safe-buffer').Buffer
-var test = require('tape').test
-var msgpack = require('../')
+const Buffer = require('safe-buffer').Buffer
+const test = require('tape').test
+const msgpack = require('../')
 
 test('encode/decode ext with a custom object check', function (t) {
-  var encoder = msgpack()
-  var all = []
+  const encoder = msgpack()
+  const all = []
 
   function MyType (data) {
     this.data = data
@@ -17,7 +17,7 @@ test('encode/decode ext with a custom object check', function (t) {
   }
 
   function mytypeEncode (obj) {
-    var buf = Buffer.allocUnsafe(2)
+    const buf = Buffer.allocUnsafe(2)
     buf.writeUInt8(0x42, 0)
     buf.writeUInt8(obj.data, 1)
     return buf
@@ -36,7 +36,7 @@ test('encode/decode ext with a custom object check', function (t) {
 
   all.forEach(function (orig) {
     t.test('encoding a custom obj encoded as ' + orig.data, function (t) {
-      var buf = encoder.encode(orig)
+      const buf = encoder.encode(orig)
       t.equal(buf.length, 3, 'must have the right length')
       t.equal(buf.readUInt8(0), 0xd4, 'must have the fixext header')
       t.equal(buf.readUInt8(1), 0x42, 'must include the custom type id')
@@ -45,7 +45,7 @@ test('encode/decode ext with a custom object check', function (t) {
     })
 
     t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
-      var buf = Buffer.allocUnsafe(3)
+      const buf = Buffer.allocUnsafe(3)
       buf[0] = 0xd4
       buf[1] = 0x42
       buf.writeUInt8(orig.data, 2)

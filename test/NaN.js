@@ -1,7 +1,7 @@
 'use strict'
 
-var test = require('tape').test
-var msgpack = require('../')
+const test = require('tape').test
+const msgpack = require('../')
 
 test('encode NaN as 32-bit float', function (t) {
   const encoder = msgpack()
@@ -14,7 +14,7 @@ test('encode NaN as 32-bit float', function (t) {
 })
 
 test('encode NaN as 64-bit float with forceFloat64', function (t) {
-  const encoder = msgpack({forceFloat64: true})
+  const encoder = msgpack({ forceFloat64: true })
 
   const buf = encoder.encode(NaN)
 
@@ -33,7 +33,7 @@ test('round-trip 32-bit NaN', function (t) {
 })
 
 test('round-trip 64-bit NaN with forceFloat64', function (t) {
-  const encoder = msgpack({forceFloat64: true})
+  const encoder = msgpack({ forceFloat64: true })
 
   t.assert(Object.is(encoder.decode(encoder.encode(NaN)), NaN))
 

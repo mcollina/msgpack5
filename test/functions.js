@@ -1,15 +1,15 @@
 'use strict'
 
-var test = require('tape').test
-var msgpack = require('../')
-var noop = function () {}
+const test = require('tape').test
+const msgpack = require('../')
+const noop = function () {}
 
 test('encode a function inside a map', function (t) {
-  var encoder = msgpack()
-  var expected = {
+  const encoder = msgpack()
+  const expected = {
     hello: 'world'
   }
-  var toEncode = {
+  const toEncode = {
     hello: 'world',
     func: noop
   }

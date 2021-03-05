@@ -1,13 +1,13 @@
 'use strict'
 
-var Buffer = require('safe-buffer').Buffer
-var test = require('tape').test
-var msgpack = require('../')
-var bl = require('bl')
+const Buffer = require('safe-buffer').Buffer
+const test = require('tape').test
+const msgpack = require('../')
+const bl = require('bl')
 
 test('encode/decode variable ext data up between 0x0100 and 0xffff', function (t) {
-  var encoder = msgpack()
-  var all = []
+  const encoder = msgpack()
+  const all = []
 
   function MyType (size, value) {
     this.value = value
@@ -15,15 +15,15 @@ test('encode/decode variable ext data up between 0x0100 and 0xffff', function (t
   }
 
   function mytipeEncode (obj) {
-    var buf = Buffer.allocUnsafe(obj.size)
+    const buf = Buffer.allocUnsafe(obj.size)
     buf.fill(obj.value)
     return buf
   }
 
   function mytipeDecode (data) {
-    var result = new MyType(data.length, data.toString('utf8', 0, 1))
+    const result = new MyType(data.length, data.toString('utf8', 0, 1))
 
-    for (var i = 0; i < data.length; i++) {
+    for (let i = 0; i < data.length; i++) {
       if (data.readUInt8(0) !== data.readUInt8(i)) {
         throw new Error('should all be the same')
       }
@@ -40,7 +40,7 @@ test('encode/decode variable ext data up between 0x0100 and 0xffff', function (t
 
   all.forEach(function (orig) {
     t.test('encoding a custom obj of length ' + orig.size, function (t) {
-      var buf = encoder.encode(orig)
+      const buf = encoder.encode(orig)
       t.equal(buf.length, 4 + orig.size, 'must have the right length')
       t.equal(buf.readUInt8(0), 0xc8, 'must have the ext header')
       t.equal(buf.readUInt16BE(1), orig.size, 'must include the data length')
@@ -56,13 +56,13 @@ test('encode/decode variable ext data up between 0x0100 and 0xffff', function (t
   })
 
   t.test('decoding an incomplete variable ext data up between 0x0100 and 0xffff', function (t) {
-    var obj = encoder.encode(new MyType(0xfff0, 'a'))
-    var buf = Buffer.allocUnsafe(obj.length)
+    const obj = encoder.encode(new MyType(0xfff0, 'a'))
+    let buf = Buffer.allocUnsafe(obj.length)
     buf[0] = 0xc8
     buf.writeUInt16BE(obj.length + 2, 1) // set bigger size
     obj.copy(buf, 3, 3, obj.length)
     buf = bl().append(buf)
-    var origLength = buf.length
+    const origLength = buf.length
     t.throws(function () {
       encoder.decode(buf)
     }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
@@ -71,10 +71,10 @@ test('encode/decode variable ext data up between 0x0100 and 0xffff', function (t
   })
 
   t.test('decoding an incomplete header of variable ext data up between 0x0100 and 0xffff', function (t) {
-    var buf = Buffer.allocUnsafe(3)
+    let buf = Buffer.allocUnsafe(3)
     buf[0] = 0xc8
     buf = bl().append(buf)
-    var origLength = buf.length
+    const origLength = buf.length
     t.throws(function () {
       encoder.decode(buf)
     }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')

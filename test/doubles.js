@@ -1,13 +1,13 @@
 'use strict'
 
-var Buffer = require('safe-buffer').Buffer
-var test = require('tape').test
-var msgpack = require('../')
-var bl = require('bl')
+const Buffer = require('safe-buffer').Buffer
+const test = require('tape').test
+const msgpack = require('../')
+const bl = require('bl')
 
 test('encoding/decoding 64-bits float numbers', function (t) {
-  var encoder = msgpack()
-  var allNum = []
+  const encoder = msgpack()
+  const allNum = []
 
   allNum.push(748365544534.2)
   allNum.push(-222111111000004.2)
@@ -16,8 +16,8 @@ test('encoding/decoding 64-bits float numbers', function (t) {
 
   allNum.forEach(function (num) {
     t.test('encoding ' + num, function (t) {
-      var buf = encoder.encode(num)
-      var dec = buf.readDoubleBE(1)
+      const buf = encoder.encode(num)
+      const dec = buf.readDoubleBE(1)
       t.equal(buf.length, 9, 'must have 9 bytes')
       t.equal(buf[0], 0xcb, 'must have the proper header')
       t.true(Math.abs(dec - num) < 0.1, 'must decode correctly')
@@ -25,17 +25,16 @@ test('encoding/decoding 64-bits float numbers', function (t) {
     })
 
     t.test('decoding ' + num, function (t) {
-      var buf = Buffer.allocUnsafe(9)
-      var dec
+      const buf = Buffer.allocUnsafe(9)
       buf[0] = 0xcb
       buf.writeDoubleBE(num, 1)
-      dec = encoder.decode(buf)
+      const dec = encoder.decode(buf)
       t.true(Math.abs(dec - num) < 0.1, 'must decode correctly')
       t.end()
     })
 
     t.test('mirror test ' + num, function (t) {
-      var dec = encoder.decode(encoder.encode(num))
+      const dec = encoder.decode(encoder.encode(num))
       t.true(Math.abs(dec - num) < 0.1, 'must decode correctly')
       t.end()
     })
@@ -45,11 +44,11 @@ test('encoding/decoding 64-bits float numbers', function (t) {
 })
 
 test('decoding an incomplete 64-bits float numbers', function (t) {
-  var encoder = msgpack()
-  var buf = Buffer.allocUnsafe(8)
+  const encoder = msgpack()
+  let buf = Buffer.allocUnsafe(8)
   buf[0] = 0xcb
   buf = bl().append(buf)
-  var origLength = buf.length
+  const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')

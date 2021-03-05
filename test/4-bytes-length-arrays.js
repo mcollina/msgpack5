@@ -1,14 +1,14 @@
 'use strict'
 
-var Buffer = require('safe-buffer').Buffer
-var test = require('tape').test
-var msgpack = require('../')
-var bl = require('bl')
+const Buffer = require('safe-buffer').Buffer
+const test = require('tape').test
+const msgpack = require('../')
+const bl = require('bl')
 
 function build (size) {
-  var array = []
+  const array = []
 
-  for (var i = 0; i < size; i++) {
+  for (let i = 0; i < size; i++) {
     array.push(42)
   }
 
@@ -16,11 +16,11 @@ function build (size) {
 }
 
 test('encode/decode arrays up to 0xffffffff elements', function (t) {
-  var encoder = msgpack()
+  const encoder = msgpack()
 
   function doTest (array) {
     t.test('encoding an array with ' + array.length + ' elements', function (t) {
-      var buf = encoder.encode(array)
+      const buf = encoder.encode(array)
       // the array is full of 1-byte integers
       t.equal(buf.length, 5 + array.length, 'must have the right length')
       t.equal(buf.readUInt8(0), 0xdd, 'must have the proper header')
@@ -42,20 +42,20 @@ test('encode/decode arrays up to 0xffffffff elements', function (t) {
 })
 
 test('decoding an incomplete array', function (t) {
-  var encoder = msgpack()
+  const encoder = msgpack()
 
-  var array = build(0xffff + 42)
-  var buf = Buffer.allocUnsafe(5 + array.length)
+  const array = build(0xffff + 42)
+  let buf = Buffer.allocUnsafe(5 + array.length)
   buf[0] = 0xdd
   buf.writeUInt32BE(array.length + 10, 1) // set bigger size
-  var pos = 5
-  for (var i = 0; i < array.length; i++) {
-    var obj = encoder.encode(array[i], true)
+  let pos = 5
+  for (let i = 0; i < array.length; i++) {
+    const obj = encoder.encode(array[i], true)
     obj.copy(buf, pos)
     pos += obj.length
   }
   buf = bl().append(buf)
-  var origLength = buf.length
+  const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
@@ -64,12 +64,12 @@ test('decoding an incomplete array', function (t) {
 })
 
 test('decoding an incomplete header', function (t) {
-  var encoder = msgpack()
+  const encoder = msgpack()
 
-  var buf = Buffer.allocUnsafe(4)
+  let buf = Buffer.allocUnsafe(4)
   buf[0] = 0xdd
   buf = bl().append(buf)
-  var origLength = buf.length
+  const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
