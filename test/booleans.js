@@ -1,11 +1,11 @@
 'use strict'
 
-var Buffer = require('safe-buffer').Buffer
-var test = require('tape').test
-var msgpack = require('../')
+const Buffer = require('safe-buffer').Buffer
+const test = require('tape').test
+const msgpack = require('../')
 
 test('encode/decode booleans', function (t) {
-  var encoder = msgpack()
+  const encoder = msgpack()
 
   t.equal(encoder.encode(true)[0], 0xc3, 'encode true as 0xc3')
   t.equal(encoder.encode(true).length, 1, 'encode true as a buffer of length 1')

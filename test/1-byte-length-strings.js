@@ -1,17 +1,18 @@
 'use strict'
 
-var Buffer = require('safe-buffer').Buffer
-var test = require('tape').test
-var msgpack = require('../')
-var bl = require('bl')
+const Buffer = require('safe-buffer').Buffer
+const test = require('tape').test
+const msgpack = require('../')
+const bl = require('bl')
 
 test('encode/decode 32 <-> (2^8-1) bytes strings', function (t) {
-  var encoder = msgpack()
-  var all = []
-  var i
+  const encoder = msgpack()
+  const all = []
+  let i
 
   // build base
-  for (i = 'a'; i.length < 32; i += 'a') {
+  for (i = 'a'; i.length < 32;) {
+    i += 'a'
   }
 
   for (; i.length < Math.pow(2, 8); i += 'aaaaa') {
@@ -20,7 +21,7 @@ test('encode/decode 32 <-> (2^8-1) bytes strings', function (t) {
 
   all.forEach(function (str) {
     t.test('encoding a string of length ' + str.length, function (t) {
-      var buf = encoder.encode(str)
+      const buf = encoder.encode(str)
       t.equal(buf.length, 2 + Buffer.byteLength(str), 'must be the proper length')
       t.equal(buf.readUInt8(0), 0xd9, 'must have the proper header')
       t.equal(buf.readUInt8(1), Buffer.byteLength(str), 'must include the str length')
@@ -29,7 +30,7 @@ test('encode/decode 32 <-> (2^8-1) bytes strings', function (t) {
     })
 
     t.test('decoding a string of length ' + str.length, function (t) {
-      var buf = Buffer.allocUnsafe(2 + Buffer.byteLength(str))
+      const buf = Buffer.allocUnsafe(2 + Buffer.byteLength(str))
       buf[0] = 0xd9
       buf[1] = Buffer.byteLength(str)
       buf.write(str, 2)
@@ -47,16 +48,17 @@ test('encode/decode 32 <-> (2^8-1) bytes strings', function (t) {
 })
 
 test('decoding a chopped string', function (t) {
-  var encoder = msgpack()
-  var str
-  for (str = 'a'; str.length < 40; str += 'a') {
+  const encoder = msgpack()
+  let str
+  for (str = 'a'; str.length < 40;) {
+    str += 'a'
   }
-  var buf = Buffer.allocUnsafe(2 + Buffer.byteLength(str))
+  let buf = Buffer.allocUnsafe(2 + Buffer.byteLength(str))
   buf[0] = 0xd9
   buf[1] = Buffer.byteLength(str) + 10 // set bigger size
   buf.write(str, 2)
   buf = bl().append(buf)
-  var origLength = buf.length
+  const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
@@ -65,11 +67,11 @@ test('decoding a chopped string', function (t) {
 })
 
 test('decoding an incomplete header of a string', function (t) {
-  var encoder = msgpack()
-  var buf = Buffer.allocUnsafe(1)
+  const encoder = msgpack()
+  let buf = Buffer.allocUnsafe(1)
   buf[0] = 0xd9
   buf = bl().append(buf)
-  var origLength = buf.length
+  const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')

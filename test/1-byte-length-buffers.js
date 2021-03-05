@@ -1,22 +1,20 @@
 'use strict'
 
-var Buffer = require('safe-buffer').Buffer
-var test = require('tape').test
-var msgpack = require('../')
-var bl = require('bl')
+const Buffer = require('safe-buffer').Buffer
+const test = require('tape').test
+const msgpack = require('../')
+const bl = require('bl')
 
 function build (size) {
-  var buf
-
-  buf = Buffer.allocUnsafe(size)
+  const buf = Buffer.allocUnsafe(size)
   buf.fill('a')
 
   return buf
 }
 
 test('encode/decode 2^8-1 bytes buffers', function (t) {
-  var encoder = msgpack()
-  var all = []
+  const encoder = msgpack()
+  const all = []
 
   all.push(build(Math.pow(2, 8) - 1))
   all.push(build(Math.pow(2, 6) + 1))
@@ -25,7 +23,7 @@ test('encode/decode 2^8-1 bytes buffers', function (t) {
 
   all.forEach(function (orig) {
     t.test('encoding a buffer of length ' + orig.length, function (t) {
-      var buf = encoder.encode(orig)
+      const buf = encoder.encode(orig)
       t.equal(buf.length, 2 + orig.length, 'must have the right length')
       t.equal(buf.readUInt8(0), 0xc4, 'must have the proper header')
       t.equal(buf.readUInt8(1), orig.length, 'must include the buf length')
@@ -34,7 +32,7 @@ test('encode/decode 2^8-1 bytes buffers', function (t) {
     })
 
     t.test('decoding a buffer of length ' + orig.length, function (t) {
-      var buf = Buffer.allocUnsafe(2 + orig.length)
+      const buf = Buffer.allocUnsafe(2 + orig.length)
       buf[0] = 0xc4
       buf[1] = orig.length
       orig.copy(buf, 2)
@@ -52,14 +50,14 @@ test('encode/decode 2^8-1 bytes buffers', function (t) {
 })
 
 test('decoding a chopped 2^8-1 bytes buffer', function (t) {
-  var encoder = msgpack()
-  var orig = build(Math.pow(2, 6))
-  var buf = Buffer.allocUnsafe(2 + orig.length)
+  const encoder = msgpack()
+  const orig = build(Math.pow(2, 6))
+  let buf = Buffer.allocUnsafe(2 + orig.length)
   buf[0] = 0xc4
   buf[1] = Math.pow(2, 8) - 1 // set bigger size
   orig.copy(buf, 2)
   buf = bl().append(buf)
-  var origLength = buf.length
+  const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
@@ -68,11 +66,11 @@ test('decoding a chopped 2^8-1 bytes buffer', function (t) {
 })
 
 test('decoding an incomplete header of 2^8-1 bytes buffer', function (t) {
-  var encoder = msgpack()
-  var buf = Buffer.allocUnsafe(1)
+  const encoder = msgpack()
+  let buf = Buffer.allocUnsafe(1)
   buf[0] = 0xc4
   buf = bl().append(buf)
-  var origLength = buf.length
+  const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')

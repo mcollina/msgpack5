@@ -1,17 +1,17 @@
 'use strict'
 
-var test = require('tape').test
-var level = require('memdb')
-var msgpack = require('../')
+const test = require('tape').test
+const level = require('memdb')
+const msgpack = require('../')
 
 test('msgpack level encoding put', function (t) {
   t.plan(4)
 
-  var pack = msgpack()
-  var db = level({
+  const pack = msgpack()
+  const db = level({
     valueEncoding: pack
   })
-  var obj = { my: 'obj' }
+  const obj = { my: 'obj' }
 
   db.put('hello', obj, function (err) {
     t.error(err, 'put has no errors')
@@ -28,12 +28,12 @@ test('msgpack level encoding put', function (t) {
 test('msgpack level encoding get', function (t) {
   t.plan(4)
 
-  var pack = msgpack()
-  var db = level({
+  const pack = msgpack()
+  const db = level({
     valueEncoding: pack
   })
-  var obj = { my: 'obj' }
-  var buf = pack.encode(obj)
+  const obj = { my: 'obj' }
+  const buf = pack.encode(obj)
 
   db.put('hello', buf, { valueEncoding: 'binary' }, function (err) {
     t.error(err, 'putting has no errors')
@@ -50,11 +50,11 @@ test('msgpack level encoding get', function (t) {
 test('msgpack level encoding mirror', function (t) {
   t.plan(4)
 
-  var pack = msgpack()
-  var db = level({
+  const pack = msgpack()
+  const db = level({
     valueEncoding: pack
   })
-  var obj = { my: 'obj' }
+  const obj = { my: 'obj' }
 
   db.put('hello', obj, function (err) {
     t.error(err, 'putting has no errors')

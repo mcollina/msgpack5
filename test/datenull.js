@@ -1,9 +1,9 @@
 'use strict'
-var test = require('tape').test
-var msgpack = require('../')
+const test = require('tape').test
+const msgpack = require('../')
 
 test('encode date is null ', function (t) {
-  var encoder = msgpack({
+  const encoder = msgpack({
     disableTimestampEncoding: true
   })
 

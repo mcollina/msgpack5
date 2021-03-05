@@ -1,18 +1,18 @@
 'use strict'
 
-var Buffer = require('safe-buffer').Buffer
-var test = require('tape').test
-var fs = require('fs')
-var p = require('path')
-var msgpack = require('../')
+const Buffer = require('safe-buffer').Buffer
+const test = require('tape').test
+const fs = require('fs')
+const p = require('path')
+const msgpack = require('../')
 
 test('encode/decode map with multiple short buffers', function (t) {
-  var map = {
+  const map = {
     first: Buffer.from('first'),
     second: Buffer.from('second'),
     third: Buffer.from('third')
   }
-  var pack = msgpack()
+  const pack = msgpack()
 
   t.deepEqual(pack.decode(pack.encode(map)), map)
   t.end()
@@ -20,12 +20,12 @@ test('encode/decode map with multiple short buffers', function (t) {
 
 if (process.title !== 'browser') {
   test('encode/decode map with all files in this directory', function (t) {
-    var files = fs.readdirSync(__dirname)
-    var map = files.reduce(function (acc, file) {
+    const files = fs.readdirSync(__dirname)
+    const map = files.reduce(function (acc, file) {
       acc[file] = fs.readFileSync(p.join(__dirname, file))
       return acc
     }, {})
-    var pack = msgpack()
+    const pack = msgpack()
 
     t.deepEqual(pack.decode(pack.encode(map)), map)
     t.end()

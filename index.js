@@ -1,17 +1,17 @@
 'use strict'
 
-var Buffer = require('safe-buffer').Buffer
-var assert = require('assert')
-var bl = require('bl')
-var streams = require('./lib/streams')
-var buildDecode = require('./lib/decoder')
-var buildEncode = require('./lib/encoder')
-var IncompleteBufferError = require('./lib/helpers.js').IncompleteBufferError
-var DateCodec = require('./lib/codecs/DateCodec')
+const Buffer = require('safe-buffer').Buffer
+const assert = require('assert')
+const bl = require('bl')
+const streams = require('./lib/streams')
+const buildDecode = require('./lib/decoder')
+const buildEncode = require('./lib/encoder')
+const IncompleteBufferError = require('./lib/helpers.js').IncompleteBufferError
+const DateCodec = require('./lib/codecs/DateCodec')
 
 function msgpack (options) {
-  var encodingTypes = []
-  var decodingTypes = new Map()
+  const encodingTypes = []
+  const decodingTypes = new Map()
 
   options = options || {
     forceFloat64: false,
@@ -56,8 +56,8 @@ function msgpack (options) {
     }
 
     function reEncode (obj) {
-      var buf = bl()
-      var header = Buffer.allocUnsafe(1)
+      const buf = bl()
+      const header = Buffer.allocUnsafe(1)
 
       header.writeInt8(type, 0)
 

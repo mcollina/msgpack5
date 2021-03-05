@@ -1,7 +1,7 @@
 'use strict'
 
-var test = require('tape').test
-var msgpack = require('../')
+const test = require('tape').test
+const msgpack = require('../')
 
 test('decode throws when object has forbidden __proto__ property', function (t) {
   const encoder = msgpack()

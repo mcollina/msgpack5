@@ -1,8 +1,8 @@
 'use strict'
 
-var Buffer = require('safe-buffer').Buffer
-var test = require('tape').test
-var msgpack = require('../')
+const Buffer = require('safe-buffer').Buffer
+const test = require('tape').test
+const msgpack = require('../')
 
 test('encode/decode map with multiple short buffers as both keys and values', function (t) {
   const first = Buffer.from('first')
@@ -13,13 +13,13 @@ test('encode/decode map with multiple short buffers as both keys and values', fu
     .set(second, third)
     .set(third, first)
 
-  var pack = msgpack()
+  const pack = msgpack()
 
   const newMapping = pack.decode(pack.encode(mapping))
 
   t.equals(newMapping.size, mapping.size)
-  t.deepEqual([ ...newMapping.keys() ], [ ...mapping.keys() ])
-  t.deepEqual([ ...newMapping.values() ], [ ...mapping.values() ])
+  t.deepEqual([...newMapping.keys()], [...mapping.keys()])
+  t.deepEqual([...newMapping.values()], [...mapping.values()])
 
   t.end()
 })
