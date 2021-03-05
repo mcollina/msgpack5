@@ -19,7 +19,9 @@ function msgpack (options) {
     // if true, skips encoding Dates using the msgpack
     // timestamp ext format (-1)
     disableTimestampEncoding: false,
-    preferMap: false
+    preferMap: false,
+    // options.protoAction: 'error' (default) / 'remove' / 'ignore'
+    protoAction: 'error'
   }
 
   decodingTypes.set(DateCodec.type, DateCodec.decode)
