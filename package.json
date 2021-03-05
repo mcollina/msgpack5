@@ -1,6 +1,6 @@
 {
   "name": "msgpack5",
-  "version": "5.3.0",
+  "version": "5.3.1",
   "description": "A msgpack v5 implementation for node.js and the browser, with extension points",
   "main": "index.js",
   "scripts": {
