@@ -109,6 +109,7 @@ options:
 - `forceFloat64`, a boolean to that forces all floats to be encoded as 64-bits floats. Defaults to false.
 - `compatibilityMode`, a boolean that enables "compatibility mode" which doesn't use str 8 format. Defaults to false.
 - `disableTimestampEncoding`, a boolean that when set disables the encoding of Dates into the [timestamp extension type](https://github.com/msgpack/msgpack/blob/master/spec.md#timestamp-extension-type). Defaults to false.
+- `protoAction`, a string which can be `error|ignore|remove` that determines what happens when decoding a plain object with a `__proto__` property which would cause prototype poisoning. `error` (default) throws an error, `remove` removes the property, `ignore` (not recommended) allows the property, thereby causing prototype poisoning on the decoded object.
 
 -------------------------------------------------------
 <a name="encode"></a>
