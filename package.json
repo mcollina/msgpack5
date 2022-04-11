@@ -44,7 +44,7 @@
     ]
   },
   "dependencies": {
-    "bl": "^4.0.0",
+    "bl": "^5.0.0",
     "inherits": "^2.0.3",
     "readable-stream": "^3.0.0",
     "safe-buffer": "^5.1.2"
