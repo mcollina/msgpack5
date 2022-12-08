@@ -8,8 +8,13 @@ const decode = msgpack.decode
 
 msgpack.register(0x42, MyType, mytipeEncode, mytipeDecode)
 
-console.log(encode({ hello: 'world' }).toString('hex'))
+const hex = encode({ hello: 'world' }).toString('hex')
+console.log(hex)
 // 81a568656c6c6fa5776f726c64
+const obj = decode(Buffer.from(hex, 'hex'))
+console.log(obj)
+// { hello: 'world' }
+
 console.log(decode(encode({ hello: 'world' })))
 // { hello: 'world' }
 console.log(encode(a).toString('hex'))
