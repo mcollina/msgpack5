@@ -9,7 +9,7 @@ This file provides guidance to AI coding agents like Claude Code (claude.ai/code
 - Build both tracked browser bundles: `npm run build`. This runs Browserify for `dist/msgpack5.js`, then UglifyJS for `dist/msgpack5.min.js`.
 - Build only the unminified browser bundle: `npm run browserify`; minify the existing bundle: `npm run dist`.
 
-CI runs `npm test` on Node.js 10, 12, 14, 16, 18, 20, 22, 24, and 26 across Linux, macOS, and Windows. Keep runtime code compatible with Node.js 10 unless the support matrix is intentionally changed.
+CI runs `npm test` on Node.js 10, 12, 14, 16, 18, 20, 22, 24, and 26. Node.js 10–14 run on Linux and Windows only because they do not provide binaries for current arm64 macOS runners; newer versions also run on macOS. Keep runtime code compatible with Node.js 10 unless the support matrix is intentionally changed.
 
 # Architecture
 

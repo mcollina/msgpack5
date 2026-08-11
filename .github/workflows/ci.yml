@@ -9,6 +9,14 @@ jobs:
       matrix:
         os: [macOS-latest, windows-latest, ubuntu-latest]
         node-version: [10, 12, 14, 16, 18, 20, 22, 24, 26]
+        exclude:
+          # These releases do not provide binaries for current arm64 macOS runners.
+          - os: macOS-latest
+            node-version: 10
+          - os: macOS-latest
+            node-version: 12
+          - os: macOS-latest
+            node-version: 14
     steps:
       - uses: actions/checkout@v7
       - name: Use Node.js ${{ matrix.node-version }}
