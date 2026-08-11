@@ -14,15 +14,19 @@ function msgpack (options) {
   const encodingTypes = []
   const decodingTypes = new Map()
 
-  options = options || {
+  options = Object.assign({
     forceFloat64: false,
     compatibilityMode: false,
     // if true, skips encoding Dates using the msgpack
     // timestamp ext format (-1)
     disableTimestampEncoding: false,
     preferMap: false,
-    // options.protoAction: 'error' (default) / 'remove' / 'ignore'
     protoAction: 'error'
+  }, options || {})
+
+  if (options.protoAction === undefined) options.protoAction = 'error'
+  if (options.protoAction !== 'error' && options.protoAction !== 'remove' && options.protoAction !== 'ignore') {
+    throw new TypeError('protoAction must be "error", "remove", or "ignore"')
   }
 
   validateMaxLength(options.maxArrayLength, 'maxArrayLength')
