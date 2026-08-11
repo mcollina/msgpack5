@@ -207,6 +207,23 @@ test('map32 header split across chunks', function (t) {
   decoder.end()
 })
 
+test('many concatenated values do not overflow the stack', function (t) {
+  t.plan(2)
+
+  const total = 50000
+  const decoder = msgpack().decoder()
+  let decoded = 0
+
+  decoder.on('data', function () {
+    decoded++
+  })
+
+  decoder.write(Buffer.alloc(total, 0x01), function (err) {
+    t.error(err, 'must decode without an error')
+    t.equal(decoded, total, 'must decode every value')
+  })
+})
+
 test('nil processing works', function (t) {
   t.plan(3)
 
