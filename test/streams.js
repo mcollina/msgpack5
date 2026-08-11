@@ -224,6 +224,43 @@ test('many concatenated values do not overflow the stack', function (t) {
   })
 })
 
+test('incomplete containers resume without decoding elements again', function (t) {
+  t.plan(3)
+
+  const pack = msgpack()
+  const decoder = pack.decoder()
+  const values = []
+  let decodeCalls = 0
+  let maxBuffered = 0
+
+  function MyType (value) {
+    this.value = value
+  }
+
+  pack.register(0x42, MyType, function (obj) {
+    return Buffer.from([obj.value])
+  }, function (buf) {
+    decodeCalls++
+    return buf.readUInt8(0)
+  })
+
+  for (let i = 0; i < 100; i++) {
+    values.push(new MyType(i))
+  }
+
+  decoder.on('data', function (result) {
+    t.deepEqual(result, { values: values.map(function (value) { return value.value }) })
+    t.equal(decodeCalls, values.length, 'each completed element is decoded once')
+  })
+
+  const encoded = pack.encode({ values })
+  for (let i = 0; i < encoded.length; i++) {
+    decoder.write(encoded.slice(i, i + 1))
+    maxBuffered = Math.max(maxBuffered, decoder._chunks.length)
+  }
+  t.ok(maxBuffered <= 6, 'only the current incomplete value remains buffered')
+  decoder.end()
+})
 test('nil processing works', function (t) {
   t.plan(3)
 
