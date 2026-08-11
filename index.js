@@ -24,6 +24,9 @@ function msgpack (options) {
     protoAction: 'error'
   }
 
+  validateMaxLength(options.maxArrayLength, 'maxArrayLength')
+  validateMaxLength(options.maxMapLength, 'maxMapLength')
+
   decodingTypes.set(DateCodec.type, DateCodec.decode)
   if (!options.disableTimestampEncoding) {
     encodingTypes.push(DateCodec)
@@ -85,6 +88,12 @@ function msgpack (options) {
     buffer: true,
     type: 'msgpack5',
     IncompleteBufferError
+  }
+}
+
+function validateMaxLength (value, name) {
+  if (value !== undefined && (!Number.isSafeInteger(value) || value < 0)) {
+    throw new TypeError(name + ' must be a non-negative safe integer')
   }
 }
 
