@@ -400,6 +400,7 @@ function tryDecode (buf, initialOffset, context) {
     const result = buf.toString('utf8', offset, offset + length)
     return [result, length + 1]
   }
+  if (first === 0xc1) throw new Error('0xc1 is a reserved MessagePack byte')
   if (first >= 0xc0 && first <= 0xc3) return decodeConstants(first)
   if (first >= 0xc4 && first <= 0xc6) {
     const length = buf.readUIntBE(offset, size - 1)
@@ -918,7 +919,9 @@ Decoder.prototype._transform = function (buf, enc, done) {
       if (err instanceof this._msgpack.IncompleteBufferError) {
         done()
       } else {
-        this.emit('error', err)
+        this._chunks = bl()
+        this.destroy(err)
+        done()
       }
       return
     }
