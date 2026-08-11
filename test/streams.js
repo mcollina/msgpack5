@@ -183,6 +183,30 @@ test('concatenated buffers work', function (t) {
   encoder.end()
 })
 
+test('map32 header split across chunks', function (t) {
+  t.plan(2)
+
+  const decoder = msgpack().decoder()
+
+  decoder.on('data', function (value) {
+    t.deepEqual(value, {}, 'must decode the map')
+  })
+
+  decoder.on('error', function (err) {
+    t.fail(err.message)
+  })
+
+  decoder.on('end', function () {
+    t.pass('must end normally')
+  })
+
+  const encoded = [0xdf, 0x00, 0x00, 0x00, 0x00]
+  encoded.forEach(function (byte) {
+    decoder.write(Buffer.from([byte]))
+  })
+  decoder.end()
+})
+
 test('nil processing works', function (t) {
   t.plan(3)
 

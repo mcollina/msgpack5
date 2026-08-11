@@ -266,9 +266,10 @@ const SIZES = {
   0xd9: 2,
   0xda: 3,
   0xdb: 5,
-  0xde: 3,
   0xdc: 3,
-  0xdd: 5
+  0xdd: 5,
+  0xde: 3,
+  0xdf: 5
 }
 
 function isValidDataSize (dataLength, bufLength, headerLength) {
