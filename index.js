@@ -20,6 +20,7 @@ function msgpack (options) {
     // timestamp ext format (-1)
     disableTimestampEncoding: false,
     preferMap: false,
+    maxDepth: 100,
     protoAction: 'error'
   }, options || {})
 

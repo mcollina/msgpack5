@@ -118,6 +118,7 @@ options:
 - `preferMap`, a boolean that forces all maps to be decoded to `Map`s rather than plain objects. This ensures that `decode(encode(new Map())) instanceof Map` and that iteration order is preserved. Defaults to false.
 - `maxArrayLength`, a non-negative integer that limits the number of elements in a decoded array. Arrays over the limit throw a `RangeError`. Defaults to no limit beyond the MessagePack format maximum.
 - `maxMapLength`, a non-negative integer that limits the number of entries in a decoded map. Maps over the limit throw a `RangeError`. Defaults to no limit beyond the MessagePack format maximum.
+- `maxDepth`, a non-negative integer that limits how deeply arrays and maps can be nested when decoding. Defaults to 100.
 - `protoAction`, a string which can be `error|ignore|remove` that determines what happens when decoding a plain object with a `__proto__` property which would cause prototype poisoning. `error` (the default when omitted) throws an error, `remove` removes the property, `ignore` (not recommended) allows the property, thereby causing prototype poisoning on the decoded object. Any other value throws a `TypeError`.
 
 -------------------------------------------------------
