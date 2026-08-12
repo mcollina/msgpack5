@@ -116,6 +116,8 @@ options:
 - `compatibilityMode`, a boolean that enables "compatibility mode" which doesn't use bin format family and str 8 format. Defaults to false.
 - `disableTimestampEncoding`, a boolean that when set disables the encoding of Dates into the [timestamp extension type](https://github.com/msgpack/msgpack/blob/master/spec.md#timestamp-extension-type). Defaults to false.
 - `preferMap`, a boolean that forces all maps to be decoded to `Map`s rather than plain objects. This ensures that `decode(encode(new Map())) instanceof Map` and that iteration order is preserved. Defaults to false.
+- `maxArrayLength`, a non-negative integer that limits the number of elements in a decoded array. Arrays over the limit throw a `RangeError`. Defaults to no limit beyond the MessagePack format maximum.
+- `maxMapLength`, a non-negative integer that limits the number of entries in a decoded map. Maps over the limit throw a `RangeError`. Defaults to no limit beyond the MessagePack format maximum.
 - `protoAction`, a string which can be `error|ignore|remove` that determines what happens when decoding a plain object with a `__proto__` property which would cause prototype poisoning. `error` (default) throws an error, `remove` removes the property, `ignore` (not recommended) allows the property, thereby causing prototype poisoning on the decoded object.
 
 -------------------------------------------------------
