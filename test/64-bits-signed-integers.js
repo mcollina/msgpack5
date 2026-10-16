@@ -3,7 +3,7 @@
 const Buffer = require('safe-buffer').Buffer
 const test = require('tape').test
 const msgpack = require('../')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
 test('encoding/decoding 64-bits big-endian signed integers', function (t) {
   const encoder = msgpack()
@@ -45,12 +45,12 @@ test('decoding a negative 64-bits integer does not mutate the input', function (
   t.equal(encoded.toString('hex'), expected, 'leaves the buffer unchanged after repeated decoding')
 
   const singleChunk = Buffer.from(encoded)
-  t.equal(encoder.decode(bl().append(singleChunk)), -2, 'decodes a single-chunk BufferList')
+  t.equal(encoder.decode(new DynamicBuffer().append(singleChunk)), -2, 'decodes a single-chunk BufferList')
   t.equal(singleChunk.toString('hex'), expected, 'does not mutate the underlying chunk')
 
   const firstChunk = Buffer.from(encoded.slice(0, 4))
   const secondChunk = Buffer.from(encoded.slice(4))
-  t.equal(encoder.decode(bl().append(firstChunk).append(secondChunk)), -2, 'decodes a split-chunk BufferList')
+  t.equal(encoder.decode(new DynamicBuffer().append(firstChunk).append(secondChunk)), -2, 'decodes a split-chunk BufferList')
   t.equal(Buffer.concat([firstChunk, secondChunk]).toString('hex'), expected, 'does not mutate split chunks')
   t.end()
 })
@@ -59,7 +59,7 @@ test('decoding an incomplete 64-bits big-endian signed integer', function (t) {
   const encoder = msgpack()
   let buf = Buffer.allocUnsafe(8)
   buf[0] = 0xd3
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)

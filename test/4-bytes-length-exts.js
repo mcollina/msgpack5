@@ -3,7 +3,7 @@
 const Buffer = require('safe-buffer').Buffer
 const test = require('tape').test
 const msgpack = require('../')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
 test('encode/decode variable ext data up between 0x10000 and 0xffffffff', function (t) {
   const encoder = msgpack()
@@ -61,7 +61,7 @@ test('encode/decode variable ext data up between 0x10000 and 0xffffffff', functi
     buf[0] = 0xc9
     buf.writeUInt32BE(obj.length + 2, 1) // set bigger size
     obj.copy(buf, 5, 5, obj.length)
-    buf = bl().append(buf)
+    buf = new DynamicBuffer().append(buf)
     const origLength = buf.length
     t.throws(function () {
       encoder.decode(buf)
@@ -73,7 +73,7 @@ test('encode/decode variable ext data up between 0x10000 and 0xffffffff', functi
   t.test('decoding an incomplete header of variable ext data up between 0x10000 and 0xffffffff', function (t) {
     let buf = Buffer.allocUnsafe(5)
     buf[0] = 0xc9
-    buf = bl().append(buf)
+    buf = new DynamicBuffer().append(buf)
     const origLength = buf.length
     t.throws(function () {
       encoder.decode(buf)

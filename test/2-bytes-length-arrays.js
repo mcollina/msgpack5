@@ -3,7 +3,7 @@
 const Buffer = require('safe-buffer').Buffer
 const test = require('tape').test
 const msgpack = require('../')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
 function build (size) {
   const array = []
@@ -60,7 +60,7 @@ test('decoding an incomplete array', function (t) {
     obj.copy(buf, pos)
     pos += obj.length
   }
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)
@@ -74,7 +74,7 @@ test('decoding an incomplete header', function (t) {
 
   let buf = Buffer.allocUnsafe(2)
   buf[0] = 0xdc
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)

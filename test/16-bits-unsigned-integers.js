@@ -3,7 +3,7 @@
 const Buffer = require('safe-buffer').Buffer
 const test = require('tape').test
 const msgpack = require('../')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
 test('encoding/decoding 16-bits big-endian unsigned integers', function (t) {
   const encoder = msgpack()
@@ -46,7 +46,7 @@ test('decoding an incomplete 16-bits big-endian unsigned integer', function (t) 
   const encoder = msgpack()
   let buf = Buffer.allocUnsafe(2)
   buf[0] = 0xcd
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)

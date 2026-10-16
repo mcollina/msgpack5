@@ -3,7 +3,7 @@
 const Buffer = require('safe-buffer').Buffer
 const test = require('tape').test
 const msgpack = require('../')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
 test('encode/decode strings with max 31 of length', function (t) {
   const encoder = msgpack()
@@ -49,7 +49,7 @@ test('decoding a chopped string', function (t) {
   let buf = Buffer.allocUnsafe(1 + Buffer.byteLength(str))
   buf[0] = 0xa0 | Buffer.byteLength(str) + 2 // set bigger size
   buf.write(str, 1)
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)

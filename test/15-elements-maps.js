@@ -3,7 +3,7 @@
 const Buffer = require('safe-buffer').Buffer
 const test = require('tape').test
 const msgpack = require('../')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
 function build (size, value) {
   const map = {}
@@ -109,7 +109,7 @@ test('decoding a chopped map', function (t) {
   let buf = Buffer.allocUnsafe(map.length)
   buf[0] = 0x80 | 5 // set bigger size
   map.copy(buf, 1, 1, map.length)
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)

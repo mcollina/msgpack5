@@ -3,7 +3,7 @@
 const Buffer = require('safe-buffer').Buffer
 const test = require('tape').test
 const msgpack = require('../')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 const base = 100000
 
 function build (size, value) {
@@ -62,7 +62,7 @@ test('decoding a chopped map', function (t) {
   buf[0] = 0xde
   buf.writeUInt16BE(Math.pow(2, 16) - 1, 1) // set bigger size
   map.copy(buf, 3, 3, map.length)
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)
@@ -75,7 +75,7 @@ test('decoding an incomplete header of a map', function (t) {
   const encoder = msgpack()
   let buf = Buffer.allocUnsafe(2)
   buf[0] = 0xde
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)

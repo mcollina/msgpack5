@@ -3,7 +3,7 @@
 const Buffer = require('safe-buffer').Buffer
 const test = require('tape').test
 const msgpack = require('../')
-const BufferList = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
 test('must send an object through', function (t) {
   t.plan(1)
@@ -166,8 +166,8 @@ test('concatenated buffers work', function (t) {
 
   t.plan(data.length)
 
-  const bl = new BufferList()
-  encoder.on('data', bl.append.bind(bl))
+  const chunks = new DynamicBuffer()
+  encoder.on('data', chunks.append.bind(chunks))
 
   data.forEach(encoder.write.bind(encoder))
 
@@ -176,7 +176,7 @@ test('concatenated buffers work', function (t) {
   })
 
   encoder.once('finish', function () {
-    const buf = bl.slice()
+    const buf = chunks.slice()
     decoder.write(buf)
   })
 

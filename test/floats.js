@@ -3,7 +3,7 @@
 const Buffer = require('safe-buffer').Buffer
 const test = require('tape').test
 const msgpack = require('../')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
 test('encoding/decoding 32-bits float numbers', function (t) {
   const encoder = msgpack()
@@ -94,7 +94,7 @@ test('decoding an incomplete 32-bits float numbers', function (t) {
   const encoder = msgpack()
   let buf = Buffer.allocUnsafe(4)
   buf[0] = 0xca
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)
@@ -107,7 +107,7 @@ test('decoding an incomplete 64-bits float numbers', function (t) {
   const encoder = msgpack()
   let buf = Buffer.allocUnsafe(8)
   buf[0] = 0xcb
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)

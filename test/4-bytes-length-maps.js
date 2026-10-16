@@ -3,7 +3,7 @@
 const Buffer = require('safe-buffer').Buffer
 const test = require('tape').test
 const msgpack = require('../')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
 test('decoding incomplete map32 headers', function (t) {
   const pack = msgpack()
@@ -11,7 +11,7 @@ test('decoding incomplete map32 headers', function (t) {
   for (let length = 1; length < 5; length++) {
     const buf = Buffer.alloc(length)
     buf[0] = 0xdf
-    const input = bl().append(buf)
+    const input = new DynamicBuffer().append(buf)
 
     t.throws(function () {
       pack.decode(input)
