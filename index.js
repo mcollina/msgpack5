@@ -2,7 +2,8 @@
 
 const Buffer = require('safe-buffer').Buffer
 const assert = require('assert')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
+const appendBuffer = require('./lib/helpers.js').appendBuffer
 const streams = require('./lib/streams')
 const buildDecode = require('./lib/decoder')
 const buildEncode = require('./lib/encoder')
@@ -64,13 +65,13 @@ function msgpack (options) {
     }
 
     function reEncode (obj) {
-      const buf = bl()
+      const buf = new DynamicBuffer()
       const header = Buffer.allocUnsafe(1)
 
       header.writeInt8(type, 0)
 
-      buf.append(header)
-      buf.append(encode(obj))
+      appendBuffer(buf, header)
+      appendBuffer(buf, encode(obj))
 
       return buf
     }

@@ -3,7 +3,7 @@
 const Buffer = require('safe-buffer').Buffer
 const test = require('tape').test
 const msgpack = require('../')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
 test('encode/decode 1 byte fixext data', function (t) {
   const encoder = msgpack()
@@ -432,7 +432,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
     const encoder = msgpack()
     let buf = Buffer.allocUnsafe(2)
     buf[0] = 0xd4
-    buf = bl().append(buf)
+    buf = new DynamicBuffer().append(buf)
     const origLength = buf.length
     t.throws(function () {
       encoder.decode(buf)
@@ -445,7 +445,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
     const encoder = msgpack()
     let buf = Buffer.allocUnsafe(3)
     buf[0] = 0xd5
-    buf = bl().append(buf)
+    buf = new DynamicBuffer().append(buf)
     const origLength = buf.length
     t.throws(function () {
       encoder.decode(buf)
@@ -458,7 +458,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
     const encoder = msgpack()
     let buf = Buffer.allocUnsafe(5)
     buf[0] = 0xd6
-    buf = bl().append(buf)
+    buf = new DynamicBuffer().append(buf)
     const origLength = buf.length
     t.throws(function () {
       encoder.decode(buf)
@@ -471,7 +471,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
     const encoder = msgpack()
     let buf = Buffer.allocUnsafe(9)
     buf[0] = 0xd7
-    buf = bl().append(buf)
+    buf = new DynamicBuffer().append(buf)
     const origLength = buf.length
     t.throws(function () {
       encoder.decode(buf)
@@ -484,7 +484,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
     const encoder = msgpack()
     let buf = Buffer.allocUnsafe(17)
     buf[0] = 0xd8
-    buf = bl().append(buf)
+    buf = new DynamicBuffer().append(buf)
     const origLength = buf.length
     t.throws(function () {
       encoder.decode(buf)

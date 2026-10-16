@@ -3,7 +3,7 @@
 const Buffer = require('safe-buffer').Buffer
 const test = require('tape').test
 const msgpack = require('../')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
 test('encode/decode 2^8 <-> (2^16-1) bytes strings', function (t) {
   const encoder = msgpack()
@@ -64,7 +64,7 @@ test('decoding a chopped string', function (t) {
   buf[0] = 0xda
   buf.writeUInt16BE(Buffer.byteLength(str) + 10, 1) // set bigger size
   buf.write(str, 3)
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)
@@ -77,7 +77,7 @@ test('decoding an incomplete header of a string', function (t) {
   const encoder = msgpack()
   let buf = Buffer.allocUnsafe(2)
   buf[0] = 0xda
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     encoder.decode(buf)

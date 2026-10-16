@@ -1,7 +1,7 @@
 msgpack5&nbsp;&nbsp;[![CI](https://github.com/mcollina/msgpack5/workflows/CI/badge.svg)](https://github.com/mcollina/msgpack5/actions?query=workflow%3ACI)
 ========
 
-A msgpack v5 implementation for node.js and the browser, with extension point support.
+A msgpack v5 implementation for node.js, with extension point support.
 
 Install
 -------
@@ -63,28 +63,6 @@ function mytipeDecode(data) {
 }
 ```
 
-In the Browser
------------
-
-This library is compatible with [Browserify](http://npm.im/browserify).
-
-If you want to use standalone, grab the file in the `dist` folder of
-this repo, and use in your own HTML page, the module will expose a
-`msgpack5` global.
-
-
-```
-<script type="text/javascript"
-        src="./msgpack5.min.js">
-</script>
-```
-
-### To build
-
-```
-	npm run build
-```
-
 API
 ---
 
@@ -126,16 +104,16 @@ options:
 
 ### encode(object)
 
-Encodes `object` in msgpack, returns a [bl](http://npm.im/bl).
+Encodes `object` in msgpack, returns a `Buffer`.
 
 -------------------------------------------------------
 <a name="decode"></a>
 
 ### decode(buf)
 
-Decodes buf from in msgpack. `buf` can be a `Buffer` or a [bl](http://npm.im/bl) instance.
+Decodes buf from in msgpack. `buf` can be a `Buffer` or a `DynamicBuffer` instance.
 
-In order to support a stream interface, a user must pass in a [bl](http://npm.im/bl) instance.
+In order to support a stream interface, a user must pass in a `DynamicBuffer` instance.
 
 -------------------------------------------------------
 <a name="registerEncoder"></a>
@@ -240,7 +218,7 @@ Related projects
 Disclaimer
 ----------
 
-This library is built fully on JS and on [bl](http://npm.im/bl) to
+This library is built fully on JS and on `@platformatic/dynamic-buffer` to
 simplify the code. Every improvement that keeps the same API is welcome.
 
 Acknowledgements

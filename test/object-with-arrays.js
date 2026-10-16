@@ -2,7 +2,7 @@
 
 const test = require('tape').test
 const msgpack = require('../')
-const bl = require('bl')
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
 function build (size) {
   const array = []
@@ -38,7 +38,7 @@ test('decoding a map with multiple big arrays. First one is incomplete', functio
   // 1 (fixmap's header 0x82) + first key's length + 1 (first array's 0xdd)
   const sizePosOfFirstArray = 1 + pack.encode('first').length + 1
   buf.writeUInt32BE(array.length + 10, sizePosOfFirstArray) // set first array's size bigger than its actual size
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     pack.decode(buf)
@@ -59,7 +59,7 @@ test('decoding a map with multiple big arrays. Second one is incomplete', functi
   // 1 (fixmap's header 0x82) + first key-value pair's length + second key's length + 1 (second array's 0xdd)
   const sizePosOfSecondArray = 1 + pack.encode('first').length + pack.encode(array).length + pack.encode('second').length + 1
   buf.writeUInt32BE(array.length + 10, sizePosOfSecondArray) // set second array's size bigger than its actual size
-  buf = bl().append(buf)
+  buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
   t.throws(function () {
     pack.decode(buf)

@@ -1,13 +1,13 @@
 const msgpack = require('../')()
-const bl = require('bl')
-const msg = bl(msgpack.encode({ hello: 'world' }))
+const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
+const msg = new DynamicBuffer(msgpack.encode({ hello: 'world' }))
 const decode = msgpack.decode
 const max = 1000000
 let i
 
 function run () {
   for (i = 0; i < max; i++) {
-    decode(msg.duplicate())
+    decode(msg.clone())
   }
 }
 
