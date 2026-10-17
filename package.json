@@ -3,6 +3,9 @@
   "version": "6.1.0",
   "description": "A msgpack v5 implementation for node.js, with extension points",
   "main": "index.js",
+  "engines": {
+    "node": ">= 22.19.0"
+  },
   "scripts": {
     "test": "standard && tape test/* | tap-mocha-reporter dot"
   },
