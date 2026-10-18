@@ -7,7 +7,11 @@
     "node": ">= 22.19.0"
   },
   "scripts": {
-    "test": "standard && tape test/* | tap-mocha-reporter dot"
+    "test": "standard && tape test/* | tap-mocha-reporter dot",
+    "bench": "node benchmarks/bench.js",
+    "bench:stream": "node benchmarks/stream.js",
+    "bench:ab": "node benchmarks/ab.js",
+    "bench:gen": "node benchmarks/gen-data.js"
   },
   "pre-commit": [
     "test"
@@ -30,7 +34,10 @@
   },
   "homepage": "https://github.com/mcollina/msgpack5",
   "devDependencies": {
+    "@msgpack/msgpack": "^3.0.0",
     "memdb": "^1.3.1",
+    "msgpack-lite": "^0.1.26",
+    "msgpackr": "^2.0.0",
     "pre-commit": "^1.2.2",
     "standard": "^16.0.0",
     "tap-mocha-reporter": "^5.0.0",
