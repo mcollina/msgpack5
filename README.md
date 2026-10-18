@@ -208,6 +208,37 @@ db.put('hello', obj, function(err) {
 
 ```
 
+Benchmarks
+----------
+
+`benchmarks/` contains a self-contained throughput harness. It compares msgpack5
+against whatever comparison libraries are installed (`msgpackr`, `msgpack-lite`,
+`@msgpack/msgpack`) and against JSON, over generated datasets in
+`benchmarks/data/`.
+
+```sh
+npm install          # pulls in the optional comparison libraries
+npm run bench        # head-to-head encode/decode per dataset (ops/sec + ratios)
+npm run bench:stream # streaming .decoder() throughput vs msgpackr
+npm run bench:gen    # regenerate the datasets in benchmarks/data/
+```
+
+The datasets are generated deterministically by
+[`benchmarks/gen-data.js`](benchmarks/gen-data.js) and written to
+`benchmarks/data/` (git-ignored). Each function runs under a fixed wall-clock
+budget (default 4000 ms, override with `BENCH_MS`), counting iterations to
+produce ops/sec. Round-trips are verified against the source JSON, and missing
+comparison libraries are skipped.
+
+To compare two local msgpack5 checkouts (for example an optimization branch
+against a baseline worktree), use the A/B harness. It interleaves encode/decode
+rounds on `benchmarks/data/sample-large.json`, then reports the median ops/sec
+per build and a new/old ratio (ratio > 1 means the NEW build is faster):
+
+```sh
+AB_OLD=/path/to/baseline AB_NEW=/path/to/current npm run bench:ab
+```
+
 Related projects
 ----------------
 

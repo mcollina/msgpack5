@@ -27,3 +27,5 @@ node_modules
 spec.html spec.md
 
 package-lock.json
+# Generated benchmark datasets
+benchmarks/data
