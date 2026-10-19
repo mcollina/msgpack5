@@ -1,7 +1,7 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
@@ -29,7 +29,7 @@ function computeLength (map) {
   return length
 }
 
-test('encode/decode maps up to 15 elements', function (t) {
+test('encode/decode maps up to 15 elements', async function (t) {
   const encoder = msgpack()
   const all = []
   let i
@@ -42,54 +42,47 @@ test('encode/decode maps up to 15 elements', function (t) {
     all.push(build(i, 'aaa'))
   }
 
-  all.forEach(function (map) {
+  for (const map of all) {
     const length = Object.keys(map).length
-    t.test('encoding a map with ' + length + ' elements of ' + map[100], function (t) {
+    await t.test('encoding a map with ' + length + ' elements of ' + map[100], async function (t) {
       const buf = encoder.encode(map)
-      t.equal(buf.length, computeLength(map), 'must have the right length')
-      t.equal(buf.readUInt8(0) & 0xf0, 0x80, 'must have the proper header')
-      t.equal(buf.readUInt8(0) & 0x0f, length, 'must include the map length')
-      t.end()
+      t.assert.strictEqual(buf.length, computeLength(map), 'must have the right length')
+      t.assert.strictEqual(buf.readUInt8(0) & 0xf0, 0x80, 'must have the proper header')
+      t.assert.strictEqual(buf.readUInt8(0) & 0x0f, length, 'must include the map length')
     })
 
-    t.test('mirror test for a map of length ' + length + ' with ' + map[100], function (t) {
-      t.deepEqual(encoder.decode(encoder.encode(map)), map, 'must stay the same')
-      t.end()
+    await t.test('mirror test for a map of length ' + length + ' with ' + map[100], async function (t) {
+      t.assert.deepStrictEqual(encoder.decode(encoder.encode(map)), map, 'must stay the same')
     })
-  })
-
-  t.end()
+  }
 })
 
-test('do not encode undefined in a map', function (t) {
+test('do not encode undefined in a map', async function (t) {
   const instance = msgpack()
   const expected = { hello: 'world' }
   const toEncode = { a: undefined, hello: 'world' }
   const buf = instance.encode(toEncode)
 
-  t.deepEqual(expected, instance.decode(buf), 'must ignore undefined')
-  t.end()
+  t.assert.deepStrictEqual(expected, instance.decode(buf), 'must ignore undefined')
 })
 
-test('encode NaN in a map', function (t) {
+test('encode NaN in a map', async function (t) {
   const instance = msgpack()
   const toEncode = { a: NaN, hello: 'world' }
 
   const buf = instance.encode(toEncode)
 
-  t.assert(Object.is(instance.decode(buf).a, NaN))
+  t.assert.ok(Object.is(instance.decode(buf).a, NaN))
 
   const expected = { ...toEncode }
   delete toEncode.a
   const actual = instance.decode(buf)
   delete buf.a
 
-  t.deepEqual(actual, expected)
-
-  t.end()
+  t.assert.deepStrictEqual(actual, expected)
 })
 
-test('encode/decode map with buf, ints and strings', function (t) {
+test('encode/decode map with buf, ints and strings', async function (t) {
   const map = {
     topic: 'hello',
     qos: 1,
@@ -99,11 +92,10 @@ test('encode/decode map with buf, ints and strings', function (t) {
   }
   const pack = msgpack()
 
-  t.deepEqual(pack.decode(pack.encode(map)), map)
-  t.end()
+  t.assert.deepStrictEqual(pack.decode(pack.encode(map)), map)
 })
 
-test('decoding a chopped map', function (t) {
+test('decoding a chopped map', async function (t) {
   const encoder = msgpack()
   const map = encoder.encode({ a: 'b', c: 'd', e: 'f' })
   let buf = Buffer.allocUnsafe(map.length)
@@ -111,9 +103,8 @@ test('decoding a chopped map', function (t) {
   map.copy(buf, 1, 1, map.length)
   buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
-  t.throws(function () {
+  t.assert.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
-  t.equals(buf.length, origLength, 'must not consume any byte')
-  t.end()
+  t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
 })

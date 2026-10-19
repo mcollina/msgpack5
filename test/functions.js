@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 const noop = function () {}
 
@@ -14,6 +14,5 @@ test('encode a function inside a map', function (t) {
     func: noop
   }
 
-  t.deepEqual(encoder.decode(encoder.encode(toEncode)), expected, 'remove the function from the map')
-  t.end()
+  t.assert.deepStrictEqual(encoder.decode(encoder.encode(toEncode)), expected, 'remove the function from the map')
 })

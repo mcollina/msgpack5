@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 
 test('encode/decode nested containers (map/array)', function (t) {
@@ -12,7 +12,7 @@ test('encode/decode nested containers (map/array)', function (t) {
 
   function preserveTest (A, message = 'works') {
     const B = doEncodeDecode(A)
-    t.deepEqual(A, B, message)
+    t.assert.deepStrictEqual(A, B, message)
   }
 
   preserveTest({
@@ -39,6 +39,4 @@ test('encode/decode nested containers (map/array)', function (t) {
       }
     ]
   ])
-
-  t.end()
 })

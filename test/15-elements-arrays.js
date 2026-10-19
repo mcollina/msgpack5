@@ -1,7 +1,7 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
@@ -29,7 +29,7 @@ function computeLength (array) {
   return length
 }
 
-test('encode/decode arrays up to 15 elements', function (t) {
+test('encode/decode arrays up to 15 elements', async function (t) {
   const encoder = msgpack()
   const all = []
   let i
@@ -42,26 +42,22 @@ test('encode/decode arrays up to 15 elements', function (t) {
     all.push(build(i, 'aaa'))
   }
 
-  all.forEach(function (array) {
-    t.test('encoding an array with ' + array.length + ' elements of ' + array[0], function (t) {
+  for (const array of all) {
+    await t.test('encoding an array with ' + array.length + ' elements of ' + array[0], async function (t) {
       const buf = encoder.encode(array)
       // the array is full of 1-byte integers
-      t.equal(buf.length, computeLength(array), 'must have the right length')
-      t.equal(buf.readUInt8(0) & 0xf0, 0x90, 'must have the proper header')
-      t.equal(buf.readUInt8(0) & 0x0f, array.length, 'must include the array length')
-      t.end()
+      t.assert.strictEqual(buf.length, computeLength(array), 'must have the right length')
+      t.assert.strictEqual(buf.readUInt8(0) & 0xf0, 0x90, 'must have the proper header')
+      t.assert.strictEqual(buf.readUInt8(0) & 0x0f, array.length, 'must include the array length')
     })
 
-    t.test('mirror test for an array of length ' + array.length + ' with ' + array[0], function (t) {
-      t.deepEqual(encoder.decode(encoder.encode(array)), array, 'must stay the same')
-      t.end()
+    await t.test('mirror test for an array of length ' + array.length + ' with ' + array[0], async function (t) {
+      t.assert.deepStrictEqual(encoder.decode(encoder.encode(array)), array, 'must stay the same')
     })
-  })
-
-  t.end()
+  }
 })
 
-test('decoding an incomplete array', function (t) {
+test('decoding an incomplete array', async function (t) {
   const encoder = msgpack()
 
   const array = ['a', 'b', 'c']
@@ -76,9 +72,8 @@ test('decoding an incomplete array', function (t) {
   }
   buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
-  t.throws(function () {
+  t.assert.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
-  t.equals(origLength, buf.length, 'must not consume any byte')
-  t.end()
+  t.assert.strictEqual(origLength, buf.length, 'must not consume any byte')
 })

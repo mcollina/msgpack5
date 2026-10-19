@@ -1,10 +1,10 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 
-test('encoding/decoding 5-bits negative ints', function (t) {
+test('encoding/decoding 5-bits negative ints', async function (t) {
   const encoder = msgpack()
   const allNum = []
 
@@ -12,25 +12,20 @@ test('encoding/decoding 5-bits negative ints', function (t) {
     allNum.push(-i)
   }
 
-  allNum.forEach(function (num) {
-    t.test('encoding ' + num, function (t) {
+  for (const num of allNum) {
+    await t.test('encoding ' + num, async function (t) {
       const buf = encoder.encode(num)
-      t.equal(buf.length, 1, 'must have 1 byte')
-      t.equal(buf[0], num + 0x100, 'must encode correctly')
-      t.end()
+      t.assert.strictEqual(buf.length, 1, 'must have 1 byte')
+      t.assert.strictEqual(buf[0], num + 0x100, 'must encode correctly')
     })
 
-    t.test('decoding' + num, function (t) {
+    await t.test('decoding' + num, async function (t) {
       const buf = Buffer.from([num + 0x100])
-      t.equal(encoder.decode(buf), num, 'must decode correctly')
-      t.end()
+      t.assert.strictEqual(encoder.decode(buf), num, 'must decode correctly')
     })
 
-    t.test('mirror test' + num, function (t) {
-      t.equal(encoder.decode(encoder.encode(num)), num, 'must stay the same')
-      t.end()
+    await t.test('mirror test' + num, async function (t) {
+      t.assert.strictEqual(encoder.decode(encoder.encode(num)), num, 'must stay the same')
     })
-  })
-
-  t.end()
+  }
 })

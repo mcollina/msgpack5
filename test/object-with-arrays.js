@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
@@ -22,8 +22,7 @@ test('decoding a map with multiple big arrays', function (t) {
   }
   const pack = msgpack()
 
-  t.deepEqual(pack.decode(pack.encode(map)), map)
-  t.end()
+  t.assert.deepStrictEqual(pack.decode(pack.encode(map)), map)
 })
 
 test('decoding a map with multiple big arrays. First one is incomplete', function (t) {
@@ -40,11 +39,10 @@ test('decoding a map with multiple big arrays. First one is incomplete', functio
   buf.writeUInt32BE(array.length + 10, sizePosOfFirstArray) // set first array's size bigger than its actual size
   buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
-  t.throws(function () {
+  t.assert.throws(function () {
     pack.decode(buf)
   }, pack.IncompleteBufferError, 'must throw IncompleteBufferError')
-  t.equals(buf.length, origLength, 'must not consume any byte')
-  t.end()
+  t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
 })
 
 test('decoding a map with multiple big arrays. Second one is incomplete', function (t) {
@@ -61,9 +59,8 @@ test('decoding a map with multiple big arrays. Second one is incomplete', functi
   buf.writeUInt32BE(array.length + 10, sizePosOfSecondArray) // set second array's size bigger than its actual size
   buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
-  t.throws(function () {
+  t.assert.throws(function () {
     pack.decode(buf)
   }, pack.IncompleteBufferError, 'must throw IncompleteBufferError')
-  t.equals(buf.length, origLength, 'must not consume any byte')
-  t.end()
+  t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
 })

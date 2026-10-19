@@ -1,7 +1,7 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 
 function build (size) {
@@ -15,7 +15,7 @@ function build (size) {
   return new Uint8Array(array)
 }
 
-test('encode/decode 2^8-1 Uint8Arrays', function (t) {
+test('encode/decode 2^8-1 Uint8Arrays', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -24,20 +24,16 @@ test('encode/decode 2^8-1 Uint8Arrays', function (t) {
   all.push(build(1))
   all.push(new Uint8Array(0))
 
-  all.forEach(function (array) {
-    t.test('encoding Uint8Array of length ' + array.byteLength + ' bytes', function (t) {
+  for (const array of all) {
+    await t.test('encoding Uint8Array of length ' + array.byteLength + ' bytes', async function (t) {
       const buf = encoder.encode(array)
-      t.equal(buf.length, 2 + array.byteLength, 'must have the right length')
-      t.equal(buf.readUInt8(0), 0xc4, 'must have the proper header')
-      t.equal(buf.readUInt8(1), array.byteLength, 'must include the buf length')
-      t.end()
+      t.assert.strictEqual(buf.length, 2 + array.byteLength, 'must have the right length')
+      t.assert.strictEqual(buf.readUInt8(0), 0xc4, 'must have the proper header')
+      t.assert.strictEqual(buf.readUInt8(1), array.byteLength, 'must include the buf length')
     })
 
-    t.test('mirror test for an Uint8Array of length ' + array.byteLength + ' bytes', function (t) {
-      t.deepEqual(encoder.decode(encoder.encode(array)), Buffer.from(array), 'must stay the same')
-      t.end()
+    await t.test('mirror test for an Uint8Array of length ' + array.byteLength + ' bytes', async function (t) {
+      t.assert.deepStrictEqual(encoder.decode(encoder.encode(array)), Buffer.from(array), 'must stay the same')
     })
-  })
-
-  t.end()
+  }
 })

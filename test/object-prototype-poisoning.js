@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 
 test('decode throws when object has forbidden __proto__ property', function (t) {
@@ -14,8 +14,7 @@ test('decode throws when object has forbidden __proto__ property', function (t) 
 
   const encoded = encoder.encode(payload)
 
-  t.throws(() => encoder.decode(encoded), /Object contains forbidden prototype property/)
-  t.end()
+  t.assert.throws(() => encoder.decode(encoded), /Object contains forbidden prototype property/)
 })
 
 test('decode defaults protoAction with partial options', function (t) {
@@ -37,31 +36,28 @@ test('decode defaults protoAction with partial options', function (t) {
   ]
 
   options.forEach(function (opts) {
-    t.throws(function () {
+    t.assert.throws(function () {
       msgpack(opts).decode(encoded)
     }, /Object contains forbidden prototype property/)
   })
-  t.equal({}.polluted, undefined, 'does not affect Object.prototype')
-  t.end()
+  t.assert.strictEqual({}.polluted, undefined, 'does not affect Object.prototype')
 })
 
 test('does not mutate the caller options object', function (t) {
   const options = { forceFloat64: true }
   msgpack(options)
 
-  t.equal(options.protoAction, undefined)
-  t.end()
+  t.assert.strictEqual(options.protoAction, undefined)
 })
 
 test('validates protoAction', function (t) {
   const invalid = [null, false, '', 'typo']
 
   invalid.forEach(function (protoAction) {
-    t.throws(function () {
+    t.assert.throws(function () {
       msgpack({ protoAction })
     }, /protoAction must be "error", "remove", or "ignore"/)
   })
-  t.end()
 })
 
 test('decode ignores forbidden __proto__ property if protoAction is "ignore"', function (t) {
@@ -75,11 +71,10 @@ test('decode ignores forbidden __proto__ property if protoAction is "ignore"', f
 
   const decoded = encoder.decode(encoder.encode(payload))
 
-  t.equal(decoded.polluted, true)
-  t.notEqual(Object.getPrototypeOf(decoded), Object.prototype)
-  t.notOk(Object.prototype.hasOwnProperty.call(decoded, 'polluted'))
-  t.equal({}.polluted, undefined, 'does not affect Object.prototype')
-  t.end()
+  t.assert.strictEqual(decoded.polluted, true)
+  t.assert.notStrictEqual(Object.getPrototypeOf(decoded), Object.prototype)
+  t.assert.ok(!Object.prototype.hasOwnProperty.call(decoded, 'polluted'))
+  t.assert.strictEqual({}.polluted, undefined, 'does not affect Object.prototype')
 })
 
 test('decode removes forbidden __proto__ property if protoAction is "remove"', function (t) {
@@ -93,7 +88,6 @@ test('decode removes forbidden __proto__ property if protoAction is "remove"', f
 
   const decoded = encoder.decode(encoder.encode(payload))
 
-  t.equal(decoded.polluted, undefined)
-  t.equal(Object.getPrototypeOf(decoded), Object.prototype)
-  t.end()
+  t.assert.strictEqual(decoded.polluted, undefined)
+  t.assert.strictEqual(Object.getPrototypeOf(decoded), Object.prototype)
 })

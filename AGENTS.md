@@ -3,9 +3,10 @@ This file provides guidance to AI coding agents like Claude Code (claude.ai/code
 # Development commands
 
 - Install dependencies: `npm install` (the repository has no lockfile).
-- Run lint and the complete Tape suite: `npm test`.
+- Run lint and the complete test suite: `npm test` (this runs `standard` then `borp`, the `node:test` runner).
+- Run tests with coverage: `npm run test:coverage` (runs `c8` over the `borp` suite and reports V8 coverage for `index.js` and `lib/`).
 - Run lint only: `./node_modules/.bin/standard`.
-- Run one test file: `node test/streams.js` (replace the path with any `test/*.js` file). This emits raw TAP and does not run lint.
+- Run one test file: `npx borp test/streams.js` (replace the path with any `test/*.js` file).
 - Benchmark throughput: `npm run bench` (head-to-head vs `msgpackr`, `msgpack-lite`, `@msgpack/msgpack`, and JSON), `npm run bench:stream` (streaming decoder), and `npm run bench:ab` (A/B two checkouts via `AB_OLD`/`AB_NEW`). The comparison libraries are devDependencies, and `benchmarks/` is linted by `standard` as part of `npm test`.
 
 CI runs `npm test` on Node.js 22, 24, and 26 on macOS, Windows, and Ubuntu. `@platformatic/dynamic-buffer` requires Node.js >= 22.19.0, so older releases are not supported.
@@ -21,4 +22,4 @@ CI runs `npm test` on Node.js 22, 24, and 26 on macOS, Windows, and Ubuntu. `@pl
 
 # Test organization
 
-Tests are Tape files grouped primarily by MessagePack wire type and size boundary. For encoder/decoder changes, preserve exact-byte assertions and cover both sides of affected boundaries; use the focused suites for extensions, timestamps, maps, prototype handling, and streaming when those cross-cutting paths change. `spec.md` is the checked-in MessagePack specification used by this implementation.
+Tests are `node:test` files (run through `borp`) grouped primarily by MessagePack wire type and size boundary. Async/streaming and callback-based tests use `async` functions and `t.plan(n)`; assertions use the test context's `t.assert.*` (which count toward `t.plan`). For encoder/decoder changes, preserve exact-byte assertions and cover both sides of affected boundaries; use the focused suites for extensions, timestamps, maps, prototype handling, and streaming when those cross-cutting paths change. `spec.md` is the checked-in MessagePack specification used by this implementation.
