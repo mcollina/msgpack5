@@ -1,7 +1,7 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 
 test('encode/decode map with multiple short buffers as both keys and values', function (t) {
@@ -17,9 +17,7 @@ test('encode/decode map with multiple short buffers as both keys and values', fu
 
   const newMapping = pack.decode(pack.encode(mapping))
 
-  t.equals(newMapping.size, mapping.size)
-  t.deepEqual([...newMapping.keys()], [...mapping.keys()])
-  t.deepEqual([...newMapping.values()], [...mapping.values()])
-
-  t.end()
+  t.assert.strictEqual(newMapping.size, mapping.size)
+  t.assert.deepStrictEqual([...newMapping.keys()], [...mapping.keys()])
+  t.assert.deepStrictEqual([...newMapping.values()], [...mapping.values()])
 })

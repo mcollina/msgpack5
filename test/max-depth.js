@@ -1,7 +1,7 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 
 function nestedArray (depth) {
@@ -30,66 +30,65 @@ test('limits array and map nesting depth by default', function (t) {
     map = map.x
   }
 
-  t.equal(array, null, 'decodes arrays at the limit')
-  t.equal(map, null, 'decodes maps at the limit')
-  t.throws(function () {
+  t.assert.strictEqual(array, null, 'decodes arrays at the limit')
+  t.assert.strictEqual(map, null, 'decodes maps at the limit')
+  t.assert.throws(function () {
     pack.decode(nestedArray(101))
   }, /Maximum decode depth exceeded/, 'rejects arrays over the limit')
-  t.throws(function () {
+  t.assert.throws(function () {
     pack.decode(nestedMap(101))
   }, /Maximum decode depth exceeded/, 'rejects maps over the limit')
-  t.end()
 })
 
 test('supports a custom maximum nesting depth', function (t) {
   const pack = msgpack({ maxDepth: 2 })
 
-  t.doesNotThrow(function () {
+  t.assert.doesNotThrow(function () {
     pack.decode(nestedArray(2))
   }, 'decodes input at the configured limit')
-  t.throws(function () {
+  t.assert.throws(function () {
     pack.decode(nestedArray(3))
   }, /Maximum decode depth exceeded/, 'rejects input over the configured limit')
-  t.end()
 })
 
 test('defaults maxDepth when other options are provided', function (t) {
   const pack = msgpack({ forceFloat64: true })
 
-  t.throws(function () {
+  t.assert.throws(function () {
     pack.decode(nestedArray(101))
   }, /Maximum decode depth exceeded/)
-  t.end()
 })
 
 test('allows scalars but no containers when maxDepth is zero', function (t) {
   const pack = msgpack({ maxDepth: 0 })
 
-  t.equal(pack.decode(Buffer.from([0xc0])), null, 'decodes a scalar')
-  t.throws(function () {
+  t.assert.strictEqual(pack.decode(Buffer.from([0xc0])), null, 'decodes a scalar')
+  t.assert.throws(function () {
     pack.decode(Buffer.from([0x90]))
   }, /Maximum decode depth exceeded/, 'rejects an empty container')
-  t.end()
 })
 
 test('validates maxDepth', function (t) {
   const invalid = [-1, 1.5, Infinity, NaN, '100', null]
 
   invalid.forEach(function (maxDepth) {
-    t.throws(function () {
+    t.assert.throws(function () {
       msgpack({ maxDepth })
     }, /maxDepth must be a non-negative integer/)
   })
-  t.end()
 })
 
-test('reports a controlled error from the decoder stream', function (t) {
+test('reports a controlled error from the decoder stream', async function (t) {
   t.plan(2)
 
   const decoder = msgpack().decoder()
-  decoder.on('error', function (err) {
-    t.equal(err.message, 'Maximum decode depth exceeded')
-    t.notOk(err instanceof RangeError, 'does not exhaust the native stack')
+  const done = new Promise((resolve, reject) => {
+    decoder.on('error', function (err) {
+      t.assert.strictEqual(err.message, 'Maximum decode depth exceeded')
+      t.assert.ok(!(err instanceof RangeError), 'does not exhaust the native stack')
+      resolve()
+    })
   })
   decoder.end(nestedArray(101))
+  await done
 })

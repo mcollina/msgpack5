@@ -1,10 +1,11 @@
 'use strict'
 
-const test = require('tape').test
+const test = require('node:test')
+const { promisify } = require('node:util')
 const level = require('memdb')
 const msgpack = require('../')
 
-test('msgpack level encoding put', function (t) {
+test('msgpack level encoding put', async function (t) {
   t.plan(4)
 
   const pack = msgpack()
@@ -12,20 +13,31 @@ test('msgpack level encoding put', function (t) {
     valueEncoding: pack
   })
   const obj = { my: 'obj' }
+  const put = promisify(db.put.bind(db))
+  const get = promisify(db.get.bind(db))
+  const close = promisify(db.close.bind(db))
 
-  db.put('hello', obj, function (err) {
-    t.error(err, 'put has no errors')
-    db.get('hello', { valueEncoding: 'binary' }, function (err, buf) {
-      t.error(err, 'get has no error')
-      t.deepEqual(pack.decode(buf), obj)
-      db.close(function () {
-        t.pass('db closed')
-      })
-    })
-  })
+  let err
+  try {
+    await put('hello', obj)
+  } catch (e) {
+    err = e
+  }
+  t.assert.ifError(err, 'put has no errors')
+
+  let buf
+  try {
+    buf = await get('hello', { valueEncoding: 'binary' })
+  } catch (e) {
+    err = e
+  }
+  t.assert.ifError(err, 'get has no error')
+  t.assert.deepStrictEqual(pack.decode(buf), obj)
+  await close()
+  t.assert.ok(true, 'db closed')
 })
 
-test('msgpack level encoding get', function (t) {
+test('msgpack level encoding get', async function (t) {
   t.plan(4)
 
   const pack = msgpack()
@@ -34,20 +46,31 @@ test('msgpack level encoding get', function (t) {
   })
   const obj = { my: 'obj' }
   const buf = pack.encode(obj)
+  const put = promisify(db.put.bind(db))
+  const get = promisify(db.get.bind(db))
+  const close = promisify(db.close.bind(db))
 
-  db.put('hello', buf, { valueEncoding: 'binary' }, function (err) {
-    t.error(err, 'putting has no errors')
-    db.get('hello', function (err, result) {
-      t.error(err, 'get has no error')
-      t.deepEqual(result, obj)
-      db.close(function () {
-        t.pass('db closed')
-      })
-    })
-  })
+  let err
+  try {
+    await put('hello', buf, { valueEncoding: 'binary' })
+  } catch (e) {
+    err = e
+  }
+  t.assert.ifError(err, 'putting has no errors')
+
+  let result
+  try {
+    result = await get('hello')
+  } catch (e) {
+    err = e
+  }
+  t.assert.ifError(err, 'get has no error')
+  t.assert.deepStrictEqual(result, obj)
+  await close()
+  t.assert.ok(true, 'db closed')
 })
 
-test('msgpack level encoding mirror', function (t) {
+test('msgpack level encoding mirror', async function (t) {
   t.plan(4)
 
   const pack = msgpack()
@@ -55,15 +78,26 @@ test('msgpack level encoding mirror', function (t) {
     valueEncoding: pack
   })
   const obj = { my: 'obj' }
+  const put = promisify(db.put.bind(db))
+  const get = promisify(db.get.bind(db))
+  const close = promisify(db.close.bind(db))
 
-  db.put('hello', obj, function (err) {
-    t.error(err, 'putting has no errors')
-    db.get('hello', function (err, result) {
-      t.error(err, 'get has no error')
-      t.deepEqual(result, obj)
-      db.close(function () {
-        t.pass('db closed')
-      })
-    })
-  })
+  let err
+  try {
+    await put('hello', obj)
+  } catch (e) {
+    err = e
+  }
+  t.assert.ifError(err, 'putting has no errors')
+
+  let result
+  try {
+    result = await get('hello')
+  } catch (e) {
+    err = e
+  }
+  t.assert.ifError(err, 'get has no error')
+  t.assert.deepStrictEqual(result, obj)
+  await close()
+  t.assert.ok(true, 'db closed')
 })

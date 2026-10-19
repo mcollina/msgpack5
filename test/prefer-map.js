@@ -1,4 +1,4 @@
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 
 const map = new Map()
@@ -13,20 +13,16 @@ test('round-trip string-keyed Maps', function (t) {
 
   for (const input of [new Map(), map]) {
     const result = encoder.decode(encoder.encode(input))
-    t.assert(result instanceof Map)
-    t.deepEqual(result, input)
+    t.assert.ok(result instanceof Map)
+    t.assert.deepStrictEqual(result, input)
   }
-
-  t.end()
 })
 
 test('preserve iteration order of string-keyed Maps', function (t) {
   const encoder = msgpack({ preferMap: true })
   const decoded = encoder.decode(encoder.encode(map))
 
-  t.deepEqual([...decoded.keys()], [...map.keys()])
-
-  t.end()
+  t.assert.deepStrictEqual([...decoded.keys()], [...map.keys()])
 })
 
 test('user can still encode objects as ext maps', function (t) {
@@ -63,9 +59,7 @@ test('user can still encode objects as ext maps', function (t) {
     const buf = encoder.encode(input)
     const result = encoder.decode(buf)
 
-    t.deepEqual(result, input)
-    t.equal(Object.getPrototypeOf(result), Object.getPrototypeOf(input))
+    t.assert.deepStrictEqual(result, input)
+    t.assert.strictEqual(Object.getPrototypeOf(result), Object.getPrototypeOf(input))
   }
-
-  t.end()
 })

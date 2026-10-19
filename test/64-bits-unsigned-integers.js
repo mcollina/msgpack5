@@ -1,7 +1,7 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
@@ -15,23 +15,19 @@ test('encoding/decoding 64-bits big-endian unsigned integers', function (t) {
   allNum.forEach(function (num) {
     t.test('encoding ' + num, function (t) {
       const buf = encoder.encode(num)
-      t.equal(buf.length, 9, 'must have 9 bytes')
-      t.equal(buf[0], 0xcf, 'must have the proper header')
+      t.assert.strictEqual(buf.length, 9, 'must have 9 bytes')
+      t.assert.strictEqual(buf[0], 0xcf, 'must have the proper header')
       let result = 0
       for (let k = 7; k >= 0; k--) {
         result += (buf.readUInt8(k + 1) * Math.pow(2, (8 * (7 - k))))
       }
-      t.equal(result, num, 'must decode correctly')
-      t.end()
+      t.assert.strictEqual(result, num, 'must decode correctly')
     })
 
     t.test('mirror test ' + num, function (t) {
-      t.equal(encoder.decode(encoder.encode(num)), num, 'must stay the same')
-      t.end()
+      t.assert.strictEqual(encoder.decode(encoder.encode(num)), num, 'must stay the same')
     })
   })
-
-  t.end()
 })
 
 test('decoding an incomplete 64-bits big-endian unsigned integer', function (t) {
@@ -40,9 +36,8 @@ test('decoding an incomplete 64-bits big-endian unsigned integer', function (t) 
   buf[0] = 0xcf
   buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
-  t.throws(function () {
+  t.assert.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
-  t.equals(buf.length, origLength, 'must not consume any byte')
-  t.end()
+  t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
 })

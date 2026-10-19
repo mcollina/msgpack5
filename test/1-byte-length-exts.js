@@ -1,7 +1,7 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
@@ -57,17 +57,15 @@ test('encode/decode variable ext data up to 0xff', function (t) {
   all.forEach(function (orig) {
     t.test('encoding a custom obj of length ' + orig.size, function (t) {
       const buf = encoder.encode(orig)
-      t.equal(buf.length, 3 + orig.size, 'must have the right length')
-      t.equal(buf.readUInt8(0), 0xc7, 'must have the ext header')
-      t.equal(buf.readUInt8(1), orig.size, 'must include the data length')
-      t.equal(buf.readUInt8(2), 0x42, 'must include the custom type id')
-      t.equal(buf.toString('utf8', 3, 4), orig.value, 'must decode correctly')
-      t.end()
+      t.assert.strictEqual(buf.length, 3 + orig.size, 'must have the right length')
+      t.assert.strictEqual(buf.readUInt8(0), 0xc7, 'must have the ext header')
+      t.assert.strictEqual(buf.readUInt8(1), orig.size, 'must include the data length')
+      t.assert.strictEqual(buf.readUInt8(2), 0x42, 'must include the custom type id')
+      t.assert.strictEqual(buf.toString('utf8', 3, 4), orig.value, 'must decode correctly')
     })
 
     t.test('mirror test with a custom obj of length ' + orig.size, function (t) {
-      t.deepEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
-      t.end()
+      t.assert.deepStrictEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
     })
   })
 
@@ -79,11 +77,10 @@ test('encode/decode variable ext data up to 0xff', function (t) {
     obj.copy(buf, 2, 2, obj.length)
     buf = new DynamicBuffer().append(buf)
     const origLength = buf.length
-    t.throws(function () {
+    t.assert.throws(function () {
       encoder.decode(buf)
     }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
-    t.equals(buf.length, origLength, 'must not consume any byte')
-    t.end()
+    t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
   })
 
   t.test('decoding an incomplete header of variable ext data up to 0xff', function (t) {
@@ -91,12 +88,9 @@ test('encode/decode variable ext data up to 0xff', function (t) {
     buf[0] = 0xc7
     buf = new DynamicBuffer().append(buf)
     const origLength = buf.length
-    t.throws(function () {
+    t.assert.throws(function () {
       encoder.decode(buf)
     }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
-    t.equals(buf.length, origLength, 'must not consume any byte')
-    t.end()
+    t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
   })
-
-  t.end()
 })

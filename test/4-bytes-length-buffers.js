@@ -1,7 +1,7 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
@@ -23,11 +23,10 @@ test('encode/decode 2^32-1 bytes buffers', function (t) {
   all.forEach(function (orig) {
     t.test('encoding a buffer of length ' + orig.length, function (t) {
       const buf = encoder.encode(orig)
-      t.equal(buf.length, 5 + orig.length, 'must have the right length')
-      t.equal(buf.readUInt8(0), 0xc6, 'must have the proper header')
-      t.equal(buf.readUInt32BE(1), orig.length, 'must include the buf length')
-      t.equal(buf.toString('utf8', 5), orig.toString('utf8'), 'must decode correctly')
-      t.end()
+      t.assert.strictEqual(buf.length, 5 + orig.length, 'must have the right length')
+      t.assert.strictEqual(buf.readUInt8(0), 0xc6, 'must have the proper header')
+      t.assert.strictEqual(buf.readUInt32BE(1), orig.length, 'must include the buf length')
+      t.assert.strictEqual(buf.toString('utf8', 5), orig.toString('utf8'), 'must decode correctly')
     })
 
     t.test('decoding a buffer of length ' + orig.length, function (t) {
@@ -35,17 +34,13 @@ test('encode/decode 2^32-1 bytes buffers', function (t) {
       buf[0] = 0xc6
       buf.writeUInt32BE(orig.length, 1)
       orig.copy(buf, 5)
-      t.equal(encoder.decode(buf).toString('utf8'), orig.toString('utf8'), 'must decode correctly')
-      t.end()
+      t.assert.strictEqual(encoder.decode(buf).toString('utf8'), orig.toString('utf8'), 'must decode correctly')
     })
 
     t.test('mirror test a buffer of length ' + orig.length, function (t) {
-      t.equal(encoder.decode(encoder.encode(orig)).toString(), orig.toString(), 'must stay the same')
-      t.end()
+      t.assert.strictEqual(encoder.decode(encoder.encode(orig)).toString(), orig.toString(), 'must stay the same')
     })
   })
-
-  t.end()
 })
 
 test('decoding a chopped 2^32-1 bytes buffer', function (t) {
@@ -57,11 +52,10 @@ test('decoding a chopped 2^32-1 bytes buffer', function (t) {
   orig.copy(buf, 5)
   buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
-  t.throws(function () {
+  t.assert.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
-  t.equals(buf.length, origLength, 'must not consume any byte')
-  t.end()
+  t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
 })
 
 test('decoding an incomplete header of 2^32-1 bytes buffer', function (t) {
@@ -70,9 +64,8 @@ test('decoding an incomplete header of 2^32-1 bytes buffer', function (t) {
   buf[0] = 0xc6
   buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
-  t.throws(function () {
+  t.assert.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
-  t.equals(buf.length, origLength, 'must not consume any byte')
-  t.end()
+  t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
 })

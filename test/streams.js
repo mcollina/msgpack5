@@ -1,11 +1,12 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const { once } = require('node:events')
+const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
-test('must send an object through', function (t) {
+test('must send an object through', async function (t) {
   t.plan(1)
 
   const pack = msgpack()
@@ -13,16 +14,19 @@ test('must send an object through', function (t) {
   const decoder = pack.decoder()
   const data = { hello: 'world' }
 
-  encoder.pipe(decoder)
-
   decoder.on('data', function (chunk) {
-    t.deepEqual(chunk, data)
+    t.assert.deepStrictEqual(chunk, data)
   })
 
+  const done = once(decoder, 'end')
+  encoder.pipe(decoder)
   encoder.end(data)
+  await done
 })
 
-test('must send three objects through', function (t) {
+test('must send three objects through', async function (t) {
+  t.plan(3)
+
   const pack = msgpack()
   const encoder = pack.encoder()
   const decoder = pack.decoder()
@@ -32,20 +36,22 @@ test('must send three objects through', function (t) {
     { hello: 3 }
   ]
 
-  t.plan(data.length)
-
   decoder.on('data', function (chunk) {
-    t.deepEqual(chunk, data.shift())
+    t.assert.deepStrictEqual(chunk, data.shift())
   })
 
+  const done = once(decoder, 'end')
   data.forEach(encoder.write.bind(encoder))
 
   encoder.pipe(decoder)
 
   encoder.end()
+  await done
 })
 
-test('end-to-end', function (t) {
+test('end-to-end', async function (t) {
+  t.plan(3)
+
   const pack = msgpack()
   const encoder = pack.encoder()
   const decoder = pack.decoder()
@@ -55,20 +61,21 @@ test('end-to-end', function (t) {
     { hello: 3 }
   ]
 
-  t.plan(data.length)
-
   decoder.on('data', function (chunk) {
-    t.deepEqual(chunk, data.shift())
+    t.assert.deepStrictEqual(chunk, data.shift())
   })
+
+  const done = once(decoder, 'end')
 
   data.forEach(encoder.write.bind(encoder))
 
   encoder.end()
 
   encoder.pipe(decoder)
+  await done
 })
 
-test('encoding error wrapped', function (t) {
+test('encoding error wrapped', async function (t) {
   t.plan(1)
 
   const pack = msgpack()
@@ -88,13 +95,15 @@ test('encoding error wrapped', function (t) {
   pack.register(0x42, MyType, mytypeEncode, mytypeDecode)
 
   encoder.on('error', function (err) {
-    t.equal(err.message, 'muahha')
+    t.assert.strictEqual(err.message, 'muahha')
   })
 
+  const done = once(encoder, 'error')
   encoder.end(data)
+  await done
 })
 
-test('decoding error wrapped', function (t) {
+test('decoding error wrapped', async function (t) {
   t.plan(1)
 
   const pack = msgpack()
@@ -116,15 +125,16 @@ test('decoding error wrapped', function (t) {
   pack.register(0x42, MyType, mytypeEncode, mytypeDecode)
 
   decoder.on('error', function (err) {
-    t.equal(err.message, 'muahha')
+    t.assert.strictEqual(err.message, 'muahha')
   })
 
   encoder.end(data)
 
   encoder.pipe(decoder)
+  await once(decoder, 'error')
 })
 
-test('decoding error wrapped', function (t) {
+test('decoding error wrapped', async function (t) {
   t.plan(1)
 
   const pack = msgpack()
@@ -146,15 +156,18 @@ test('decoding error wrapped', function (t) {
   pack.register(0x42, MyType, mytypeEncode, mytypeDecode)
 
   decoder.on('error', function (err) {
-    t.equal(err.message, 'muahha')
+    t.assert.strictEqual(err.message, 'muahha')
   })
 
   encoder.end(data)
 
   encoder.pipe(decoder)
+  await once(decoder, 'error')
 })
 
-test('concatenated buffers work', function (t) {
+test('concatenated buffers work', async function (t) {
+  t.plan(3)
+
   const pack = msgpack()
   const encoder = pack.encoder()
   const decoder = pack.decoder()
@@ -164,15 +177,17 @@ test('concatenated buffers work', function (t) {
     { hello: 3 }
   ]
 
-  t.plan(data.length)
-
   const chunks = new DynamicBuffer()
   encoder.on('data', chunks.append.bind(chunks))
 
   data.forEach(encoder.write.bind(encoder))
 
-  decoder.on('data', function (d) {
-    t.deepEqual(d, data.shift())
+  const done = new Promise((resolve, reject) => {
+    decoder.on('data', function (d) {
+      t.assert.deepStrictEqual(d, data.shift())
+      if (data.length === 0) resolve()
+    })
+    decoder.on('error', reject)
   })
 
   encoder.once('finish', function () {
@@ -181,23 +196,27 @@ test('concatenated buffers work', function (t) {
   })
 
   encoder.end()
+  await done
 })
 
-test('map32 header split across chunks', function (t) {
+test('map32 header split across chunks', async function (t) {
   t.plan(2)
 
   const decoder = msgpack().decoder()
 
-  decoder.on('data', function (value) {
-    t.deepEqual(value, {}, 'must decode the map')
-  })
+  const done = new Promise((resolve, reject) => {
+    decoder.on('data', function (value) {
+      t.assert.deepStrictEqual(value, {}, 'must decode the map')
+    })
 
-  decoder.on('error', function (err) {
-    t.fail(err.message)
-  })
+    decoder.on('error', function (err) {
+      reject(err)
+    })
 
-  decoder.on('end', function () {
-    t.pass('must end normally')
+    decoder.on('end', function () {
+      t.assert.ok(true, 'must end normally')
+      resolve()
+    })
   })
 
   const encoded = [0xdf, 0x00, 0x00, 0x00, 0x00]
@@ -205,9 +224,10 @@ test('map32 header split across chunks', function (t) {
     decoder.write(Buffer.from([byte]))
   })
   decoder.end()
+  await done
 })
 
-test('many concatenated values do not overflow the stack', function (t) {
+test('many concatenated values do not overflow the stack', async function (t) {
   t.plan(2)
 
   const total = 50000
@@ -218,13 +238,20 @@ test('many concatenated values do not overflow the stack', function (t) {
     decoded++
   })
 
-  decoder.write(Buffer.alloc(total, 0x01), function (err) {
-    t.error(err, 'must decode without an error')
-    t.equal(decoded, total, 'must decode every value')
+  await new Promise((resolve, reject) => {
+    decoder.write(Buffer.alloc(total, 0x01), function (err) {
+      try {
+        t.assert.ifError(err, 'must decode without an error')
+        t.assert.strictEqual(decoded, total, 'must decode every value')
+        resolve()
+      } catch (e) {
+        reject(e)
+      }
+    })
   })
 })
 
-test('incomplete containers resume without decoding elements again', function (t) {
+test('incomplete containers resume without decoding elements again', async function (t) {
   t.plan(3)
 
   const pack = msgpack()
@@ -248,9 +275,13 @@ test('incomplete containers resume without decoding elements again', function (t
     values.push(new MyType(i))
   }
 
-  decoder.on('data', function (result) {
-    t.deepEqual(result, { values: values.map(function (value) { return value.value }) })
-    t.equal(decodeCalls, values.length, 'each completed element is decoded once')
+  const done = new Promise((resolve, reject) => {
+    decoder.on('data', function (result) {
+      t.assert.deepStrictEqual(result, { values: values.map(function (value) { return value.value }) })
+      t.assert.strictEqual(decodeCalls, values.length, 'each completed element is decoded once')
+      resolve()
+    })
+    decoder.on('error', reject)
   })
 
   const encoded = pack.encode({ values })
@@ -258,10 +289,11 @@ test('incomplete containers resume without decoding elements again', function (t
     decoder.write(encoded.slice(i, i + 1))
     maxBuffered = Math.max(maxBuffered, decoder._chunks.length)
   }
-  t.ok(maxBuffered <= 6, 'only the current incomplete value remains buffered')
+  t.assert.ok(maxBuffered <= 6, 'only the current incomplete value remains buffered')
   decoder.end()
+  await done
 })
-test('nil processing works', function (t) {
+test('nil processing works', async function (t) {
   t.plan(3)
 
   const pack = msgpack()
@@ -270,18 +302,20 @@ test('nil processing works', function (t) {
 
   decoder.on('data', function (chunk) {
     decodedItemIndex++
-    t.deepEqual(chunk.value, decodedItemIndex === 1 ? null : false)
+    t.assert.deepStrictEqual(chunk.value, decodedItemIndex === 1 ? null : false)
   })
 
+  const done = once(decoder, 'end')
   decoder.on('end', function () {
-    t.equal(decodedItemIndex, 2)
+    t.assert.strictEqual(decodedItemIndex, 2)
   })
 
   decoder.write(Buffer.from([0xc0, 0xc2]))
   decoder.end()
+  await done
 })
 
-test('encoder wrap mode works', function (t) {
+test('encoder wrap mode works', async function (t) {
   t.plan(1)
 
   const pack = msgpack()
@@ -293,13 +327,15 @@ test('encoder wrap mode works', function (t) {
   encoder.pipe(decoder)
 
   decoder.on('data', function (chunk) {
-    t.deepEqual(chunk, data)
+    t.assert.deepStrictEqual(chunk, data)
   })
 
+  const done = once(decoder, 'end')
   encoder.end(wrappedData)
+  await done
 })
 
-test('encoder/decoder wrap mode must send an object through', function (t) {
+test('encoder/decoder wrap mode must send an object through', async function (t) {
   t.plan(1)
 
   const pack = msgpack()
@@ -310,13 +346,15 @@ test('encoder/decoder wrap mode must send an object through', function (t) {
   encoder.pipe(decoder)
 
   decoder.on('data', function (chunk) {
-    t.deepEqual(chunk, data)
+    t.assert.deepStrictEqual(chunk, data)
   })
 
+  const done = once(decoder, 'end')
   encoder.end(data)
+  await done
 })
 
-test('encoder pack null', function (t) {
+test('encoder pack null', async function (t) {
   t.plan(2)
   const pack = msgpack()
   const encoder = pack.encoder({ wrap: true })
@@ -327,13 +365,15 @@ test('encoder pack null', function (t) {
   let decodedItemIndex = 0
   decoder.on('data', function (chunk) {
     decodedItemIndex++
-    t.deepEqual(chunk.value, null)
+    t.assert.deepStrictEqual(chunk.value, null)
   })
 
   decoder.on('end', function () {
-    t.equal(decodedItemIndex, 1)
+    t.assert.strictEqual(decodedItemIndex, 1)
   })
 
+  const done = once(decoder, 'end')
   encoder.write({ value: null })
   encoder.end()
+  await done
 })

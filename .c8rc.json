@@ -1,0 +1,12 @@
+{
+  "include": [
+    "index.js",
+    "lib/**/*.js"
+  ],
+  "exclude": [
+    "node_modules/**",
+    "test/**",
+    "benchmarks/**",
+    "dist/**"
+  ]
+}

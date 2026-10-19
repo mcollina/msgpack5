@@ -1,7 +1,7 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
@@ -19,27 +19,22 @@ test('encoding/decoding 16-bits big-endian signed integers', function (t) {
   allNum.forEach(function (num) {
     t.test('encoding ' + num, function (t) {
       const buf = encoder.encode(num)
-      t.equal(buf.length, 3, 'must have 3 bytes')
-      t.equal(buf[0], 0xd1, 'must have the proper header')
-      t.equal(buf.readInt16BE(1), num, 'must decode correctly')
-      t.end()
+      t.assert.strictEqual(buf.length, 3, 'must have 3 bytes')
+      t.assert.strictEqual(buf[0], 0xd1, 'must have the proper header')
+      t.assert.strictEqual(buf.readInt16BE(1), num, 'must decode correctly')
     })
 
     t.test('decoding ' + num, function (t) {
       const buf = Buffer.allocUnsafe(3)
       buf[0] = 0xd1
       buf.writeInt16BE(num, 1)
-      t.equal(encoder.decode(buf), num, 'must decode correctly')
-      t.end()
+      t.assert.strictEqual(encoder.decode(buf), num, 'must decode correctly')
     })
 
     t.test('mirror test ' + num, function (t) {
-      t.equal(encoder.decode(encoder.encode(num)), num, 'must stay the same')
-      t.end()
+      t.assert.strictEqual(encoder.decode(encoder.encode(num)), num, 'must stay the same')
     })
   })
-
-  t.end()
 })
 
 test('decoding an incomplete 16-bits big-endian integer', function (t) {
@@ -48,9 +43,8 @@ test('decoding an incomplete 16-bits big-endian integer', function (t) {
   buf[0] = 0xd1
   buf = new DynamicBuffer().append(buf)
   const origLength = buf.length
-  t.throws(function () {
+  t.assert.throws(function () {
     encoder.decode(buf)
   }, encoder.IncompleteBufferError, 'must throw IncompleteBufferError')
-  t.equals(buf.length, origLength, 'must not consume any byte')
-  t.end()
+  t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
 })

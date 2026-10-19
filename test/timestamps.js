@@ -1,7 +1,7 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 
 test('timestamp disabling', function (t) {
@@ -16,13 +16,10 @@ test('timestamp disabling', function (t) {
 
     t.test('encoding ' + item.toString(), function (t) {
       const buf = encoder.encode(item).slice()
-      t.equal(buf.length, expected.length, 'must have ' + expected.length + ' bytes')
-      t.equal(buf[0], expected[0], 'Should return 0x80 ({}) by default')
-      t.end()
+      t.assert.strictEqual(buf.length, expected.length, 'must have ' + expected.length + ' bytes')
+      t.assert.strictEqual(buf[0], expected[0], 'Should return 0x80 ({}) by default')
     })
   })
-
-  t.end()
 })
 test('encoding/decoding timestamp 64', function (t) {
   const encoder = msgpack()
@@ -40,36 +37,31 @@ test('encoding/decoding timestamp 64', function (t) {
 
     t.test('encoding ' + item.toString(), function (t) {
       const buf = encoder.encode(item).slice()
-      t.equal(buf.length, expected.length, 'must have ' + expected.length + ' bytes')
+      t.assert.strictEqual(buf.length, expected.length, 'must have ' + expected.length + ' bytes')
       switch (expected.length) {
         case 6:
-          t.equal(buf[0], 0xd6, 'must have the correct header')
+          t.assert.strictEqual(buf[0], 0xd6, 'must have the correct header')
           break
         case 10:
-          t.equal(buf[0], 0xd7, 'must have the correct header')
+          t.assert.strictEqual(buf[0], 0xd7, 'must have the correct header')
           break
       }
-      t.equal(buf.readInt8(1), -1, 'must have the correct type') // Signed
+      t.assert.strictEqual(buf.readInt8(1), -1, 'must have the correct type') // Signed
       for (let j = 2; j < buf.length; j++) {
-        t.equal(buf[j], expected[j], 'byte ' + (j - 2) + ' match')
+        t.assert.strictEqual(buf[j], expected[j], 'byte ' + (j - 2) + ' match')
       }
-      t.end()
     })
 
     t.test('decoding ' + item, function (t) {
       const buf = Buffer.from(expected)
       const dt = encoder.decode(buf)
-      t.equal(dt.toString(), item.toString(), 'must decode correctly\nDecoded:\t' + dt * 1 + '\nExp:\t' + item * 1)
-      t.end()
+      t.assert.strictEqual(dt.toString(), item.toString(), 'must decode correctly\nDecoded:\t' + dt * 1 + '\nExp:\t' + item * 1)
     })
 
     t.test('mirror test ' + item, function (t) {
-      t.equal(encoder.decode(encoder.encode(item)) * 1, item * 1, 'must stay the same')
-      t.end()
+      t.assert.strictEqual(encoder.decode(encoder.encode(item)) * 1, item * 1, 'must stay the same')
     })
   })
-
-  t.end()
 })
 
 test('encoding/decoding timestamp 96', function (t) {
@@ -89,28 +81,23 @@ test('encoding/decoding timestamp 96', function (t) {
 
     t.test('encoding ' + item.toString(), function (t) {
       const buf = encoder.encode(item).slice()
-      t.equal(buf.length, expected.length, 'must have ' + expected.length + ' bytes')
-      t.equal(buf[0], 0xc7, 'must have the correct header')
-      t.equal(buf.readInt8(1), 12, 'must have the correct size')
-      t.equal(buf.readInt8(2), -1, 'must have the correct type') // Signed
+      t.assert.strictEqual(buf.length, expected.length, 'must have ' + expected.length + ' bytes')
+      t.assert.strictEqual(buf[0], 0xc7, 'must have the correct header')
+      t.assert.strictEqual(buf.readInt8(1), 12, 'must have the correct size')
+      t.assert.strictEqual(buf.readInt8(2), -1, 'must have the correct type') // Signed
       for (let j = 3; j < buf.length; j++) {
-        t.equal(buf[j], expected[j], 'byte ' + (j - 3) + ' match')
+        t.assert.strictEqual(buf[j], expected[j], 'byte ' + (j - 3) + ' match')
       }
-      t.end()
     })
 
     t.test('decoding ' + item, function (t) {
       const buf = Buffer.from(expected)
       const dt = encoder.decode(buf)
-      t.equal(dt.toString(), item.toString(), 'must decode correctly\nDecoded:\t' + dt * 1 + '\nExp:\t' + item * 1)
-      t.end()
+      t.assert.strictEqual(dt.toString(), item.toString(), 'must decode correctly\nDecoded:\t' + dt * 1 + '\nExp:\t' + item * 1)
     })
 
     t.test('mirror test ' + item, function (t) {
-      t.equal(encoder.decode(encoder.encode(item)) * 1, item * 1, 'must stay the same')
-      t.end()
+      t.assert.strictEqual(encoder.decode(encoder.encode(item)) * 1, item * 1, 'must stay the same')
     })
   })
-
-  t.end()
 })

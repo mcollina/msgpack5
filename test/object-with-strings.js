@@ -1,6 +1,6 @@
 'use strict'
 
-const test = require('tape').test
+const test = require('node:test')
 const fs = require('fs')
 const p = require('path')
 const msgpack = require('../')
@@ -13,8 +13,7 @@ test('encode/decode map with multiple short buffers', function (t) {
   }
   const pack = msgpack()
 
-  t.deepEqual(pack.decode(pack.encode(map)), map)
-  t.end()
+  t.assert.deepStrictEqual(pack.decode(pack.encode(map)), map)
 })
 
 if (process.title !== 'browser') {
@@ -26,7 +25,6 @@ if (process.title !== 'browser') {
     }, {})
     const pack = msgpack()
 
-    t.deepEqual(pack.decode(pack.encode(map)), map)
-    t.end()
+    t.assert.deepStrictEqual(pack.decode(pack.encode(map)), map)
   })
 }

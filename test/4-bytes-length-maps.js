@@ -1,7 +1,7 @@
 'use strict'
 
 const Buffer = require('safe-buffer').Buffer
-const test = require('tape').test
+const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
@@ -13,19 +13,16 @@ test('decoding incomplete map32 headers', function (t) {
     buf[0] = 0xdf
     const input = new DynamicBuffer().append(buf)
 
-    t.throws(function () {
+    t.assert.throws(function () {
       pack.decode(input)
     }, pack.IncompleteBufferError, 'must reject a ' + length + '-byte header as incomplete')
-    t.equal(input.length, length, 'must not consume an incomplete header')
+    t.assert.strictEqual(input.length, length, 'must not consume an incomplete header')
   }
-
-  t.end()
 })
 
 test('decoding an empty map32', function (t) {
   const pack = msgpack()
   const buf = Buffer.from([0xdf, 0x00, 0x00, 0x00, 0x00])
 
-  t.deepEqual(pack.decode(buf), {}, 'must decode a complete map32 header')
-  t.end()
+  t.assert.deepStrictEqual(pack.decode(buf), {}, 'must decode a complete map32 header')
 })
