@@ -5,7 +5,7 @@ const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
-test('encode/decode 2^16 <-> (2^32 - 1) bytes strings', function (t) {
+test('encode/decode 2^16 <-> (2^32 - 1) bytes strings', async function (t) {
   const encoder = msgpack()
   const all = []
   let str
@@ -22,8 +22,8 @@ test('encode/decode 2^16 <-> (2^32 - 1) bytes strings', function (t) {
   str.fill('a')
   all.push(str.toString())
 
-  all.forEach(function (str) {
-    t.test('encoding a string of length ' + str.length, function (t) {
+  for (const str of all) {
+    await t.test('encoding a string of length ' + str.length, async function (t) {
       const buf = encoder.encode(str)
       t.assert.strictEqual(buf.length, 5 + Buffer.byteLength(str), 'must be the proper length')
       t.assert.strictEqual(buf[0], 0xdb, 'must have the proper header')
@@ -31,7 +31,7 @@ test('encode/decode 2^16 <-> (2^32 - 1) bytes strings', function (t) {
       t.assert.strictEqual(buf.toString('utf8', 5, Buffer.byteLength(str) + 5), str, 'must decode correctly')
     })
 
-    t.test('decoding a string of length ' + str.length, function (t) {
+    await t.test('decoding a string of length ' + str.length, async function (t) {
       const buf = Buffer.allocUnsafe(5 + Buffer.byteLength(str))
       buf[0] = 0xdb
       buf.writeUInt32BE(Buffer.byteLength(str), 1)
@@ -39,13 +39,13 @@ test('encode/decode 2^16 <-> (2^32 - 1) bytes strings', function (t) {
       t.assert.strictEqual(encoder.decode(buf), str, 'must decode correctly')
     })
 
-    t.test('mirror test a string of length ' + str.length, function (t) {
+    await t.test('mirror test a string of length ' + str.length, async function (t) {
       t.assert.strictEqual(encoder.decode(encoder.encode(str)), str, 'must stay the same')
     })
-  })
+  }
 })
 
-test('decoding a chopped string', function (t) {
+test('decoding a chopped string', async function (t) {
   const encoder = msgpack()
   let str
   for (str = 'a'; str.length < 0xffff + 100;) {
@@ -63,7 +63,7 @@ test('decoding a chopped string', function (t) {
   t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
 })
 
-test('decoding an incomplete header of a string', function (t) {
+test('decoding an incomplete header of a string', async function (t) {
   const encoder = msgpack()
   let buf = Buffer.allocUnsafe(4)
   buf[0] = 0xdb

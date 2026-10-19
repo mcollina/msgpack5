@@ -10,7 +10,7 @@ function buildBuffer (size) {
   return buf
 }
 
-test('encode/compatibility mode', function (t) {
+test('encode/compatibility mode', async function (t) {
   const compatEncoder = msgpack({
     compatibilityMode: true
   })
@@ -21,21 +21,21 @@ test('encode/compatibility mode', function (t) {
   const oneBytesStr = Array(31 + 2).join('x')
   const twoBytesStr = Array(255 + 2).join('x')
 
-  t.test('default encoding a string of length ' + oneBytesStr.length, function (t) {
+  await t.test('default encoding a string of length ' + oneBytesStr.length, async function (t) {
     // Default: use 1 byte length string (str8)
     const buf = defaultEncoder.encode(oneBytesStr)
     t.assert.strictEqual(buf[0], 0xd9, 'must have the proper header (str8)')
     t.assert.strictEqual(buf.toString('utf8', 2, Buffer.byteLength(oneBytesStr) + 2), oneBytesStr, 'must decode correctly')
   })
 
-  t.test('compat. encoding a string of length ' + oneBytesStr.length, function (t) {
+  await t.test('compat. encoding a string of length ' + oneBytesStr.length, async function (t) {
     // Compat. mode: use 2 byte length string (str16)
     const buf = compatEncoder.encode(oneBytesStr)
     t.assert.strictEqual(buf[0], 0xda, 'must have the proper header (str16)')
     t.assert.strictEqual(buf.toString('utf8', 3, Buffer.byteLength(oneBytesStr) + 3), oneBytesStr, 'must decode correctly')
   })
 
-  t.test('encoding for a string of length ' + twoBytesStr.length, function (t) {
+  await t.test('encoding for a string of length ' + twoBytesStr.length, async function (t) {
     // Two byte strings: compat. mode should make no difference
     const buf1 = defaultEncoder.encode(twoBytesStr)
     const buf2 = compatEncoder.encode(twoBytesStr)
@@ -46,20 +46,20 @@ test('encode/compatibility mode', function (t) {
   const raw16Buffer = buildBuffer(Math.pow(2, 16) - 1)
   const raw32Buffer = buildBuffer(Math.pow(2, 16) + 1)
 
-  t.test('compat. encoding a Buffer of length ' + fixRawBuffer.length, function (t) {
+  await t.test('compat. encoding a Buffer of length ' + fixRawBuffer.length, async function (t) {
     // fix raw header: 0xa0 | 1 = 0xa1
     const buf = compatEncoder.encode(fixRawBuffer)
     t.assert.strictEqual(buf[0], 0xa1, 'must have the proper header (fix raw)')
     t.assert.strictEqual(buf.toString('utf8', 1, Buffer.byteLength(fixRawBuffer) + 1), fixRawBuffer.toString('utf8'), 'must decode correctly')
   })
 
-  t.test('compat. encoding a Buffer of length ' + raw16Buffer.length, function (t) {
+  await t.test('compat. encoding a Buffer of length ' + raw16Buffer.length, async function (t) {
     const buf = compatEncoder.encode(raw16Buffer)
     t.assert.strictEqual(buf[0], 0xda, 'must have the proper header (raw 16)')
     t.assert.strictEqual(buf.toString('utf8', 3, Buffer.byteLength(raw16Buffer) + 3), raw16Buffer.toString('utf8'), 'must decode correctly')
   })
 
-  t.test('compat. encoding a Buffer of length ' + raw32Buffer.length, function (t) {
+  await t.test('compat. encoding a Buffer of length ' + raw32Buffer.length, async function (t) {
     const buf = compatEncoder.encode(raw32Buffer)
     t.assert.strictEqual(buf[0], 0xdb, 'must have the proper header (raw 32)')
     t.assert.strictEqual(buf.toString('utf8', 5, Buffer.byteLength(raw32Buffer) + 5), raw32Buffer.toString('utf8'), 'must decode correctly')

@@ -5,7 +5,7 @@ const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
-test('encode/decode variable ext data up between 0x10000 and 0xffffffff', function (t) {
+test('encode/decode variable ext data up between 0x10000 and 0xffffffff', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -38,8 +38,8 @@ test('encode/decode variable ext data up between 0x10000 and 0xffffffff', functi
   all.push(new MyType(0x10001, 'a'))
   all.push(new MyType(0xffffff, 'a'))
 
-  all.forEach(function (orig) {
-    t.test('encoding a custom obj of length ' + orig.size, function (t) {
+  for (const orig of all) {
+    await t.test('encoding a custom obj of length ' + orig.size, async function (t) {
       const buf = encoder.encode(orig)
       t.assert.strictEqual(buf.length, 6 + orig.size, 'must have the right length')
       t.assert.strictEqual(buf.readUInt8(0), 0xc9, 'must have the ext header')
@@ -48,12 +48,12 @@ test('encode/decode variable ext data up between 0x10000 and 0xffffffff', functi
       t.assert.strictEqual(buf.toString('utf8', 6, 7), orig.value, 'must decode correctly')
     })
 
-    t.test('mirror test with a custom obj of length ' + orig.size, function (t) {
+    await t.test('mirror test with a custom obj of length ' + orig.size, async function (t) {
       t.assert.deepStrictEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
     })
-  })
+  }
 
-  t.test('decoding an incomplete variable ext data up between 0x10000 and 0xffffffff', function (t) {
+  await t.test('decoding an incomplete variable ext data up between 0x10000 and 0xffffffff', async function (t) {
     const obj = encoder.encode(new MyType(0xffffff, 'a'))
     let buf = Buffer.allocUnsafe(obj.length)
     buf[0] = 0xc9
@@ -67,7 +67,7 @@ test('encode/decode variable ext data up between 0x10000 and 0xffffffff', functi
     t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
   })
 
-  t.test('decoding an incomplete header of variable ext data up between 0x10000 and 0xffffffff', function (t) {
+  await t.test('decoding an incomplete header of variable ext data up between 0x10000 and 0xffffffff', async function (t) {
     let buf = Buffer.allocUnsafe(5)
     buf[0] = 0xc9
     buf = new DynamicBuffer().append(buf)

@@ -5,7 +5,7 @@ const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
-test('encode/decode strings with max 31 of length', function (t) {
+test('encode/decode strings with max 31 of length', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -14,8 +14,8 @@ test('encode/decode strings with max 31 of length', function (t) {
     all.push(i)
   }
 
-  all.forEach(function (str) {
-    t.test('encoding a string of length ' + str.length, function (t) {
+  for (const str of all) {
+    await t.test('encoding a string of length ' + str.length, async function (t) {
       const buf = encoder.encode(str)
       t.assert.strictEqual(buf.length, 1 + Buffer.byteLength(str), 'must be the proper length')
       t.assert.strictEqual(buf.readUInt8(0) & 0xe0, 0xa0, 'must have the proper header')
@@ -23,7 +23,7 @@ test('encode/decode strings with max 31 of length', function (t) {
       t.assert.strictEqual(buf.toString('utf8', 1, Buffer.byteLength(str) + 2), str, 'must decode correctly')
     })
 
-    t.test('decoding a string of length ' + str.length, function (t) {
+    await t.test('decoding a string of length ' + str.length, async function (t) {
       const buf = Buffer.allocUnsafe(1 + Buffer.byteLength(str))
       buf[0] = 0xa0 | Buffer.byteLength(str)
       if (str.length > 0) {
@@ -32,13 +32,13 @@ test('encode/decode strings with max 31 of length', function (t) {
       t.assert.strictEqual(encoder.decode(buf), str, 'must decode correctly')
     })
 
-    t.test('mirror test a string of length ' + str.length, function (t) {
+    await t.test('mirror test a string of length ' + str.length, async function (t) {
       t.assert.strictEqual(encoder.decode(encoder.encode(str)), str, 'must stay the same')
     })
-  })
+  }
 })
 
-test('decoding a chopped string', function (t) {
+test('decoding a chopped string', async function (t) {
   const encoder = msgpack()
   const str = 'aaa'
   let buf = Buffer.allocUnsafe(1 + Buffer.byteLength(str))

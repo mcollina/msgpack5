@@ -5,7 +5,7 @@ const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
-test('encoding/decoding 64-bits big-endian signed integers', function (t) {
+test('encoding/decoding 64-bits big-endian signed integers', async function (t) {
   const encoder = msgpack()
   const table = [
     { num: -9007199254740991, hi: 0xffe00000, lo: 0x00000001 },
@@ -15,8 +15,8 @@ test('encoding/decoding 64-bits big-endian signed integers', function (t) {
     { num: -214748365, hi: 0xffffffff, lo: 0xf3333333 }
   ]
 
-  table.forEach(function (testCase) {
-    t.test('encoding ' + testCase.num, function (t) {
+  for (const testCase of table) {
+    await t.test('encoding ' + testCase.num, async function (t) {
       const buf = encoder.encode(testCase.num)
       t.assert.strictEqual(buf.length, 9, 'must have 9 bytes')
       t.assert.strictEqual(buf[0], 0xd3, 'must have the proper header')
@@ -24,13 +24,13 @@ test('encoding/decoding 64-bits big-endian signed integers', function (t) {
       t.assert.strictEqual(buf.readUInt32BE(5), testCase.lo, 'lo word must be properly written')
     })
 
-    t.test('mirror test ' + testCase.num, function (t) {
+    await t.test('mirror test ' + testCase.num, async function (t) {
       t.assert.strictEqual(encoder.decode(encoder.encode(testCase.num)), testCase.num, 'must stay the same')
     })
-  })
+  }
 })
 
-test('decoding a negative 64-bits integer does not mutate the input', function (t) {
+test('decoding a negative 64-bits integer does not mutate the input', async function (t) {
   const encoder = msgpack()
   const encoded = Buffer.from([0xd3, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe])
   const expected = encoded.toString('hex')
@@ -50,7 +50,7 @@ test('decoding a negative 64-bits integer does not mutate the input', function (
   t.assert.strictEqual(Buffer.concat([firstChunk, secondChunk]).toString('hex'), expected, 'does not mutate split chunks')
 })
 
-test('decoding an incomplete 64-bits big-endian signed integer', function (t) {
+test('decoding an incomplete 64-bits big-endian signed integer', async function (t) {
   const encoder = msgpack()
   let buf = Buffer.allocUnsafe(8)
   buf[0] = 0xd3

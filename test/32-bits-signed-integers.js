@@ -5,7 +5,7 @@ const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
-test('encoding/decoding 32-bits big-endian signed integers', function (t) {
+test('encoding/decoding 32-bits big-endian signed integers', async function (t) {
   const encoder = msgpack()
   const allNum = []
 
@@ -15,28 +15,28 @@ test('encoding/decoding 32-bits big-endian signed integers', function (t) {
 
   allNum.push(-214748364)
 
-  allNum.forEach(function (num) {
-    t.test('encoding ' + num, function (t) {
+  for (const num of allNum) {
+    await t.test('encoding ' + num, async function (t) {
       const buf = encoder.encode(num)
       t.assert.strictEqual(buf.length, 5, 'must have 5 bytes')
       t.assert.strictEqual(buf[0], 0xd2, 'must have the proper header')
       t.assert.strictEqual(buf.readInt32BE(1), num, 'must decode correctly')
     })
 
-    t.test('decoding ' + num, function (t) {
+    await t.test('decoding ' + num, async function (t) {
       const buf = Buffer.allocUnsafe(5)
       buf[0] = 0xd2
       buf.writeInt32BE(num, 1)
       t.assert.strictEqual(encoder.decode(buf), num, 'must decode correctly')
     })
 
-    t.test('mirror test ' + num, function (t) {
+    await t.test('mirror test ' + num, async function (t) {
       t.assert.strictEqual(encoder.decode(encoder.encode(num)), num, 'must stay the same')
     })
-  })
+  }
 })
 
-test('decoding an incomplete 32-bits big-endian integer', function (t) {
+test('decoding an incomplete 32-bits big-endian integer', async function (t) {
   const encoder = msgpack()
   let buf = Buffer.allocUnsafe(4)
   buf[0] = 0xd2

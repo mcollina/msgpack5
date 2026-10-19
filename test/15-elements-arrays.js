@@ -29,7 +29,7 @@ function computeLength (array) {
   return length
 }
 
-test('encode/decode arrays up to 15 elements', function (t) {
+test('encode/decode arrays up to 15 elements', async function (t) {
   const encoder = msgpack()
   const all = []
   let i
@@ -42,8 +42,8 @@ test('encode/decode arrays up to 15 elements', function (t) {
     all.push(build(i, 'aaa'))
   }
 
-  all.forEach(function (array) {
-    t.test('encoding an array with ' + array.length + ' elements of ' + array[0], function (t) {
+  for (const array of all) {
+    await t.test('encoding an array with ' + array.length + ' elements of ' + array[0], async function (t) {
       const buf = encoder.encode(array)
       // the array is full of 1-byte integers
       t.assert.strictEqual(buf.length, computeLength(array), 'must have the right length')
@@ -51,13 +51,13 @@ test('encode/decode arrays up to 15 elements', function (t) {
       t.assert.strictEqual(buf.readUInt8(0) & 0x0f, array.length, 'must include the array length')
     })
 
-    t.test('mirror test for an array of length ' + array.length + ' with ' + array[0], function (t) {
+    await t.test('mirror test for an array of length ' + array.length + ' with ' + array[0], async function (t) {
       t.assert.deepStrictEqual(encoder.decode(encoder.encode(array)), array, 'must stay the same')
     })
-  })
+  }
 })
 
-test('decoding an incomplete array', function (t) {
+test('decoding an incomplete array', async function (t) {
   const encoder = msgpack()
 
   const array = ['a', 'b', 'c']

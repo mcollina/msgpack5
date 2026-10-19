@@ -4,7 +4,7 @@ const Buffer = require('safe-buffer').Buffer
 const test = require('node:test')
 const msgpack = require('../')
 
-test('encode/decode ext with a custom object check', function (t) {
+test('encode/decode ext with a custom object check', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -34,8 +34,8 @@ test('encode/decode ext with a custom object check', function (t) {
   all.push(new MyType(1))
   all.push(new MyType(42))
 
-  all.forEach(function (orig) {
-    t.test('encoding a custom obj encoded as ' + orig.data, function (t) {
+  for (const orig of all) {
+    await t.test('encoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = encoder.encode(orig)
       t.assert.strictEqual(buf.length, 3, 'must have the right length')
       t.assert.strictEqual(buf.readUInt8(0), 0xd4, 'must have the fixext header')
@@ -43,7 +43,7 @@ test('encode/decode ext with a custom object check', function (t) {
       t.assert.strictEqual(buf.readUInt8(2), orig.data, 'must decode correctly')
     })
 
-    t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
+    await t.test('decoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = Buffer.allocUnsafe(3)
       buf[0] = 0xd4
       buf[1] = 0x42
@@ -52,8 +52,8 @@ test('encode/decode ext with a custom object check', function (t) {
       t.assert.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
     })
 
-    t.test('mirror test with a custom obj containing ' + orig.data, function (t) {
+    await t.test('mirror test with a custom obj containing ' + orig.data, async function (t) {
       t.assert.deepStrictEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
     })
-  })
+  }
 })

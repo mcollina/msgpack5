@@ -16,7 +16,7 @@ function build (size) {
   return array
 }
 
-test('encode/decode arrays up to 0xffff elements', function (t) {
+test('encode/decode arrays up to 0xffff elements', async function (t) {
   const encoder = msgpack()
   const all = []
   let i
@@ -28,8 +28,8 @@ test('encode/decode arrays up to 0xffff elements', function (t) {
   all.push(build(0xff))
   all.push(build(0xffff))
 
-  all.forEach(function (array) {
-    t.test('encoding an array with ' + array.length + ' elements', function (t) {
+  for (const array of all) {
+    await t.test('encoding an array with ' + array.length + ' elements', async function (t) {
       const buf = encoder.encode(array)
       // the array is full of 1-byte integers
       t.assert.strictEqual(buf.length, 3 + array.length, 'must have the right length')
@@ -37,13 +37,13 @@ test('encode/decode arrays up to 0xffff elements', function (t) {
       t.assert.strictEqual(buf.readUInt16BE(1), array.length, 'must include the array length')
     })
 
-    t.test('mirror test for an array of length ' + array.length, function (t) {
+    await t.test('mirror test for an array of length ' + array.length, async function (t) {
       t.assert.deepStrictEqual(encoder.decode(encoder.encode(array)), array, 'must stay the same')
     })
-  })
+  }
 })
 
-test('decoding an incomplete array', function (t) {
+test('decoding an incomplete array', async function (t) {
   const encoder = msgpack()
 
   const array = build(0xffff / 2)
@@ -64,7 +64,7 @@ test('decoding an incomplete array', function (t) {
   t.assert.strictEqual(origLength, buf.length, 'must not consume any byte')
 })
 
-test('decoding an incomplete header', function (t) {
+test('decoding an incomplete header', async function (t) {
   const encoder = msgpack()
 
   let buf = Buffer.allocUnsafe(2)

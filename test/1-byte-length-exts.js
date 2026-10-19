@@ -5,7 +5,7 @@ const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
-test('encode/decode variable ext data up to 0xff', function (t) {
+test('encode/decode variable ext data up to 0xff', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -54,8 +54,8 @@ test('encode/decode variable ext data up to 0xff', function (t) {
 
   all.push(new MyType(255, 'a'))
 
-  all.forEach(function (orig) {
-    t.test('encoding a custom obj of length ' + orig.size, function (t) {
+  for (const orig of all) {
+    await t.test('encoding a custom obj of length ' + orig.size, async function (t) {
       const buf = encoder.encode(orig)
       t.assert.strictEqual(buf.length, 3 + orig.size, 'must have the right length')
       t.assert.strictEqual(buf.readUInt8(0), 0xc7, 'must have the ext header')
@@ -64,12 +64,12 @@ test('encode/decode variable ext data up to 0xff', function (t) {
       t.assert.strictEqual(buf.toString('utf8', 3, 4), orig.value, 'must decode correctly')
     })
 
-    t.test('mirror test with a custom obj of length ' + orig.size, function (t) {
+    await t.test('mirror test with a custom obj of length ' + orig.size, async function (t) {
       t.assert.deepStrictEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
     })
-  })
+  }
 
-  t.test('decoding an incomplete variable ext data up to 0xff', function (t) {
+  await t.test('decoding an incomplete variable ext data up to 0xff', async function (t) {
     const obj = encoder.encode(new MyType(250, 'a'))
     let buf = Buffer.allocUnsafe(obj.length)
     buf[0] = 0xc7
@@ -83,7 +83,7 @@ test('encode/decode variable ext data up to 0xff', function (t) {
     t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
   })
 
-  t.test('decoding an incomplete header of variable ext data up to 0xff', function (t) {
+  await t.test('decoding an incomplete header of variable ext data up to 0xff', async function (t) {
     let buf = Buffer.allocUnsafe(2)
     buf[0] = 0xc7
     buf = new DynamicBuffer().append(buf)

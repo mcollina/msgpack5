@@ -5,7 +5,7 @@ const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
-test('encode/decode 1 byte fixext data', function (t) {
+test('encode/decode 1 byte fixext data', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -29,8 +29,8 @@ test('encode/decode 1 byte fixext data', function (t) {
   all.push(new MyType(1))
   all.push(new MyType(42))
 
-  all.forEach(function (orig) {
-    t.test('encoding a custom obj encoded as ' + orig.data, function (t) {
+  for (const orig of all) {
+    await t.test('encoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = encoder.encode(orig)
       t.assert.strictEqual(buf.length, 3, 'must have the right length')
       t.assert.strictEqual(buf.readUInt8(0), 0xd4, 'must have the fixext header')
@@ -38,7 +38,7 @@ test('encode/decode 1 byte fixext data', function (t) {
       t.assert.strictEqual(buf.readUInt8(2), orig.data, 'must decode correctly')
     })
 
-    t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
+    await t.test('decoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = Buffer.allocUnsafe(3)
       buf[0] = 0xd4
       buf[1] = 0x42
@@ -47,13 +47,13 @@ test('encode/decode 1 byte fixext data', function (t) {
       t.assert.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
     })
 
-    t.test('mirror test with a custom obj containing ' + orig.data, function (t) {
+    await t.test('mirror test with a custom obj containing ' + orig.data, async function (t) {
       t.assert.deepStrictEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
     })
-  })
+  }
 })
 
-test('encode/decode 2 bytes fixext data', function (t) {
+test('encode/decode 2 bytes fixext data', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -77,8 +77,8 @@ test('encode/decode 2 bytes fixext data', function (t) {
   all.push(new MyType(1))
   all.push(new MyType(42))
 
-  all.forEach(function (orig) {
-    t.test('encoding a custom obj encoded as ' + orig.data, function (t) {
+  for (const orig of all) {
+    await t.test('encoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = encoder.encode(orig)
       t.assert.strictEqual(buf.length, 4, 'must have the right length')
       t.assert.strictEqual(buf.readUInt8(0), 0xd5, 'must have the fixext header')
@@ -86,7 +86,7 @@ test('encode/decode 2 bytes fixext data', function (t) {
       t.assert.strictEqual(buf.readUInt16BE(2), orig.data, 'must decode correctly')
     })
 
-    t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
+    await t.test('decoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = Buffer.allocUnsafe(4)
       buf[0] = 0xd5
       buf[1] = 0x42
@@ -95,13 +95,13 @@ test('encode/decode 2 bytes fixext data', function (t) {
       t.assert.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
     })
 
-    t.test('mirror test with a custom obj containing ' + orig.data, function (t) {
+    await t.test('mirror test with a custom obj containing ' + orig.data, async function (t) {
       t.assert.deepStrictEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
     })
-  })
+  }
 })
 
-test('encode/decode 4 bytes fixext data', function (t) {
+test('encode/decode 4 bytes fixext data', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -125,8 +125,8 @@ test('encode/decode 4 bytes fixext data', function (t) {
   all.push(new MyType(1))
   all.push(new MyType(42))
 
-  all.forEach(function (orig) {
-    t.test('encoding a custom obj encoded as ' + orig.data, function (t) {
+  for (const orig of all) {
+    await t.test('encoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = encoder.encode(orig)
       t.assert.strictEqual(buf.length, 6, 'must have the right length')
       t.assert.strictEqual(buf.readUInt8(0), 0xd6, 'must have the fixext header')
@@ -134,7 +134,7 @@ test('encode/decode 4 bytes fixext data', function (t) {
       t.assert.strictEqual(buf.readUInt32BE(2), orig.data, 'must decode correctly')
     })
 
-    t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
+    await t.test('decoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = Buffer.allocUnsafe(6)
       buf[0] = 0xd6
       buf[1] = 0x44
@@ -143,13 +143,13 @@ test('encode/decode 4 bytes fixext data', function (t) {
       t.assert.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
     })
 
-    t.test('mirror test with a custom obj containing ' + orig.data, function (t) {
+    await t.test('mirror test with a custom obj containing ' + orig.data, async function (t) {
       t.assert.deepStrictEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
     })
-  })
+  }
 })
 
-test('encode/decode 8 bytes fixext data', function (t) {
+test('encode/decode 8 bytes fixext data', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -174,8 +174,8 @@ test('encode/decode 8 bytes fixext data', function (t) {
   all.push(new MyType(4))
   all.push(new MyType(42))
 
-  all.forEach(function (orig) {
-    t.test('encoding a custom obj encoded as ' + orig.data, function (t) {
+  for (const orig of all) {
+    await t.test('encoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = encoder.encode(orig)
       t.assert.strictEqual(buf.length, 10, 'must have the right length')
       t.assert.strictEqual(buf.readUInt8(0), 0xd7, 'must have the fixext header')
@@ -183,7 +183,7 @@ test('encode/decode 8 bytes fixext data', function (t) {
       t.assert.strictEqual(buf.readUInt32BE(2) + buf.readUInt32BE(6), orig.data, 'must decode correctly')
     })
 
-    t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
+    await t.test('decoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = Buffer.allocUnsafe(10)
       buf[0] = 0xd7
       buf[1] = 0x44
@@ -193,13 +193,13 @@ test('encode/decode 8 bytes fixext data', function (t) {
       t.assert.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
     })
 
-    t.test('mirror test with a custom obj containing ' + orig.data, function (t) {
+    await t.test('mirror test with a custom obj containing ' + orig.data, async function (t) {
       t.assert.deepStrictEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
     })
-  })
+  }
 })
 
-test('encode/decode 16 bytes fixext data', function (t) {
+test('encode/decode 16 bytes fixext data', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -226,8 +226,8 @@ test('encode/decode 16 bytes fixext data', function (t) {
   all.push(new MyType(8))
   all.push(new MyType(44))
 
-  all.forEach(function (orig) {
-    t.test('encoding a custom obj encoded as ' + orig.data, function (t) {
+  for (const orig of all) {
+    await t.test('encoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = encoder.encode(orig)
       t.assert.strictEqual(buf.length, 18, 'must have the right length')
       t.assert.strictEqual(buf.readUInt8(0), 0xd8, 'must have the fixext header')
@@ -235,7 +235,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
       t.assert.strictEqual(buf.readUInt32BE(2) + buf.readUInt32BE(6) + buf.readUInt32BE(10) + buf.readUInt32BE(14), orig.data, 'must decode correctly')
     })
 
-    t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
+    await t.test('decoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = Buffer.allocUnsafe(18)
       buf[0] = 0xd8
       buf[1] = 0x46
@@ -247,13 +247,13 @@ test('encode/decode 16 bytes fixext data', function (t) {
       t.assert.deepStrictEqual(encoder.decode(buf), orig, 'must decode correctly')
     })
 
-    t.test('mirror test with a custom obj containing ' + orig.data, function (t) {
+    await t.test('mirror test with a custom obj containing ' + orig.data, async function (t) {
       t.assert.deepStrictEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
     })
-  })
+  }
 })
 
-test('encode/decode fixext inside a map', function (t) {
+test('encode/decode fixext inside a map', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -281,15 +281,15 @@ test('encode/decode fixext inside a map', function (t) {
     return acc
   }, {}))
 
-  all.forEach(function (orig) {
-    t.test('mirror test with a custom obj inside a map', function (t) {
+  for (const orig of all) {
+    await t.test('mirror test with a custom obj inside a map', async function (t) {
       const encoded = encoder.encode(orig)
       t.assert.deepStrictEqual(encoder.decode(encoded), orig, 'must stay the same')
     })
-  })
+  }
 })
 
-test('encode/decode 8 bytes fixext data', function (t) {
+test('encode/decode 8 bytes fixext data', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -314,8 +314,8 @@ test('encode/decode 8 bytes fixext data', function (t) {
   all.push(new MyType(4))
   all.push(new MyType(42))
 
-  all.forEach(function (orig) {
-    t.test('encoding a custom obj encoded as ' + orig.data, function (t) {
+  for (const orig of all) {
+    await t.test('encoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = encoder.encode(orig)
       t.assert.strictEqual(buf.length, 10, 'must have the right length')
       t.assert.strictEqual(buf.readUInt8(0), 0xd7, 'must have the fixext header')
@@ -323,7 +323,7 @@ test('encode/decode 8 bytes fixext data', function (t) {
       t.assert.strictEqual(buf.readUInt32BE(2) + buf.readUInt32BE(6), orig.data, 'must decode correctly')
     })
 
-    t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
+    await t.test('decoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = Buffer.allocUnsafe(10)
       buf[0] = 0xd7
       buf[1] = 0x44
@@ -333,13 +333,13 @@ test('encode/decode 8 bytes fixext data', function (t) {
       t.assert.ok(encoder.decode(buf) instanceof MyType, 'must have the correct prototype')
     })
 
-    t.test('mirror test with a custom obj containing ' + orig.data, function (t) {
+    await t.test('mirror test with a custom obj containing ' + orig.data, async function (t) {
       t.assert.deepStrictEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
     })
-  })
+  }
 })
 
-test('encode/decode 16 bytes fixext data', function (t) {
+test('encode/decode 16 bytes fixext data', async function (t) {
   const encoder = msgpack()
   const all = []
 
@@ -366,8 +366,8 @@ test('encode/decode 16 bytes fixext data', function (t) {
   all.push(new MyType(8))
   all.push(new MyType(44))
 
-  all.forEach(function (orig) {
-    t.test('encoding a custom obj encoded as ' + orig.data, function (t) {
+  for (const orig of all) {
+    await t.test('encoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = encoder.encode(orig)
       t.assert.strictEqual(buf.length, 18, 'must have the right length')
       t.assert.strictEqual(buf.readUInt8(0), 0xd8, 'must have the fixext header')
@@ -375,7 +375,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
       t.assert.strictEqual(buf.readUInt32BE(2) + buf.readUInt32BE(6) + buf.readUInt32BE(10) + buf.readUInt32BE(14), orig.data, 'must decode correctly')
     })
 
-    t.test('decoding a custom obj encoded as ' + orig.data, function (t) {
+    await t.test('decoding a custom obj encoded as ' + orig.data, async function (t) {
       const buf = Buffer.allocUnsafe(18)
       buf[0] = 0xd8
       buf[1] = 0x46
@@ -387,12 +387,12 @@ test('encode/decode 16 bytes fixext data', function (t) {
       t.assert.deepStrictEqual(encoder.decode(buf), orig, 'must decode correctly')
     })
 
-    t.test('mirror test with a custom obj containing ' + orig.data, function (t) {
+    await t.test('mirror test with a custom obj containing ' + orig.data, async function (t) {
       t.assert.deepStrictEqual(encoder.decode(encoder.encode(orig)), orig, 'must stay the same')
     })
-  })
+  }
 
-  t.test('decoding an incomplete 1 byte fixext data', function (t) {
+  await t.test('decoding an incomplete 1 byte fixext data', async function (t) {
     const encoder = msgpack()
     let buf = Buffer.allocUnsafe(2)
     buf[0] = 0xd4
@@ -404,7 +404,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
     t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
   })
 
-  t.test('decoding an incomplete 2 byte fixext data', function (t) {
+  await t.test('decoding an incomplete 2 byte fixext data', async function (t) {
     const encoder = msgpack()
     let buf = Buffer.allocUnsafe(3)
     buf[0] = 0xd5
@@ -416,7 +416,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
     t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
   })
 
-  t.test('decoding an incomplete 4 byte fixext data', function (t) {
+  await t.test('decoding an incomplete 4 byte fixext data', async function (t) {
     const encoder = msgpack()
     let buf = Buffer.allocUnsafe(5)
     buf[0] = 0xd6
@@ -428,7 +428,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
     t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
   })
 
-  t.test('decoding an incomplete 8 byte fixext data', function (t) {
+  await t.test('decoding an incomplete 8 byte fixext data', async function (t) {
     const encoder = msgpack()
     let buf = Buffer.allocUnsafe(9)
     buf[0] = 0xd7
@@ -440,7 +440,7 @@ test('encode/decode 16 bytes fixext data', function (t) {
     t.assert.strictEqual(buf.length, origLength, 'must not consume any byte')
   })
 
-  t.test('decoding an incomplete 16 byte fixext data', function (t) {
+  await t.test('decoding an incomplete 16 byte fixext data', async function (t) {
     const encoder = msgpack()
     let buf = Buffer.allocUnsafe(17)
     buf[0] = 0xd8

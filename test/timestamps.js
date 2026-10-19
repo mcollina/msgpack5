@@ -4,24 +4,24 @@ const Buffer = require('safe-buffer').Buffer
 const test = require('node:test')
 const msgpack = require('../')
 
-test('timestamp disabling', function (t) {
+test('timestamp disabling', async function (t) {
   const encoder = msgpack({ disableTimestampEncoding: true })
   const timestamps = [
     [new Date('2018-01-02T03:04:05.000000000Z'), [0x80]]
   ]
 
-  timestamps.forEach(function (testcase) {
+  for (const testcase of timestamps) {
     const item = testcase[0]
     const expected = testcase[1]
 
-    t.test('encoding ' + item.toString(), function (t) {
+    await t.test('encoding ' + item.toString(), async function (t) {
       const buf = encoder.encode(item).slice()
       t.assert.strictEqual(buf.length, expected.length, 'must have ' + expected.length + ' bytes')
       t.assert.strictEqual(buf[0], expected[0], 'Should return 0x80 ({}) by default')
     })
-  })
+  }
 })
-test('encoding/decoding timestamp 64', function (t) {
+test('encoding/decoding timestamp 64', async function (t) {
   const encoder = msgpack()
   const timestamps = [
     [new Date('2018-01-02T03:04:05.000000000Z'), [0xd6, 0xff, 0x5a, 0x4a, 0xf6, 0xa5]],
@@ -31,11 +31,11 @@ test('encoding/decoding timestamp 64', function (t) {
     [new Date('2018-01-02T03:04:05.678000000Z'), [0xd7, 0xff, 0xa1, 0xa5, 0xd6, 0x00, 0x5a, 0x4a, 0xf6, 0xa5]]
   ]
 
-  timestamps.forEach(function (testcase) {
+  for (const testcase of timestamps) {
     const item = testcase[0]
     const expected = testcase[1]
 
-    t.test('encoding ' + item.toString(), function (t) {
+    await t.test('encoding ' + item.toString(), async function (t) {
       const buf = encoder.encode(item).slice()
       t.assert.strictEqual(buf.length, expected.length, 'must have ' + expected.length + ' bytes')
       switch (expected.length) {
@@ -52,19 +52,19 @@ test('encoding/decoding timestamp 64', function (t) {
       }
     })
 
-    t.test('decoding ' + item, function (t) {
+    await t.test('decoding ' + item, async function (t) {
       const buf = Buffer.from(expected)
       const dt = encoder.decode(buf)
       t.assert.strictEqual(dt.toString(), item.toString(), 'must decode correctly\nDecoded:\t' + dt * 1 + '\nExp:\t' + item * 1)
     })
 
-    t.test('mirror test ' + item, function (t) {
+    await t.test('mirror test ' + item, async function (t) {
       t.assert.strictEqual(encoder.decode(encoder.encode(item)) * 1, item * 1, 'must stay the same')
     })
-  })
+  }
 })
 
-test('encoding/decoding timestamp 96', function (t) {
+test('encoding/decoding timestamp 96', async function (t) {
   const encoder = msgpack()
   const timestamps = [
     [new Date('0001-01-02T03:04:05.000000000Z'), [0xc7, 0x0c, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xf1, 0x88, 0x6f, 0x85, 0xa5]],
@@ -75,11 +75,11 @@ test('encoding/decoding timestamp 96', function (t) {
     [new Date('2514-05-30T02:04:05.678000000Z'), [0xc7, 0x0c, 0xff, 0x28, 0x69, 0x75, 0x80, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x02, 0x95]]
   ]
 
-  timestamps.forEach(function (testcase) {
+  for (const testcase of timestamps) {
     const item = testcase[0]
     const expected = testcase[1]
 
-    t.test('encoding ' + item.toString(), function (t) {
+    await t.test('encoding ' + item.toString(), async function (t) {
       const buf = encoder.encode(item).slice()
       t.assert.strictEqual(buf.length, expected.length, 'must have ' + expected.length + ' bytes')
       t.assert.strictEqual(buf[0], 0xc7, 'must have the correct header')
@@ -90,14 +90,14 @@ test('encoding/decoding timestamp 96', function (t) {
       }
     })
 
-    t.test('decoding ' + item, function (t) {
+    await t.test('decoding ' + item, async function (t) {
       const buf = Buffer.from(expected)
       const dt = encoder.decode(buf)
       t.assert.strictEqual(dt.toString(), item.toString(), 'must decode correctly\nDecoded:\t' + dt * 1 + '\nExp:\t' + item * 1)
     })
 
-    t.test('mirror test ' + item, function (t) {
+    await t.test('mirror test ' + item, async function (t) {
       t.assert.strictEqual(encoder.decode(encoder.encode(item)) * 1, item * 1, 'must stay the same')
     })
-  })
+  }
 })

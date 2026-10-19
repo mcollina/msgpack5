@@ -5,15 +5,15 @@ const test = require('node:test')
 const msgpack = require('../')
 const { DynamicBuffer } = require('@platformatic/dynamic-buffer')
 
-test('encoding/decoding 64-bits big-endian unsigned integers', function (t) {
+test('encoding/decoding 64-bits big-endian unsigned integers', async function (t) {
   const encoder = msgpack()
   const allNum = []
 
   allNum.push(0x0000000100000000)
   allNum.push(0xffffffffeeeee)
 
-  allNum.forEach(function (num) {
-    t.test('encoding ' + num, function (t) {
+  for (const num of allNum) {
+    await t.test('encoding ' + num, async function (t) {
       const buf = encoder.encode(num)
       t.assert.strictEqual(buf.length, 9, 'must have 9 bytes')
       t.assert.strictEqual(buf[0], 0xcf, 'must have the proper header')
@@ -24,13 +24,13 @@ test('encoding/decoding 64-bits big-endian unsigned integers', function (t) {
       t.assert.strictEqual(result, num, 'must decode correctly')
     })
 
-    t.test('mirror test ' + num, function (t) {
+    await t.test('mirror test ' + num, async function (t) {
       t.assert.strictEqual(encoder.decode(encoder.encode(num)), num, 'must stay the same')
     })
-  })
+  }
 })
 
-test('decoding an incomplete 64-bits big-endian unsigned integer', function (t) {
+test('decoding an incomplete 64-bits big-endian unsigned integer', async function (t) {
   const encoder = msgpack()
   let buf = Buffer.allocUnsafe(8)
   buf[0] = 0xcf
